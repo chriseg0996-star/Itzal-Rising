@@ -5,10 +5,13 @@ extends CanvasLayer
 @onready var gold_label: Label = $TopBar/Margin/HBox/Gold/Label
 
 func _ready() -> void:
-	ResourceManager.resources_changed.connect(_refresh)
+	ResourceManager.resource_changed.connect(_on_resource_changed)
+	_refresh()
+
+func _on_resource_changed(_type: StringName, _new_amount: int) -> void:
 	_refresh()
 
 func _refresh() -> void:
-	wood_label.text = str(ResourceManager.wood)
-	food_label.text = str(ResourceManager.food)
-	gold_label.text = str(ResourceManager.gold)
+	wood_label.text = str(ResourceManager.get_resource(ResourceManager.WOOD))
+	food_label.text = str(ResourceManager.get_resource(ResourceManager.FOOD))
+	gold_label.text = str(ResourceManager.get_resource(ResourceManager.GOLD))

@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectShape_ETC"]
 size = Vector2(96, 96)
 
-[node name="EnemyTownCenter" type="Node2D"]
+[node name="EnemyTownCenter" type="Node2D" groups=["town_center"]]
 script = ExtResource("1_bldg_script")
 building_name = "Town Center"
 max_hp = 1500

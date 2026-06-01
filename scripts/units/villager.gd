@@ -1,28 +1,43 @@
-extends Node2D
+class_name Villager
+extends CharacterBody2D
 
-const MOVE_SPEED: float = 150.0
+signal unit_died(unit: CharacterBody2D)
+
+enum State { IDLE, MOVING, HARVESTING }
+
 const SELECTION_RADIUS: float = 22.0
 const SELECTION_COLOR: Color = Color(0.27, 0.86, 0.50, 1.0)
 const SELECTION_WIDTH: float = 3.0
 const SELECTION_SEGMENTS: int = 32
 
-const HARVEST_INTERVAL: float = 1.5
-const HARVEST_RANGE: float = 40.0
+@export var speed: float  = 120.0
+@export var faction:         String   = "player"
+@export var sprite_asset:    String   = "villager"
 
-@export var faction: String = "player"
-@export var sprite_asset: String = "villager"
+@onready var _nav_agent:          NavigationAgent2D = $NavigationAgent2D
+@onready var _harvest_component:  HarvestComponent  = $HarvestComponent
 
-@onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
-
-var selected: bool = false
-var current_resource: Node = null
-var harvest_timer: float = 0.0
+var _state:    State  = State.IDLE
+var _home:     Node2D = null
+var selected:  bool   = false
 
 func _ready() -> void:
 	add_to_group("villagers")
 	if faction == "player":
 		add_to_group("player_units")
+	_home = _find_home()
+	_harvest_component.setup(_nav_agent, _home, faction)
+	_nav_agent.velocity_computed.connect(_on_velocity_computed)
 	_apply_sprite(sprite_asset)
+
+func _find_home() -> Node2D:
+	var town_centers: Array = get_tree().get_nodes_in_group("town_center")
+	for tc in town_centers:
+		if is_instance_valid(tc) and tc.get("faction") == faction:
+			return tc as Node2D
+	if not town_centers.is_empty():
+		return town_centers[0] as Node2D
+	return null
 
 func set_selected(value: bool) -> void:
 	if selected == value:
@@ -30,46 +45,56 @@ func set_selected(value: bool) -> void:
 	selected = value
 	queue_redraw()
 
-func move_to(target: Vector2) -> void:
-	current_resource = null
-	harvest_timer = 0.0
-	nav_agent.target_position = target
+func is_harvesting() -> bool:
+	return _harvest_component.is_active()
 
-func harvest(resource: Node) -> void:
-	current_resource = resource
-	harvest_timer = 0.0
-	nav_agent.target_position = resource.global_position
+func _physics_process(delta: float) -> void:
+	match _state:
+		State.IDLE:
+			pass
+		State.MOVING:
+			_process_moving()
+		State.HARVESTING:
+			_harvest_component.tick(delta, global_position)
+			_process_moving()
+			if not _harvest_component.is_active():
+				_state = State.IDLE
+
+func _process_moving() -> void:
+	if _nav_agent.is_navigation_finished():
+		if _state == State.MOVING:
+			_state = State.IDLE
+		_nav_agent.set_velocity(Vector2.ZERO)
+		return
+	var next: Vector2 = _nav_agent.get_next_path_position()
+	var dir:  Vector2 = (next - global_position).normalized()
+	_nav_agent.set_velocity(dir * speed)
+
+func _on_velocity_computed(safe_velocity: Vector2) -> void:
+	velocity = safe_velocity
+	move_and_slide()
+
+func assign_harvest(node: ResourceNode) -> void:
+	_harvest_component.assign_node(node)
+	_state = State.HARVESTING
+
+func harvest(node) -> void:
+	if node is ResourceNode:
+		assign_harvest(node)
+
+func move_to(target: Vector2) -> void:
+	_harvest_component.stop()
+	_nav_agent.target_position = target
+	_state = State.MOVING
+
+func die() -> void:
+	unit_died.emit(self)
+	queue_free()
 
 func _draw() -> void:
 	if not selected:
 		return
 	draw_arc(Vector2.ZERO, SELECTION_RADIUS, 0.0, TAU, SELECTION_SEGMENTS, SELECTION_COLOR, SELECTION_WIDTH, true)
-
-func _physics_process(delta: float) -> void:
-	if current_resource != null and not is_instance_valid(current_resource):
-		current_resource = null
-		harvest_timer = 0.0
-
-	if current_resource != null:
-		var to_res: float = global_position.distance_to(current_resource.global_position)
-		if to_res <= HARVEST_RANGE:
-			harvest_timer += delta
-			if harvest_timer >= HARVEST_INTERVAL:
-				harvest_timer -= HARVEST_INTERVAL
-				_do_harvest()
-			return
-
-	if nav_agent.is_navigation_finished():
-		return
-	var next_pos: Vector2 = nav_agent.get_next_path_position()
-	var to_next: Vector2 = next_pos - global_position
-	var dist: float = to_next.length()
-	if dist < 0.5:
-		return
-	var step: Vector2 = to_next / dist * MOVE_SPEED * delta
-	if step.length() > dist:
-		step = to_next
-	global_position += step
 
 func _apply_sprite(asset: String) -> void:
 	if asset == "":
@@ -83,13 +108,3 @@ func _apply_sprite(asset: String) -> void:
 	add_child(sprite_2d)
 	if existing != null:
 		move_child(sprite_2d, existing.get_index() + 1)
-
-func _do_harvest() -> void:
-	if current_resource == null or not is_instance_valid(current_resource):
-		current_resource = null
-		harvest_timer = 0.0
-		return
-	current_resource.harvest(faction)
-	if not is_instance_valid(current_resource):
-		current_resource = null
-		harvest_timer = 0.0

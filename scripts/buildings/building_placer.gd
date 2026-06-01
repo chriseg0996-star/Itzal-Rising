@@ -99,10 +99,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _can_afford(cost: Dictionary) -> bool:
-	for type in cost:
-		if ResourceManager.get_amount(type) < int(cost[type]):
-			return false
-	return true
+	return ResourceManager.can_afford(cost)
 
 func _try_place() -> void:
 	var world_pos: Vector2 = preview_root.get_global_mouse_position()
@@ -116,8 +113,7 @@ func _try_place() -> void:
 	var packed: PackedScene = load(scene_path)
 	if packed == null:
 		return
-	for type in cost:
-		ResourceManager.spend(type, int(cost[type]))
+	ResourceManager.spend(cost)
 	var building: Node = packed.instantiate()
 	var target_parent: Node = get_tree().current_scene
 	if target_parent == null:

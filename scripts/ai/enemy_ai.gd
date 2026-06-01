@@ -65,7 +65,7 @@ func _phase_recolectar() -> void:
 	for v in villagers:
 		if not is_instance_valid(v):
 			continue
-		if v.current_resource != null and is_instance_valid(v.current_resource):
+		if v.has_method("is_harvesting") and v.is_harvesting():
 			continue
 		var nearest: Node = _find_nearest_to(v, trees)
 		if nearest != null:
@@ -74,10 +74,9 @@ func _phase_recolectar() -> void:
 func _phase_construir() -> void:
 	if _has_enemy_barracks():
 		return
-	if not _afford_enemy(BARRACKS_COST):
+	if not ResourceManager.can_afford(BARRACKS_COST, "enemy"):
 		return
-	for type in BARRACKS_COST:
-		ResourceManager.spend(type, int(BARRACKS_COST[type]), "enemy")
+	ResourceManager.spend(BARRACKS_COST, "enemy")
 	var pos: Vector2 = ENEMY_BASE_POS + Vector2(
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE),
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE)
@@ -155,9 +154,3 @@ func _find_nearest_to(node: Node2D, candidates: Array) -> Node:
 			nearest_dist = d
 			nearest = c
 	return nearest
-
-func _afford_enemy(cost: Dictionary) -> bool:
-	for type in cost:
-		if ResourceManager.get_amount(type, "enemy") < int(cost[type]):
-			return false
-	return true

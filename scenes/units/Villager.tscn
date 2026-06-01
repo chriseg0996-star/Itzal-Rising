@@ -1,11 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://b4v7q9z2x5n8m"]
+[gd_scene load_steps=5 format=3 uid="uid://b4v7q9z2x5n8m"]
 
 [ext_resource type="Script" path="res://scripts/units/villager.gd" id="1_vil_script"]
+[ext_resource type="Script" path="res://scripts/units/harvest_component.gd" id="2_harvest"]
 
-[sub_resource type="RectangleShape2D" id="RectShape_1"]
+[sub_resource type="RectangleShape2D" id="RectShape_Click"]
 size = Vector2(32, 32)
 
-[node name="Villager" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="RectShape_Body"]
+size = Vector2(28, 28)
+
+[node name="Villager" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+motion_mode = 1
 script = ExtResource("1_vil_script")
 
 [node name="Sprite" type="ColorRect" parent="."]
@@ -16,13 +23,21 @@ offset_bottom = 16.0
 mouse_filter = 2
 color = Color(0.9098, 0.7529, 0.4784, 1)
 
+[node name="BodyShape" type="CollisionShape2D" parent="."]
+shape = SubResource("RectShape_Body")
+
 [node name="Area2D" type="Area2D" parent="."]
 collision_layer = 1
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("RectShape_1")
+shape = SubResource("RectShape_Click")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 path_desired_distance = 4.0
 target_desired_distance = 4.0
+avoidance_enabled = true
+radius = 14.0
+
+[node name="HarvestComponent" type="Node" parent="."]
+script = ExtResource("2_harvest")

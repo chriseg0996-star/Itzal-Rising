@@ -8,6 +8,10 @@ const FORMATION_SPACING: float = 40.0
 const LINE_SPACING: float = 48.0
 const NAV_THROTTLE: float = 0.2
 
+# Mirrors harvest_component._safe_target: map (0,0)-(2048,2048) inset by 4px.
+const MAP_CLAMP_MIN: Vector2 = Vector2(4.0, 4.0)
+const MAP_CLAMP_MAX: Vector2 = Vector2(2044.0, 2044.0)
+
 var selected: Array = []
 var selected_building: Node = null
 var _throttle: Dictionary = {}
@@ -86,14 +90,40 @@ func harvest_with_selected(resource: Node) -> void:
 			u.harvest(resource)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if BuildingPlacer.is_placing():
+		return
 	if not (event is InputEventMouseButton):
 		return
 	var mb := event as InputEventMouseButton
 	if mb.button_index != MOUSE_BUTTON_RIGHT or not mb.pressed:
 		return
 	var world_pos: Vector2 = _screen_to_world(mb.position)
-	_command_move(world_pos)
+	var resource := _resource_at(world_pos)
+	if resource != null:
+		harvest_with_selected(resource)
+	else:
+		_command_move(world_pos)
 	get_viewport().set_input_as_handled()
+
+func _resource_at(world_pos: Vector2) -> Node:
+	var world := get_viewport().find_world_2d()
+	if world == null:
+		return null
+	var space := world.direct_space_state
+	var params := PhysicsPointQueryParameters2D.new()
+	params.position = world_pos
+	params.collide_with_areas = true
+	params.collide_with_bodies = false
+	params.collision_mask = 2
+	var hits := space.intersect_point(params, 8)
+	for hit in hits:
+		var collider = hit.get("collider")
+		if collider == null:
+			continue
+		var p = collider.get_parent()
+		if p != null and p.is_in_group("resources"):
+			return p
+	return null
 
 func _process(delta: float) -> void:
 	if _throttle.is_empty():
@@ -120,7 +150,7 @@ func _command_move(world_pos: Vector2) -> void:
 		if _is_throttled(u):
 			continue
 		var offset_x: float = (float(i) - float(n - 1) * 0.5) * LINE_SPACING
-		var target: Vector2 = world_pos + Vector2(offset_x, 0.0)
+		var target: Vector2 = (world_pos + Vector2(offset_x, 0.0)).clamp(MAP_CLAMP_MIN, MAP_CLAMP_MAX)
 		u.move_to(target)
 		_stamp_throttle(u)
 		dispatched.append(u)

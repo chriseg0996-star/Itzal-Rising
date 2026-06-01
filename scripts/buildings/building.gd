@@ -94,11 +94,9 @@ func try_queue_training(slot: int = 0) -> bool:
 		return false
 	if scene == null:
 		return false
-	for type in costs:
-		if ResourceManager.get_amount(type, faction) < int(costs[type]):
-			return false
-	for type in costs:
-		ResourceManager.spend(type, int(costs[type]), faction)
+	if not ResourceManager.can_afford(costs, faction):
+		return false
+	ResourceManager.spend(costs, faction)
 	queue.append({"scene": scene, "duration": duration})
 	if queue.size() == 1:
 		production_timer = duration
