@@ -1,4 +1,4 @@
-class_name Villager
+class_name EnemyVillager
 extends CharacterBody2D
 
 signal unit_died(unit: CharacterBody2D)
@@ -11,20 +11,21 @@ const SELECTION_COLOR: Color = Color(0.27, 0.86, 0.50, 1.0)
 const SELECTION_WIDTH: float = 3.0
 const SELECTION_SEGMENTS: int = 32
 
-@export var speed: float  = 120.0
-@export var faction:         String   = "player"
-@export var sprite_asset:    String   = "villager"
-@export var max_hp:          int      = 50
+@export var speed:        float  = 100.0
+@export var map_bounds:   Rect2  = Rect2(4.0, 4.0, 2040.0, 2040.0)
+@export var faction:      String = "enemy"
+@export var sprite_asset: String = "enemy_villager"
+@export var max_hp:       int    = 50
 
-@onready var _nav_agent:          NavigationAgent2D = $NavigationAgent2D
-@onready var _harvest_component:  HarvestComponent  = $HarvestComponent
-@onready var _hitbox:             Area2D            = $Area2D
-@onready var _hp_bar_fg:          ColorRect         = $HPBarFG
+@onready var _nav_agent:         NavigationAgent2D = $NavigationAgent2D
+@onready var _harvest_component: HarvestComponent  = $HarvestComponent
+@onready var _hitbox:            Area2D            = $Area2D
+@onready var _hp_bar_fg:         ColorRect         = $HPBarFG
 
+var hp:            int    = 0
+var selected:      bool   = false
 var _state:        State  = State.IDLE
 var _home:         Node2D = null
-var selected:      bool   = false
-var hp:            int    = 0
 var _death_timer:  float  = 0.0
 var _hp_bar_width: float  = 32.0
 
@@ -38,8 +39,9 @@ func _ready() -> void:
 		_hp_bar_width = _hp_bar_fg.offset_right - _hp_bar_fg.offset_left
 	_update_hp_bar()
 	_home = _find_home()
-	_harvest_component.setup(_nav_agent, _home, faction)
 	_apply_sprite(sprite_asset)
+	await get_tree().physics_frame
+	_harvest_component.setup(_nav_agent, _home, faction)
 
 func _find_home() -> Node2D:
 	var town_centers: Array = get_tree().get_nodes_in_group("town_center")
@@ -53,14 +55,14 @@ func _find_home() -> Node2D:
 func is_dying() -> bool:
 	return _state == State.DYING
 
+func is_harvesting() -> bool:
+	return _harvest_component.is_active()
+
 func set_selected(value: bool) -> void:
 	if selected == value:
 		return
 	selected = value
 	queue_redraw()
-
-func is_harvesting() -> bool:
-	return _harvest_component.is_active()
 
 func take_damage(amount: int) -> void:
 	if _state == State.DYING:
@@ -105,7 +107,7 @@ func _process_moving(delta: float) -> void:
 	if step.length() > dist:
 		step = to_next
 	global_position += step
-	var b: Rect2 = Rect2(4.0, 4.0, 2040.0, 2040.0)
+	var b: Rect2 = map_bounds.grow(-4.0)
 	global_position = global_position.clamp(b.position, b.end)
 
 func assign_harvest(node: ResourceNode) -> void:

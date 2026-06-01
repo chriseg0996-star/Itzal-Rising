@@ -23,6 +23,22 @@ offset_bottom = 16.0
 mouse_filter = 2
 color = Color(0.9098, 0.7529, 0.4784, 1)
 
+[node name="HPBarBG" type="ColorRect" parent="."]
+offset_left = -16.0
+offset_top = -28.0
+offset_right = 16.0
+offset_bottom = -24.0
+mouse_filter = 2
+color = Color(0.8, 0.15, 0.15, 1)
+
+[node name="HPBarFG" type="ColorRect" parent="."]
+offset_left = -16.0
+offset_top = -28.0
+offset_right = 16.0
+offset_bottom = -24.0
+mouse_filter = 2
+color = Color(0.25, 0.85, 0.35, 1)
+
 [node name="BodyShape" type="CollisionShape2D" parent="."]
 shape = SubResource("RectShape_Body")
 
@@ -36,8 +52,6 @@ shape = SubResource("RectShape_Click")
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 path_desired_distance = 4.0
 target_desired_distance = 4.0
-avoidance_enabled = true
-radius = 14.0
 
 [node name="HarvestComponent" type="Node" parent="."]
 script = ExtResource("2_harvest")

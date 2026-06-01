@@ -27,6 +27,7 @@ func harvest() -> int:
 	amount_changed.emit(amount)
 	if is_depleted():
 		resource_depleted.emit(self)
+		queue_free()
 	return taken
 
 func _apply_sprite(asset: String) -> void:

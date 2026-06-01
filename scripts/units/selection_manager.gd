@@ -74,7 +74,8 @@ func move_selected_to(target: Vector2, attack_move: bool = false) -> void:
 		var col_in_row: int = i % cols
 		var x_offset: float = (float(col_in_row) - float(units_in_row - 1) * 0.5) * FORMATION_SPACING
 		var y_offset: float = (float(row) - float(rows - 1) * 0.5) * FORMATION_SPACING
-		var dest: Vector2 = target + Vector2(x_offset, y_offset)
+		var dest: Vector2 = (target + Vector2(x_offset, y_offset)).clamp(MAP_CLAMP_MIN, MAP_CLAMP_MAX)
+		print("move_selected_to clamped to: ", dest)
 		if attack_move and u.has_method("attack_move"):
 			u.attack_move(dest)
 		elif u.has_method("move_to"):
@@ -151,6 +152,7 @@ func _command_move(world_pos: Vector2) -> void:
 			continue
 		var offset_x: float = (float(i) - float(n - 1) * 0.5) * LINE_SPACING
 		var target: Vector2 = (world_pos + Vector2(offset_x, 0.0)).clamp(MAP_CLAMP_MIN, MAP_CLAMP_MAX)
+		print("target clamped to: ", target)
 		u.move_to(target)
 		_stamp_throttle(u)
 		dispatched.append(u)
