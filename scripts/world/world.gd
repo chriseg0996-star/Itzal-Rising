@@ -4,7 +4,7 @@ extends Node2D
 @export var soldier_scene: PackedScene
 
 func _ready() -> void:
-	$BuildingPanel.set_world(self)
+	pass
 
 func _on_unit_spawn_requested(unit_type: StringName, spawn_position: Vector2) -> void:
 	if unit_type == &"soldier":
