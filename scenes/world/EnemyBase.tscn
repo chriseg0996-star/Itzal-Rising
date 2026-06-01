@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://gtpjl5pnkeye"]
+
+[ext_resource type="PackedScene" path="res://scenes/buildings/EnemyTownCenter.tscn" id="1_etc"]
+[ext_resource type="PackedScene" path="res://scenes/units/EnemyVillager.tscn" id="2_evil"]
+
+[node name="EnemyBase" type="Node2D"]
+
+[node name="EnemyTC" parent="." instance=ExtResource("1_etc")]
+position = Vector2(1600, 1600)
+
+[node name="EnemyVillager1" parent="." instance=ExtResource("2_evil")]
+position = Vector2(1660, 1660)
+
+[node name="EnemyVillager2" parent="." instance=ExtResource("2_evil")]
+position = Vector2(1540, 1660)

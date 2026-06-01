@@ -1,0 +1,71 @@
+[gd_scene load_steps=2 format=3 uid="uid://h7d9q3x5n2m8k"]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud_script"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud_script")
+
+[node name="TopBar" type="PanelContainer" parent="."]
+anchor_right = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+
+[node name="Margin" type="MarginContainer" parent="TopBar"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
+theme_override_constants/separation = 24
+
+[node name="Wood" type="HBoxContainer" parent="TopBar/Margin/HBox"]
+tooltip_text = "Wood"
+theme_override_constants/separation = 6
+
+[node name="Icon" type="ColorRect" parent="TopBar/Margin/HBox/Wood"]
+custom_minimum_size = Vector2(20, 20)
+tooltip_text = "Wood"
+mouse_filter = 1
+color = Color(0.5451, 0.3686, 0.2353, 1)
+
+[node name="Label" type="Label" parent="TopBar/Margin/HBox/Wood"]
+text = "200"
+tooltip_text = "Wood"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Food" type="HBoxContainer" parent="TopBar/Margin/HBox"]
+tooltip_text = "Food"
+theme_override_constants/separation = 6
+
+[node name="Icon" type="ColorRect" parent="TopBar/Margin/HBox/Food"]
+custom_minimum_size = Vector2(20, 20)
+tooltip_text = "Food"
+mouse_filter = 1
+color = Color(0.9098, 0.6588, 0.4863, 1)
+
+[node name="Label" type="Label" parent="TopBar/Margin/HBox/Food"]
+text = "200"
+tooltip_text = "Food"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Gold" type="HBoxContainer" parent="TopBar/Margin/HBox"]
+tooltip_text = "Gold"
+theme_override_constants/separation = 6
+
+[node name="Icon" type="ColorRect" parent="TopBar/Margin/HBox/Gold"]
+custom_minimum_size = Vector2(20, 20)
+tooltip_text = "Gold"
+mouse_filter = 1
+color = Color(0.9569, 0.8157, 0.2471, 1)
+
+[node name="Label" type="Label" parent="TopBar/Margin/HBox/Gold"]
+text = "100"
+tooltip_text = "Gold"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18

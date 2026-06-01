@@ -1,0 +1,77 @@
+[gd_scene format=3 uid="uid://bp4n7rax2m5k8"]
+
+[ext_resource type="Script" path="res://scripts/ui/building_panel.gd" id="1_bp_script"]
+
+[node name="BuildingPanel" type="CanvasLayer"]
+script = ExtResource("1_bp_script")
+
+[node name="BottomBar" type="PanelContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -56.0
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="BottomBar"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="BottomBar/Margin"]
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="BarracksBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "Barracks (B)"
+
+[node name="TCBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "Town Center (T)"
+
+[node name="TowerBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "Tower (Y)"
+
+[node name="SidePanel" type="PanelContainer" parent="."]
+visible = false
+anchor_left = 1.0
+anchor_top = 0.25
+anchor_right = 1.0
+anchor_bottom = 0.75
+offset_left = -240.0
+offset_right = -8.0
+grow_horizontal = 0
+
+[node name="Margin" type="MarginContainer" parent="SidePanel"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="SidePanel/Margin"]
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="SidePanel/Margin/VBox"]
+text = "Building"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="HPLabel" type="Label" parent="SidePanel/Margin/VBox"]
+text = "HP: 0/0"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="QueueLabel" type="Label" parent="SidePanel/Margin/VBox"]
+text = "Queue: 0/5"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="TimerLabel" type="Label" parent="SidePanel/Margin/VBox"]
+text = "Idle"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="TrainBtn" type="Button" parent="SidePanel/Margin/VBox"]
+text = "Train"
+
+[node name="Train2Btn" type="Button" parent="SidePanel/Margin/VBox"]
+text = "Train"

@@ -1,0 +1,92 @@
+[gd_scene load_steps=16 format=3 uid="uid://d8w3r5y6q1n2v"]
+
+[ext_resource type="PackedScene" path="res://scenes/world/Ground.tscn" id="1_ground"]
+[ext_resource type="PackedScene" path="res://scenes/camera/RTSCamera.tscn" id="2_camscn"]
+[ext_resource type="PackedScene" path="res://scenes/units/Villager.tscn" id="3_vil"]
+[ext_resource type="Script" path="res://scripts/units/selection_box.gd" id="4_sel"]
+[ext_resource type="PackedScene" path="res://scenes/world/ResourceNode.tscn" id="5_res"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BuildingPanel.tscn" id="7_bpanel"]
+[ext_resource type="PackedScene" path="res://scenes/units/EnemySoldier.tscn" id="8_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/TownCenter.tscn" id="9_ptc"]
+[ext_resource type="PackedScene" path="res://scenes/world/EnemyBase.tscn" id="10_ebase"]
+[ext_resource type="PackedScene" path="res://scenes/ui/GameEndPanel.tscn" id="11_endp"]
+[ext_resource type="PackedScene" path="res://scenes/world/GoldMine.tscn" id="12_gold"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PausePanel.tscn" id="13_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="14_minim"]
+
+[sub_resource type="NavigationPolygon" id="NavPoly_1"]
+vertices = PackedVector2Array(0, 0, 2048, 0, 2048, 2048, 0, 2048)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 2048, 0, 2048, 2048, 0, 2048)])
+
+[node name="World" type="Node2D"]
+
+[node name="Ground" parent="." instance=ExtResource("1_ground")]
+
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
+navigation_polygon = SubResource("NavPoly_1")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+
+[node name="RTSCamera" parent="." instance=ExtResource("2_camscn")]
+
+[node name="PlayerTC" parent="." instance=ExtResource("9_ptc")]
+position = Vector2(300, 500)
+
+[node name="Villager1" parent="." instance=ExtResource("3_vil")]
+position = Vector2(200, 200)
+
+[node name="Villager2" parent="." instance=ExtResource("3_vil")]
+position = Vector2(300, 200)
+
+[node name="Villager3" parent="." instance=ExtResource("3_vil")]
+position = Vector2(400, 200)
+
+[node name="Tree1" parent="." instance=ExtResource("5_res")]
+position = Vector2(600, 500)
+
+[node name="Tree2" parent="." instance=ExtResource("5_res")]
+position = Vector2(1200, 400)
+
+[node name="Tree3" parent="." instance=ExtResource("5_res")]
+position = Vector2(800, 1100)
+
+[node name="Tree4" parent="." instance=ExtResource("5_res")]
+position = Vector2(1500, 1300)
+
+[node name="Tree5" parent="." instance=ExtResource("5_res")]
+position = Vector2(350, 1500)
+
+[node name="GoldMine1" parent="." instance=ExtResource("12_gold")]
+position = Vector2(900, 700)
+
+[node name="GoldMine2" parent="." instance=ExtResource("12_gold")]
+position = Vector2(1700, 900)
+
+[node name="GoldMine3" parent="." instance=ExtResource("12_gold")]
+position = Vector2(250, 1100)
+
+[node name="EnemyBase" parent="." instance=ExtResource("10_ebase")]
+
+[node name="Enemy1" parent="." instance=ExtResource("8_enemy")]
+position = Vector2(1400, 1400)
+
+[node name="Enemy2" parent="." instance=ExtResource("8_enemy")]
+position = Vector2(1500, 1400)
+
+[node name="Enemy3" parent="." instance=ExtResource("8_enemy")]
+position = Vector2(1450, 1500)
+
+[node name="SelectionBox" type="Node2D" parent="."]
+script = ExtResource("4_sel")
+
+[node name="HUD" parent="." instance=ExtResource("6_hud")]
+
+[node name="BuildingPanel" parent="." instance=ExtResource("7_bpanel")]
+
+[node name="Minimap" parent="." instance=ExtResource("14_minim")]
+
+[node name="PausePanel" parent="." instance=ExtResource("13_pause")]
+
+[node name="GameEndPanel" parent="." instance=ExtResource("11_endp")]

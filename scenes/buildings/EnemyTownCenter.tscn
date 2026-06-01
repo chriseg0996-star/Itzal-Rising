@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://xw826ps00vix"]
+
+[ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+[ext_resource type="PackedScene" path="res://scenes/units/EnemyVillager.tscn" id="2_evil"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_ETC"]
+size = Vector2(96, 96)
+
+[node name="EnemyTownCenter" type="Node2D"]
+script = ExtResource("1_bldg_script")
+building_name = "Town Center"
+max_hp = 1500
+sprite_asset = "enemy_town_center"
+train_unit_scene = ExtResource("2_evil")
+train_unit_label = "Villager"
+train_costs = {"comida": 50}
+train_duration = 10.0
+faction = "enemy"
+
+[node name="Sprite" type="ColorRect" parent="."]
+offset_left = -48.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = 48.0
+mouse_filter = 2
+color = Color(0.4235, 0.2039, 0.5137, 1)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -48.0
+offset_top = -68.0
+offset_right = 48.0
+offset_bottom = -44.0
+mouse_filter = 2
+text = "TC"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_ETC")

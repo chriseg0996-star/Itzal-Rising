@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://d0yyl858yxpfk"]
+
+[ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_TWR"]
+size = Vector2(48, 48)
+
+[node name="Tower" type="Node2D"]
+script = ExtResource("1_bldg_script")
+building_name = "Tower"
+max_hp = 800
+sprite_asset = "tower"
+faction = "player"
+attack_damage = 18
+attack_range = 150.0
+attack_interval = 2.0
+
+[node name="Sprite" type="ColorRect" parent="."]
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+color = Color(0.4980, 0.5490, 0.5529, 1)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -24.0
+offset_top = -44.0
+offset_right = 24.0
+offset_bottom = -22.0
+mouse_filter = 2
+text = "TWR"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_TWR")

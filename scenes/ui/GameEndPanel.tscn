@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://cjb827tte0res"]
+
+[ext_resource type="Script" path="res://scripts/ui/game_end_panel.gd" id="1_gep_script"]
+
+[node name="GameEndPanel" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_gep_script")
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/VBox"]
+text = "..."
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 48
+
+[node name="StatsLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+text = ""
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="RestartBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+text = "Restart"
+custom_minimum_size = Vector2(160, 40)

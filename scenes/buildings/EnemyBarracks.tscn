@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://gec501u31res"]
+
+[ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+[ext_resource type="PackedScene" path="res://scenes/units/EnemySoldier.tscn" id="2_esol"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_EBR"]
+size = Vector2(80, 80)
+
+[node name="EnemyBarracks" type="Node2D"]
+script = ExtResource("1_bldg_script")
+building_name = "Barracks"
+max_hp = 500
+sprite_asset = "enemy_barracks"
+train_unit_scene = ExtResource("2_esol")
+train_unit_label = "Soldier"
+train_costs = {"madera": 50, "oro": 30}
+train_duration = 8.0
+faction = "enemy"
+
+[node name="Sprite" type="ColorRect" parent="."]
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.3569, 0.1725, 0.4353, 1)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -60.0
+offset_right = 40.0
+offset_bottom = -36.0
+mouse_filter = 2
+text = "BRK"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_EBR")

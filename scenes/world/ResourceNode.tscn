@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://co1k71a4ihf6n"]
+
+[ext_resource type="Script" path="res://scripts/world/resource_node.gd" id="1_res_script"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_Res"]
+size = Vector2(48, 48)
+
+[node name="ResourceNode" type="Node2D"]
+script = ExtResource("1_res_script")
+
+[node name="Sprite" type="ColorRect" parent="."]
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+color = Color(0.1765, 0.3529, 0.1529, 1)
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_Res")

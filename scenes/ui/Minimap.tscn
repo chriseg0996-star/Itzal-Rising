@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://11yckg0edjex"]
+
+[ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="1_mm_script"]
+
+[node name="Minimap" type="CanvasLayer"]
+layer = 5
+
+[node name="Frame" type="Control" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -166.0
+offset_top = -226.0
+offset_right = -16.0
+offset_bottom = -76.0
+mouse_filter = 2
+script = ExtResource("1_mm_script")
