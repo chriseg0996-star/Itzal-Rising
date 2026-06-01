@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-enum State { IDLE, MOVING, ATTACKING, DYING }
+enum State { IDLE, MOVING, ATTACKING, DYING, HOLDING, PATROLLING }
 
 const DEATH_FADE_TIME: float = 0.5
 const SELECTION_RADIUS: float = 22.0
@@ -16,36 +16,37 @@ const SELECTION_SEGMENTS: int = 32
 @onready var detection_area: Area2D = $DetectionArea
 @onready var hitbox: Area2D = $Hitbox
 
-var hp: int = 0
 var state: int = State.IDLE
 var selected: bool = false
-var has_destination: bool = false
-var destination: Vector2 = Vector2.ZERO
 var death_timer: float = 0.0
 var hp_bar_width: float = 32.0
 var _movement_component: MovementComponent = null
+var _stat: StatComponent = null
 
 func _ready() -> void:
 	add_to_group("soldiers")
 	add_to_group("combat_units")
 	if faction == "player":
 		add_to_group("player_units")
-	hp = max_hp
 	if hp_bar_fg != null:
 		hp_bar_width = hp_bar_fg.offset_right - hp_bar_fg.offset_left
-	_update_hp_bar()
 	_apply_sprite(sprite_asset)
 	add_to_group("friendly_units")
 	_movement_component = get_node_or_null("MovementComponent") as MovementComponent
-	var stat: Node = get_node_or_null("StatComponent")
-	if stat != null:
-		stat.died.connect(_on_died)
+	_stat = get_node_or_null("StatComponent") as StatComponent
+	if _stat != null:
+		_stat.died.connect(_on_died)
+		_stat.health_changed.connect(_on_health_changed)
+	_update_hp_bar()
 
 func _on_died(_owner_unit: CharacterBody2D = null) -> void:
 	if SelectionManager.has_method("deselect_unit"):
 		SelectionManager.deselect_unit(self)
 	set_physics_process(false)
 	call_deferred("queue_free")
+
+func _on_health_changed(_current: float, _maximum: float) -> void:
+	_update_hp_bar()
 
 func _apply_sprite(asset: String) -> void:
 	if asset == "":
@@ -61,6 +62,8 @@ func _apply_sprite(asset: String) -> void:
 		move_child(sprite_2d, existing.get_index() + 1)
 
 func is_dying() -> bool:
+	if _stat != null:
+		return _stat.is_dead()
 	return state == State.DYING
 
 func set_selected(value: bool) -> void:
@@ -72,8 +75,8 @@ func set_selected(value: bool) -> void:
 func move_to(target: Vector2) -> void:
 	if state == State.DYING:
 		return
-	has_destination = true
-	destination = target
+	if state == State.HOLDING:
+		_set_combat_enabled(true)
 	state = State.MOVING
 	if _movement_component != null:
 		_movement_component.move_to(target)
@@ -81,19 +84,44 @@ func move_to(target: Vector2) -> void:
 func attack_move(target: Vector2) -> void:
 	if state == State.DYING:
 		return
-	has_destination = true
-	destination = target
+	if state == State.HOLDING:
+		_set_combat_enabled(true)
 	state = State.MOVING
 	if _movement_component != null:
 		_movement_component.move_to(target)
 
-func take_damage(amount: int) -> void:
+func stop() -> void:
 	if state == State.DYING:
 		return
-	hp = max(0, hp - amount)
-	_update_hp_bar()
-	if hp <= 0:
-		_enter_dying()
+	if _movement_component != null:
+		_movement_component.stop()
+	_set_combat_enabled(true)
+	state = State.IDLE
+
+func hold() -> void:
+	if state == State.DYING:
+		return
+	if _movement_component != null:
+		_movement_component.stop()
+	_set_combat_enabled(false)
+	state = State.HOLDING
+
+func patrol(target: Vector2) -> void:
+	if state == State.DYING:
+		return
+	move_to(target)
+
+func _set_combat_enabled(enabled: bool) -> void:
+	var combat := get_node_or_null("CombatComponent")
+	if combat == null:
+		return
+	combat.set_physics_process(enabled)
+	if not enabled and combat.has_method("clear_target"):
+		combat.clear_target()
+
+func take_damage(amount: int) -> void:
+	if _stat != null:
+		_stat.take_damage(float(amount))
 
 func _physics_process(delta: float) -> void:
 	if state == State.DYING:
@@ -106,16 +134,19 @@ func _physics_process(delta: float) -> void:
 			_move_step(delta)
 		State.ATTACKING:
 			pass  # CombatComponent owns attack logic
+		State.HOLDING:
+			pass  # hold ground; CombatComponent disabled in hold()
+		State.PATROLLING:
+			_move_step(delta)
 
 func _move_step(_delta: float) -> void:
 	if _movement_component == null or not _movement_component.is_moving():
 		state = State.IDLE
-		has_destination = false
 
 func _update_hp_bar() -> void:
-	if hp_bar_fg == null:
+	if hp_bar_fg == null or _stat == null:
 		return
-	var ratio: float = clampf(float(hp) / float(max_hp), 0.0, 1.0)
+	var ratio: float = _stat.get_health_ratio()
 	hp_bar_fg.offset_right = hp_bar_fg.offset_left + hp_bar_width * ratio
 
 func _enter_dying() -> void:

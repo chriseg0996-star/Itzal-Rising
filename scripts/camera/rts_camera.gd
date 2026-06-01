@@ -8,6 +8,7 @@ extends Camera2D
 
 func _ready() -> void:
 	position = Vector2(1024, 512)
+	add_to_group("rts_camera")
 
 func _process(delta: float) -> void:
 	var direction := Vector2.ZERO

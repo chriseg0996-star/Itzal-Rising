@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://cmdp7k2x9q4n8"]
+
+[ext_resource type="Script" path="res://scripts/ui/command_panel.gd" id="1_cmd"]
+
+[sub_resource type="StyleBoxFlat" id="PanelBG"]
+bg_color = Color(0.06, 0.09, 0.13, 0.92)
+
+[node name="CommandPanel" type="CanvasLayer"]
+script = ExtResource("1_cmd")
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -56.0
+offset_right = 220.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("PanelBG")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin"]
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="MoveBtn" type="Button" parent="Panel/Margin/HBox"]
+flat = true
+text = "MOVE"
+theme_override_font_sizes/font_size = 12
+
+[node name="AttackBtn" type="Button" parent="Panel/Margin/HBox"]
+flat = true
+text = "ATTACK"
+theme_override_font_sizes/font_size = 12
+
+[node name="HoldBtn" type="Button" parent="Panel/Margin/HBox"]
+flat = true
+text = "HOLD"
+theme_override_font_sizes/font_size = 12
+
+[node name="StopBtn" type="Button" parent="Panel/Margin/HBox"]
+flat = true
+text = "STOP"
+theme_override_font_sizes/font_size = 12
+
+[node name="PatrolBtn" type="Button" parent="Panel/Margin/HBox"]
+flat = true
+text = "PATROL"
+theme_override_font_sizes/font_size = 12
+
+[node name="RallyBtn" type="Button" parent="Panel/Margin/HBox"]
+flat = true
+text = "RALLY"
+theme_override_font_sizes/font_size = 12

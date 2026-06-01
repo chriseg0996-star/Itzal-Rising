@@ -23,6 +23,8 @@ TextureGenerator="*res://scripts/utils/texture_generator.gd"
 SelectionManager="*res://scripts/units/selection_manager.gd"
 BuildingPlacer="*res://scripts/buildings/building_placer.gd"
 GameStats="*res://scripts/managers/game_stats.gd"
+AlertManager="*res://scripts/managers/alert_manager.gd"
+ObjectiveManager="*res://scripts/managers/objective_manager.gd"
 EnemyAI="*res://scripts/ai/enemy_ai.gd"
 
 [display]

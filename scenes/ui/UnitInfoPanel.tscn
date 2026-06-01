@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://uip7k2x9q4n8p"]
+
+[ext_resource type="Script" path="res://scripts/ui/unit_info_panel.gd" id="1_uip"]
+
+[node name="UnitInfoPanel" type="PanelContainer"]
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -220.0
+offset_right = 200.0
+offset_bottom = -80.0
+grow_vertical = 0
+script = ExtResource("1_uip")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 6
+
+[node name="NameLabel" type="Label" parent="VBox"]
+text = ""
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="HPBar" type="ProgressBar" parent="VBox"]
+min_value = 0.0
+max_value = 100.0
+value = 100.0
+
+[node name="HPLabel" type="Label" parent="VBox"]
+text = "100 / 100"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="MultiLabel" type="Label" parent="VBox"]
+visible = false
+text = ""
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16

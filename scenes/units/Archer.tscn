@@ -1,6 +1,9 @@
-[gd_scene format=3 uid="uid://bvk3pqlquuqo1"]
+[gd_scene load_steps=7 format=3 uid="uid://bvk3pqlquuqo1"]
 
 [ext_resource type="Script" path="res://scripts/units/soldier.gd" id="1_sol_script"]
+[ext_resource type="Script" path="res://scripts/units/components/stat_component.gd" id="2_stat"]
+[ext_resource type="Script" path="res://scripts/units/components/combat_component.gd" id="3_combat"]
+[ext_resource type="Script" path="res://scripts/units/components/movement_component.gd" id="4_move"]
 
 [sub_resource type="RectangleShape2D" id="HitboxShape_Arc"]
 size = Vector2(28, 28)
@@ -9,6 +12,9 @@ size = Vector2(28, 28)
 radius = 160.0
 
 [node name="Archer" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+motion_mode = 1
 script = ExtResource("1_sol_script")
 faction = "player"
 sprite_asset = "archer"
@@ -21,6 +27,9 @@ offset_right = 14.0
 offset_bottom = 14.0
 mouse_filter = 2
 color = Color(0.1529, 0.6824, 0.3765, 1)
+
+[node name="BodyShape" type="CollisionShape2D" parent="."]
+shape = SubResource("HitboxShape_Arc")
 
 [node name="HPBarBG" type="ColorRect" parent="."]
 offset_left = -16.0
@@ -55,3 +64,18 @@ shape = SubResource("DetectShape_Arc")
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 path_desired_distance = 4.0
 target_desired_distance = 4.0
+
+[node name="StatComponent" type="Node" parent="."]
+script = ExtResource("2_stat")
+max_health = 80.0
+armor = 2.0
+
+[node name="CombatComponent" type="Node" parent="."]
+script = ExtResource("3_combat")
+enemy_group = "enemy_units"
+attack_range = 160.0
+aggro_range = 350.0
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("4_move")
+speed = 100.0

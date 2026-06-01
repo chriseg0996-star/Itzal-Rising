@@ -3,6 +3,7 @@ extends Node
 signal building_selected(building: Node)
 signal building_deselected
 signal move_commanded(target: Vector2, units: Array)
+signal selection_changed(units: Array)
 
 const FORMATION_SPACING: float = 40.0
 const LINE_SPACING: float = 48.0
@@ -19,11 +20,13 @@ var _throttle: Dictionary = {}
 func select_only(unit: Node) -> void:
 	clear()
 	_add(unit)
+	selection_changed.emit(selected.duplicate())
 
 func select_multiple(units: Array) -> void:
 	clear()
 	for u in units:
 		_add(u)
+	selection_changed.emit(selected.duplicate())
 
 func toggle_unit(unit: Node) -> void:
 	if unit == null or not is_instance_valid(unit):
@@ -33,12 +36,14 @@ func toggle_unit(unit: Node) -> void:
 		unit.set_selected(false)
 	else:
 		_add(unit)
+	selection_changed.emit(selected.duplicate())
 
 func clear() -> void:
 	for u in selected:
 		if is_instance_valid(u):
 			u.set_selected(false)
 	selected.clear()
+	selection_changed.emit([])
 
 func select_building(b: Node) -> void:
 	if b == null or not is_instance_valid(b):

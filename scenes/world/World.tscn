@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://d8w3r5y6q1n2v"]
+[gd_scene load_steps=19 format=3 uid="uid://d8w3r5y6q1n2v"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/Ground.tscn" id="1_ground"]
 [ext_resource type="PackedScene" path="res://scenes/camera/RTSCamera.tscn" id="2_camscn"]
@@ -14,6 +14,9 @@
 [ext_resource type="PackedScene" path="res://scenes/world/GoldMine.tscn" id="12_gold"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PausePanel.tscn" id="13_pause"]
 [ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="14_minim"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CommandPanel.tscn" id="15_cmdp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ProductionQueue.tscn" id="16_prodq"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ObjectivesPanel.tscn" id="17_objp"]
 
 [sub_resource type="NavigationPolygon" id="NavPoly_1"]
 vertices = PackedVector2Array(0, 0, 2048, 0, 2048, 2048, 0, 2048)
@@ -90,3 +93,9 @@ script = ExtResource("4_sel")
 [node name="PausePanel" parent="." instance=ExtResource("13_pause")]
 
 [node name="GameEndPanel" parent="." instance=ExtResource("11_endp")]
+
+[node name="CommandPanel" parent="." instance=ExtResource("15_cmdp")]
+
+[node name="ProductionQueue" parent="." instance=ExtResource("16_prodq")]
+
+[node name="ObjectivesPanel" parent="." instance=ExtResource("17_objp")]

@@ -123,6 +123,17 @@ func move_to(target: Vector2) -> void:
 	_nav_agent.target_position = target
 	_state = State.MOVING
 
+func stop() -> void:
+	_harvest_component.stop()
+	_nav_agent.target_position = global_position
+	_state = State.IDLE
+
+func hold() -> void:
+	stop()
+
+func patrol(target: Vector2) -> void:
+	move_to(target)
+
 func _enter_dying() -> void:
 	_state = State.DYING
 	_death_timer = 0.0

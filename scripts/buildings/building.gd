@@ -1,5 +1,7 @@
 extends Node2D
 
+signal building_damaged(building: Node)
+
 const MAX_QUEUE: int = 5
 const SPAWN_OFFSET: Vector2 = Vector2(0, 80)
 
@@ -36,6 +38,8 @@ func _ready() -> void:
 		add_to_group("enemy_buildings")
 	hp = max_hp
 	_apply_sprite(sprite_asset)
+	if faction == "player":
+		AlertManager.register_building(self)
 
 func _apply_sprite(asset: String) -> void:
 	if asset == "":
@@ -106,6 +110,8 @@ func take_damage(amount: int) -> void:
 	if dying:
 		return
 	hp = max(0, hp - amount)
+	if faction == "player":
+		building_damaged.emit(self)
 	if hp <= 0:
 		_die()
 

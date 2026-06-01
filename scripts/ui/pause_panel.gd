@@ -43,6 +43,7 @@ func _on_exit_to_menu() -> void:
 	BuildingPlacer.cancel_placement()
 	EnemyAI.reset()
 	GameStats.reset()
+	ObjectiveManager.reset()
 	get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
 
 func _on_quit_game() -> void:
