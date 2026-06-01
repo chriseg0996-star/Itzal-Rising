@@ -12,7 +12,7 @@ A simple RTS game inspired by Age of Empires, built in Godot 4.
 | Left click + drag | Box-select multiple units |
 | Right click on ground | Move selected units |
 | Right click on tree / gold mine | Harvest resource (villagers) |
-| `A` + right click | Attack-move (engage enemies en route) |
+| `G` + right click | Attack-move (engage enemies en route) |
 | `B` | Enter Barracks placement mode |
 | `T` | Enter Town Center placement mode |
 | Right click (in placement mode) | Cancel placement |

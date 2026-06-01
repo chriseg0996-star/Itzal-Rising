@@ -25,8 +25,11 @@ func _handle_left(mb: InputEventMouseButton) -> void:
 	if mb.pressed:
 		var unit := _unit_at(world_pos)
 		if unit != null:
-			SelectionManager.select_only(unit)
-			SelectionManager.deselect_building()
+			if Input.is_key_pressed(KEY_SHIFT):
+				SelectionManager.toggle_unit(unit)
+			else:
+				SelectionManager.select_only(unit)
+				SelectionManager.deselect_building()
 			dragging_box = false
 			get_viewport().set_input_as_handled()
 			return
