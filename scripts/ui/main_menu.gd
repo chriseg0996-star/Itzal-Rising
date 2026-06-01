@@ -1,13 +1,11 @@
 extends Control
 
-@onready var bg: TextureRect = $BG
 @onready var play_btn: Button = $Center/VBox/PlayBtn
 @onready var settings_btn: Button = $Center/VBox/SettingsBtn
 @onready var quit_btn: Button = $Center/VBox/QuitBtn
 @onready var version_label: Label = $VersionLabel
 
 func _ready() -> void:
-	bg.texture = TextureGenerator.get_texture("menu_bg")
 	play_btn.pressed.connect(_on_play)
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
@@ -17,7 +15,7 @@ func _ready() -> void:
 	version_label.text = "v" + str(ProjectSettings.get_setting("application/config/version", "1.0.0"))
 
 func _setup_hover(btn: Button) -> void:
-	btn.mouse_entered.connect(func() -> void: btn.modulate = Color(0.6, 1.0, 0.7))
+	btn.mouse_entered.connect(func() -> void: btn.modulate = Color(1, 1, 1, 1))
 	btn.mouse_exited.connect(func() -> void: btn.modulate = Color.WHITE)
 
 func _on_play() -> void:

@@ -1,53 +1,241 @@
-[gd_scene load_steps=2 format=3 uid="uid://1w5hic7i4gby"]
+[gd_scene load_steps=8 format=3 uid="uid://1w5hic7i4gby"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mm_script"]
+
+[sub_resource type="FontVariation" id="TitleFont"]
+spacing_glyph = 8
+
+[sub_resource type="FontVariation" id="SubFont"]
+spacing_glyph = 4
+
+[sub_resource type="FontVariation" id="BtnFont"]
+spacing_glyph = 3
+
+[sub_resource type="StyleBoxLine" id="SepLine"]
+color = Color(0, 0.9, 0.78, 0.3)
+thickness = 1
+
+[sub_resource type="StyleBoxFlat" id="BtnNormal"]
+content_margin_left = 24.0
+content_margin_top = 0.0
+content_margin_right = 24.0
+content_margin_bottom = 0.0
+bg_color = Color(0.08, 0.12, 0.17, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.9, 0.78, 0.25)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="BtnHover"]
+content_margin_left = 24.0
+content_margin_top = 0.0
+content_margin_right = 24.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0.9, 0.78, 0.08)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.9, 0.78, 0.7)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="MainMenu" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_mm_script")
 
-[node name="BG" type="TextureRect" parent="."]
+[node name="BG" type="ColorRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-expand_mode = 1
-stretch_mode = 6
+color = Color(0.05, 0.07, 0.1, 1)
+
+[node name="Vignette" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.4)
+
+[node name="Decor" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="TL_H" type="ColorRect" parent="Decor"]
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 44.0
+offset_bottom = 25.0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
+
+[node name="TL_V" type="ColorRect" parent="Decor"]
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 25.0
+offset_bottom = 44.0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
+
+[node name="TR_H" type="ColorRect" parent="Decor"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -44.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 25.0
+grow_horizontal = 0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
+
+[node name="TR_V" type="ColorRect" parent="Decor"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -25.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 44.0
+grow_horizontal = 0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
+
+[node name="BL_H" type="ColorRect" parent="Decor"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -25.0
+offset_right = 44.0
+offset_bottom = -24.0
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
+
+[node name="BL_V" type="ColorRect" parent="Decor"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -44.0
+offset_right = 25.0
+offset_bottom = -24.0
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
+
+[node name="BR_H" type="ColorRect" parent="Decor"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -44.0
+offset_top = -25.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
+
+[node name="BR_V" type="ColorRect" parent="Decor"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -25.0
+offset_top = -44.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0, 0.9, 0.78, 0.3)
 
 [node name="Center" type="CenterContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="VBox" type="VBoxContainer" parent="Center"]
-theme_override_constants/separation = 18
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="Title" type="Label" parent="Center/VBox"]
-text = "RTS Game"
+text = "ITZAL RISING"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.95, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 72
+theme_override_colors/font_color = Color(1, 1, 1, 0.95)
+theme_override_fonts/font = SubResource("TitleFont")
+theme_override_font_sizes/font_size = 64
 
 [node name="Subtitle" type="Label" parent="Center/VBox"]
-text = "A simple RTS, inspired by Age of Empires"
+text = "MESOAMERICAN SCI-FI STRATEGY"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.56, 0.65, 0.77, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.9, 0.78, 0.8)
+theme_override_fonts/font = SubResource("SubFont")
+theme_override_font_sizes/font_size = 13
 
-[node name="Spacer" type="Control" parent="Center/VBox"]
-custom_minimum_size = Vector2(0, 24)
+[node name="Spacer1" type="Control" parent="Center/VBox"]
+custom_minimum_size = Vector2(0, 28)
+mouse_filter = 2
+
+[node name="Separator" type="HSeparator" parent="Center/VBox"]
+custom_minimum_size = Vector2(200, 0)
+size_flags_horizontal = 4
+theme_override_styles/separator = SubResource("SepLine")
+
+[node name="Spacer2" type="Control" parent="Center/VBox"]
+custom_minimum_size = Vector2(0, 20)
+mouse_filter = 2
 
 [node name="PlayBtn" type="Button" parent="Center/VBox"]
-text = "Play"
-custom_minimum_size = Vector2(240, 52)
+custom_minimum_size = Vector2(240, 44)
+size_flags_horizontal = 4
+text = "PLAY"
+theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_focus_color = Color(0, 0.9, 0.78, 1)
+theme_override_fonts/font = SubResource("BtnFont")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="SettingsBtn" type="Button" parent="Center/VBox"]
-text = "Settings"
-custom_minimum_size = Vector2(240, 52)
+custom_minimum_size = Vector2(240, 44)
+size_flags_horizontal = 4
+text = "SETTINGS"
+theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_focus_color = Color(0, 0.9, 0.78, 1)
+theme_override_fonts/font = SubResource("BtnFont")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="QuitBtn" type="Button" parent="Center/VBox"]
-text = "Quit"
-custom_minimum_size = Vector2(240, 52)
+custom_minimum_size = Vector2(240, 44)
+size_flags_horizontal = 4
+text = "QUIT"
+theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_focus_color = Color(0, 0.9, 0.78, 1)
+theme_override_fonts/font = SubResource("BtnFont")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="VersionLabel" type="Label" parent="."]
 anchor_left = 1.0
@@ -62,5 +250,5 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "v1.0.0"
 horizontal_alignment = 2
-theme_override_colors/font_color = Color(0.5, 0.55, 0.65, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.3, 0.4, 0.45, 1)
+theme_override_font_sizes/font_size = 11
