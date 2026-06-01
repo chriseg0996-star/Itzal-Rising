@@ -11,6 +11,8 @@ const SELECTION_SEGMENTS: int = 32
 @export var faction: String = "player"
 @export var sprite_asset: String = "soldier"
 @export var max_hp: int = 120
+@export var sound_select: AudioStream
+@export var sound_attack: AudioStream
 
 @onready var hp_bar_fg: ColorRect = $HPBarFG
 @onready var detection_area: Area2D = $DetectionArea
@@ -22,6 +24,7 @@ var death_timer: float = 0.0
 var hp_bar_width: float = 32.0
 var _movement_component: MovementComponent = null
 var _stat: StatComponent = null
+var _base_modulate: Color = Color(1, 1, 1, 1)
 
 func _ready() -> void:
 	add_to_group("soldiers")
@@ -37,16 +40,46 @@ func _ready() -> void:
 	if _stat != null:
 		_stat.died.connect(_on_died)
 		_stat.health_changed.connect(_on_health_changed)
+	_base_modulate = modulate
+	var _sfx := AudioStreamPlayer.new()
+	_sfx.name = "SFX"
+	add_child(_sfx)
+	var combat := get_node_or_null("CombatComponent") as CombatComponent
+	if combat != null:
+		combat.attack_landed.connect(_on_attack_landed)
 	_update_hp_bar()
 
 func _on_died(_owner_unit: CharacterBody2D = null) -> void:
 	if SelectionManager.has_method("deselect_unit"):
 		SelectionManager.deselect_unit(self)
 	set_physics_process(false)
-	call_deferred("queue_free")
+	set_process(false)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(queue_free)
 
 func _on_health_changed(_current: float, _maximum: float) -> void:
 	_update_hp_bar()
+	_flash_hit()
+
+func _flash_hit() -> void:
+	if is_dying():
+		return
+	modulate = Color(2.0, 2.0, 2.0, _base_modulate.a)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", _base_modulate, 0.1)
+
+func _on_attack_landed(_target: CharacterBody2D, _damage: float) -> void:
+	_play_sound(sound_attack)
+
+func _play_sound(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	var sfx := get_node_or_null("SFX") as AudioStreamPlayer
+	if sfx == null:
+		return
+	sfx.stream = stream
+	sfx.play()
 
 func _apply_sprite(asset: String) -> void:
 	if asset == "":
@@ -71,6 +104,8 @@ func set_selected(value: bool) -> void:
 		return
 	selected = value
 	queue_redraw()
+	if value:
+		_play_sound(sound_select)
 
 func move_to(target: Vector2) -> void:
 	if state == State.DYING:

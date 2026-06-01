@@ -26,6 +26,7 @@ var _death_timer:     float   = 0.0
 var _hp_bar_width:    float   = 32.0
 var _movement_component: MovementComponent = null
 var _stat:            StatComponent = null
+var _base_modulate: Color = Color(1, 1, 1, 1)
 
 func _ready() -> void:
 	add_to_group("soldiers")
@@ -41,6 +42,7 @@ func _ready() -> void:
 	if _stat != null:
 		_stat.died.connect(_on_died)
 		_stat.health_changed.connect(_on_health_changed)
+	_base_modulate = modulate
 	_update_hp_bar()
 	await get_tree().physics_frame
 
@@ -48,10 +50,21 @@ func _on_died(_owner_unit: CharacterBody2D = null) -> void:
 	if SelectionManager.has_method("deselect_unit"):
 		SelectionManager.deselect_unit(self)
 	set_physics_process(false)
-	call_deferred("queue_free")
+	set_process(false)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(queue_free)
 
 func _on_health_changed(_current: float, _maximum: float) -> void:
 	_update_hp_bar()
+	_flash_hit()
+
+func _flash_hit() -> void:
+	if is_dying():
+		return
+	modulate = Color(2.0, 2.0, 2.0, _base_modulate.a)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", _base_modulate, 0.1)
 
 func is_dying() -> bool:
 	if _stat != null:

@@ -92,6 +92,7 @@ func _attack() -> void:
 	attack_started.emit(_target)
 	stat.take_damage(attack_damage)
 	attack_landed.emit(_target, attack_damage)
+	_spawn_impact(_target.global_position)
 
 func _is_unit_dead(unit: Node) -> bool:
 	var stat: Node = unit.get_node_or_null("StatComponent")
@@ -110,3 +111,13 @@ func clear_target() -> void:
 
 func is_engaged() -> bool:
 	return _state != State.IDLE and _target != null
+
+func _spawn_impact(target_pos: Vector2) -> void:
+	var rect := ColorRect.new()
+	rect.color = Color(0.0, 1.0, 0.9, 0.8)
+	rect.size = Vector2(8, 8)
+	rect.position = target_pos - Vector2(4, 4)
+	get_tree().current_scene.add_child(rect)
+	var tween := rect.create_tween()
+	tween.tween_property(rect, "modulate:a", 0.0, 0.2)
+	tween.tween_callback(rect.queue_free)
