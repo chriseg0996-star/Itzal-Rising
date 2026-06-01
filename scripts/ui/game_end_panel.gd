@@ -8,8 +8,10 @@ var game_over: bool = false
 var player_had_tc: bool = false
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	restart_btn.pressed.connect(_on_restart)
+	$Center/Panel/Margin/VBox/MenuBtn.pressed.connect(_on_menu)
 
 func _process(_delta: float) -> void:
 	if game_over:
@@ -33,6 +35,7 @@ func _find_player_tc() -> Node:
 	return null
 
 func _show(text: String) -> void:
+	get_tree().paused = true
 	title.text = text
 	stats_label.text = "Time: %s\nUnits trained: %d\nResources gathered: %d" % [
 		GameStats.format_time(),
@@ -43,6 +46,7 @@ func _show(text: String) -> void:
 	game_over = true
 
 func _on_restart() -> void:
+	get_tree().paused = false
 	ResourceManager.reset()
 	SelectionManager.clear()
 	SelectionManager.deselect_building()
@@ -53,3 +57,7 @@ func _on_restart() -> void:
 	player_had_tc = false
 	visible = false
 	get_tree().reload_current_scene()
+
+func _on_menu() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
