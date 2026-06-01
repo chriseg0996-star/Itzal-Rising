@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://1upiobpikawh"]
+[gd_scene load_steps=6 format=3 uid="uid://1upiobpikawh"]
 
 [ext_resource type="Script" path="res://scripts/units/enemy_villager.gd" id="1_vil_script"]
 [ext_resource type="Script" path="res://scripts/units/harvest_component.gd" id="2_harvest"]
+[ext_resource type="Script" path="res://scripts/units/components/stat_component.gd" id="3_stat"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_Click"]
 size = Vector2(32, 32)
@@ -57,3 +58,7 @@ target_desired_distance = 4.0
 
 [node name="HarvestComponent" type="Node" parent="."]
 script = ExtResource("2_harvest")
+
+[node name="StatComponent" type="Node" parent="."]
+script = ExtResource("3_stat")
+max_health = 60.0

@@ -14,7 +14,8 @@ const SELECTION_SEGMENTS: int = 32
 @export var speed: float  = 120.0
 @export var faction:         String   = "player"
 @export var sprite_asset:    String   = "villager"
-@export var max_hp:          int      = 50
+@export var sound_select: AudioStream
+@export var sound_harvest: AudioStream
 
 @onready var _nav_agent:          NavigationAgent2D = $NavigationAgent2D
 @onready var _harvest_component:  HarvestComponent  = $HarvestComponent
@@ -24,22 +25,30 @@ const SELECTION_SEGMENTS: int = 32
 var _state:        State  = State.IDLE
 var _home:         Node2D = null
 var selected:      bool   = false
-var hp:            int    = 0
+var _stat:         StatComponent = null
 var _death_timer:  float  = 0.0
 var _hp_bar_width: float  = 32.0
+var _base_modulate: Color = Color(1, 1, 1, 1)
 
 func _ready() -> void:
 	add_to_group("villagers")
 	add_to_group("combat_units")
 	if faction == "player":
 		add_to_group("player_units")
-	hp = max_hp
+	_stat = get_node_or_null("StatComponent") as StatComponent
+	if _stat != null:
+		_stat.died.connect(_on_died)
+		_stat.health_changed.connect(_on_health_changed)
 	if _hp_bar_fg != null:
 		_hp_bar_width = _hp_bar_fg.offset_right - _hp_bar_fg.offset_left
 	_update_hp_bar()
 	_home = _find_home()
 	_harvest_component.setup(_nav_agent, _home, faction)
 	_apply_sprite(sprite_asset)
+	_base_modulate = modulate
+	var _sfx := AudioStreamPlayer.new()
+	_sfx.name = "SFX"
+	add_child(_sfx)
 
 func _find_home() -> Node2D:
 	var town_centers: Array = get_tree().get_nodes_in_group("town_center")
@@ -58,22 +67,43 @@ func set_selected(value: bool) -> void:
 		return
 	selected = value
 	queue_redraw()
+	if value:
+		_play_sound(sound_select)
 
 func is_harvesting() -> bool:
 	return _harvest_component.is_active()
 
 func take_damage(amount: int) -> void:
+	if _stat != null:
+		_stat.take_damage(float(amount))
+
+func _on_health_changed(_current: float, _maximum: float) -> void:
+	_update_hp_bar()
+	_flash_hit()
+
+func _on_died(_owner_unit: CharacterBody2D = null) -> void:
+	_enter_dying()
+
+func _flash_hit() -> void:
 	if _state == State.DYING:
 		return
-	hp = max(0, hp - amount)
-	_update_hp_bar()
-	if hp <= 0:
-		_enter_dying()
+	modulate = Color(2.0, 2.0, 2.0, _base_modulate.a)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", _base_modulate, 0.1)
+
+func _play_sound(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	var sfx := get_node_or_null("SFX") as AudioStreamPlayer
+	if sfx == null:
+		return
+	sfx.stream = stream
+	sfx.play()
 
 func _update_hp_bar() -> void:
-	if _hp_bar_fg == null:
+	if _hp_bar_fg == null or _stat == null:
 		return
-	var ratio: float = clampf(float(hp) / float(max_hp), 0.0, 1.0)
+	var ratio: float = _stat.get_health_ratio()
 	_hp_bar_fg.offset_right = _hp_bar_fg.offset_left + _hp_bar_width * ratio
 
 func _physics_process(delta: float) -> void:
@@ -111,6 +141,7 @@ func _process_moving(delta: float) -> void:
 func assign_harvest(node: ResourceNode) -> void:
 	_harvest_component.assign_node(node)
 	_state = State.HARVESTING
+	_play_sound(sound_harvest)
 
 func harvest(node) -> void:
 	if node is ResourceNode:
@@ -141,6 +172,11 @@ func _enter_dying() -> void:
 	if _hitbox != null:
 		_hitbox.monitorable = false
 		_hitbox.monitoring = false
+	set_physics_process(false)
+	set_process(false)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(die)
 
 func _process_dying(delta: float) -> void:
 	_death_timer += delta
