@@ -1,102 +1,62 @@
 extends CanvasLayer
 
-@onready var barracks_btn: Button = $BottomBar/Margin/HBox/BarracksBtn
-@onready var tc_btn: Button = $BottomBar/Margin/HBox/TCBtn
-@onready var tower_btn: Button = $BottomBar/Margin/HBox/TowerBtn
-@onready var side_panel: PanelContainer = $SidePanel
-@onready var name_label: Label = $SidePanel/Margin/VBox/NameLabel
-@onready var hp_label: Label = $SidePanel/Margin/VBox/HPLabel
-@onready var queue_label: Label = $SidePanel/Margin/VBox/QueueLabel
-@onready var timer_label: Label = $SidePanel/Margin/VBox/TimerLabel
-@onready var train_btn: Button = $SidePanel/Margin/VBox/TrainBtn
-@onready var train_2_btn: Button = $SidePanel/Margin/VBox/Train2Btn
+@onready var _side_panel: PanelContainer = $SidePanel
+@onready var _name_label: Label = $SidePanel/Margin/VBox/NameLabel
+@onready var _hp_label: Label = $SidePanel/Margin/VBox/HPLabel
+@onready var _queue_label: Label = $SidePanel/Margin/VBox/QueueLabel
+@onready var _timer_label: Label = $SidePanel/Margin/VBox/TimerLabel
+@onready var _train_btn: Button = $SidePanel/Margin/VBox/TrainBtn
+@onready var _train2_btn: Button = $SidePanel/Margin/VBox/Train2Btn
+@onready var _barracks_btn: Button = $BottomBar/Margin/HBox/BarracksBtn
+@onready var _tc_btn: Button = $BottomBar/Margin/HBox/TCBtn
+@onready var _tower_btn: Button = $BottomBar/Margin/HBox/TowerBtn
 
-var current_building: Node = null
+var _selected_building: Node = null
 
 func _ready() -> void:
-	barracks_btn.pressed.connect(_on_barracks)
-	tc_btn.pressed.connect(_on_tc)
-	tower_btn.pressed.connect(_on_tower)
-	train_btn.pressed.connect(_on_train_0)
-	train_2_btn.pressed.connect(_on_train_1)
-	SelectionManager.building_selected.connect(_on_building_selected)
-	SelectionManager.building_deselected.connect(_on_building_deselected)
-	side_panel.visible = false
-	_setup_tooltips()
+	_barracks_btn.pressed.connect(func(): BuildingPlacer.start_placement("barracks"))
+	_tc_btn.pressed.connect(func(): BuildingPlacer.start_placement("tc"))
+	_tower_btn.pressed.connect(func(): BuildingPlacer.start_placement("tower"))
+	_train_btn.pressed.connect(func(): _try_train(0))
+	_train2_btn.pressed.connect(func(): _try_train(1))
+	SelectionManager.building_selected.connect(show_building)
+	SelectionManager.building_deselected.connect(hide_building)
+	_side_panel.visible = false
 
-func _setup_tooltips() -> void:
-	barracks_btn.tooltip_text = _build_tooltip("Barracks", "barracks", "Trains soldiers and archers")
-	tc_btn.tooltip_text = _build_tooltip("Town Center", "tc", "Trains villagers (50F, 10s)")
-	tower_btn.tooltip_text = _build_tooltip("Tower", "tower", "Auto-attacks enemies in 150px range (18 dmg / 2s)")
+func show_building(building: Node) -> void:
+	_selected_building = building
+	_side_panel.visible = true
+	_refresh()
 
-func _build_tooltip(display_name: String, type: String, suffix: String) -> String:
-	var data: Dictionary = BuildingPlacer.BUILDING_DATA.get(type, {})
-	var cost: Dictionary = data.get("cost", {})
-	return "Build %s\nCost: %s\n%s" % [display_name, _format_cost(cost), suffix]
+func hide_building() -> void:
+	_selected_building = null
+	_side_panel.visible = false
 
-func _format_cost(cost: Dictionary) -> String:
-	var parts: PackedStringArray = PackedStringArray()
-	for type in cost:
-		var letter: String = "?"
-		match type:
-			"madera": letter = "W"
-			"comida": letter = "F"
-			"oro": letter = "G"
-		parts.append("%d%s" % [int(cost[type]), letter])
-	return ", ".join(parts)
-
-func _on_barracks() -> void:
-	BuildingPlacer.start_placement("barracks")
-
-func _on_tc() -> void:
-	BuildingPlacer.start_placement("tc")
-
-func _on_tower() -> void:
-	BuildingPlacer.start_placement("tower")
-
-func _on_train_0() -> void:
-	if current_building != null and is_instance_valid(current_building):
-		current_building.try_queue_training(0)
-
-func _on_train_1() -> void:
-	if current_building != null and is_instance_valid(current_building):
-		current_building.try_queue_training(1)
-
-func _on_building_selected(b: Node) -> void:
-	current_building = b
-	side_panel.visible = true
-
-func _on_building_deselected() -> void:
-	current_building = null
-	side_panel.visible = false
+func _try_train(slot: int) -> void:
+	if _selected_building == null:
+		return
+	if _selected_building.has_method("try_queue_training"):
+		_selected_building.try_queue_training(slot)
 
 func _process(_delta: float) -> void:
-	if not side_panel.visible:
-		return
-	if current_building == null or not is_instance_valid(current_building):
-		_on_building_deselected()
+	if _selected_building == null or not is_instance_valid(_selected_building):
+		hide_building()
 		return
 	_refresh()
 
 func _refresh() -> void:
-	name_label.text = current_building.building_name
-	hp_label.text = "HP: %d/%d" % [current_building.hp, current_building.max_hp]
-	var q_size: int = current_building.queue.size()
-	queue_label.text = "Queue: %d/5" % q_size
-	if q_size > 0:
-		var t: float = max(current_building.production_timer, 0.0)
-		timer_label.text = "Training: %.1fs" % t
-	else:
-		timer_label.text = "Idle"
-
-	if current_building.has_train_slot(0):
-		train_btn.visible = true
-		train_btn.text = "Train %s (%s)" % [current_building.get_train_label(0), current_building.get_train_cost_label(0)]
-	else:
-		train_btn.visible = false
-
-	if current_building.has_train_slot(1):
-		train_2_btn.visible = true
-		train_2_btn.text = "Train %s (%s)" % [current_building.get_train_label(1), current_building.get_train_cost_label(1)]
-	else:
-		train_2_btn.visible = false
+	var b: Node = _selected_building
+	_name_label.text = b.get("building_name") if b.get("building_name") else "Building"
+	var hp: int = b.get("hp") if b.get("hp") != null else 0
+	var max_hp: int = b.get("max_hp") if b.get("max_hp") != null else 0
+	_hp_label.text = "HP: %d/%d" % [hp, max_hp]
+	var q: Array = b.get("queue") if b.get("queue") != null else []
+	_queue_label.text = "Queue: %d/5" % q.size()
+	var timer: float = b.get("production_timer") if b.get("production_timer") != null else 0.0
+	_timer_label.text = "Idle" if q.is_empty() else "%.1fs" % timer
+	_train_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(0)
+	_train2_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(1)
+	if _train_btn.visible:
+		_train_btn.text = "%s (%s)" % [b.get_train_label(0), b.get_train_cost_label(0)]
+	if _train2_btn.visible:
+		_train2_btn.text = "%s (%s)" % [b.get_train_label(1), b.get_train_cost_label(1)]

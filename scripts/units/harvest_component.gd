@@ -8,7 +8,7 @@ signal deposit_made(type: StringName, amount: int)
 enum State { IDLE, MOVING_TO_NODE, HARVESTING, RETURNING }
 
 @export var harvest_interval: float  = 1.5
-@export var harvest_range:    float  = 48.0
+@export var harvest_range:    float  = 80.0
 @export var carry_capacity:   int    = 20
 ## Set this to match your NavigationRegion2D polygon extents in the Inspector.
 @export var map_bounds:       Rect2  = Rect2(0.0, 0.0, 2048.0, 2048.0)
@@ -56,6 +56,7 @@ func _tick_moving(unit_pos: Vector2) -> void:
 		_set_state(State.IDLE)
 		return
 	if unit_pos.distance_to(_target_node.global_position) <= harvest_range:
+		_nav_agent.target_position = unit_pos
 		_set_state(State.HARVESTING)
 		return
 	_nav_agent.target_position = _safe_target(_target_node.global_position)
