@@ -17,15 +17,15 @@ var _state:        State             = State.IDLE
 var _target_node:  ResourceNode      = null
 var _nav_agent:    NavigationAgent2D = null
 var _home:         Node2D            = null
-var _faction:      String            = "player"
+var _faction_id:   int               = 0
 var _timer:        float             = 0.0
 var _carrying:     int               = 0
 var _carry_type:   StringName        = &""
 
-func setup(nav_agent: NavigationAgent2D, home: Node2D, faction: String = "player") -> void:
+func setup(nav_agent: NavigationAgent2D, home: Node2D, faction_id: int = 0) -> void:
 	_nav_agent = nav_agent
 	_home      = home
-	_faction   = faction
+	_faction_id = faction_id
 
 func assign_node(node: ResourceNode) -> void:
 	if node == null or node.is_depleted():
@@ -85,8 +85,8 @@ func _tick_returning(unit_pos: Vector2) -> void:
 
 func _deposit_and_resume() -> void:
 	if _carrying > 0 and _carry_type != &"":
-		ResourceManager.add_resource(_carry_type, _carrying, _faction)
-		if _faction == "player":
+		ResourceManager.add_resource(_carry_type, _carrying, _faction_id)
+		if _faction_id == FactionManager.PLAYER:
 			GameStats.resources_gathered += _carrying
 		deposit_made.emit(_carry_type, _carrying)
 	_carrying   = 0

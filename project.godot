@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 [autoload]
 
 ResourceManager="*res://scripts/managers/resource_manager.gd"
+FactionManager="*res://scripts/factions/faction_manager.gd"
 TextureGenerator="*res://scripts/utils/texture_generator.gd"
 SelectionManager="*res://scripts/units/selection_manager.gd"
 BuildingPlacer="*res://scripts/buildings/building_placer.gd"

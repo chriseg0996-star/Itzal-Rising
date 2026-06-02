@@ -38,40 +38,41 @@ func _normalize(type) -> StringName:
 	var key: StringName = StringName(type)
 	return _ALIASES.get(key, key)
 
-func _pool(faction: String) -> Dictionary:
-	return _enemy if faction == "enemy" else _resources
+# Pools are keyed by faction id: 0 = player, 1 = enemy (see FactionManager).
+func _pool(faction_id: int) -> Dictionary:
+	return _enemy if faction_id == 1 else _resources
 
-func get_resource(type, faction: String = "player") -> int:
-	return _pool(faction).get(_normalize(type), 0)
+func get_resource(type, faction_id: int = 0) -> int:
+	return _pool(faction_id).get(_normalize(type), 0)
 
-func get_amount(type, faction: String = "player") -> int:
-	return get_resource(type, faction)
+func get_amount(type, faction_id: int = 0) -> int:
+	return get_resource(type, faction_id)
 
-func can_afford(costs: Dictionary, faction: String = "player") -> bool:
+func can_afford(costs: Dictionary, faction_id: int = 0) -> bool:
 	for type in costs:
-		if get_resource(type, faction) < int(costs[type]):
+		if get_resource(type, faction_id) < int(costs[type]):
 			return false
 	return true
 
-func add_resource(type, amount: int, faction: String = "player") -> void:
+func add_resource(type, amount: int, faction_id: int = 0) -> void:
 	var key: StringName = _normalize(type)
-	var pool: Dictionary = _pool(faction)
+	var pool: Dictionary = _pool(faction_id)
 	if not pool.has(key):
 		push_warning("ResourceManager: unknown type '%s'" % String(type))
 		return
 	pool[key] += amount
 	resource_changed.emit(key, pool[key])
 
-func add(type, amount: int, faction: String = "player") -> void:
-	add_resource(type, amount, faction)
+func add(type, amount: int, faction_id: int = 0) -> void:
+	add_resource(type, amount, faction_id)
 
-func spend(costs: Dictionary, faction: String = "player") -> bool:
-	if not can_afford(costs, faction):
+func spend(costs: Dictionary, faction_id: int = 0) -> bool:
+	if not can_afford(costs, faction_id):
 		for type in costs:
-			if get_resource(type, faction) < int(costs[type]):
+			if get_resource(type, faction_id) < int(costs[type]):
 				resource_insufficient.emit(_normalize(type))
 		return false
-	var pool: Dictionary = _pool(faction)
+	var pool: Dictionary = _pool(faction_id)
 	for type in costs:
 		var key: StringName = _normalize(type)
 		pool[key] -= int(costs[type])

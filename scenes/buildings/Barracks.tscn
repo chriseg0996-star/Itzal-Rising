@@ -20,6 +20,7 @@ train_unit_2_scene = ExtResource("3_arc")
 train_unit_2_label = "Archer"
 train_2_costs = {"madera": 50, "comida": 30}
 train_2_duration = 10.0
+faction_id = 0
 
 [node name="Sprite" type="ColorRect" parent="."]
 offset_left = -40.0

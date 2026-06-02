@@ -101,7 +101,7 @@ func _count_player_buildings(building_type: String) -> int:
 	for node in get_tree().get_nodes_in_group("buildings"):
 		if not is_instance_valid(node):
 			continue
-		if String(node.get("faction")) != "player":
+		if int(node.get("faction_id")) != FactionManager.PLAYER:
 			continue
 		if String(node.name).begins_with(building_type):
 			count += 1

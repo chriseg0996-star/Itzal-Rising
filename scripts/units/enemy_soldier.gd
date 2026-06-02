@@ -12,7 +12,7 @@ const SELECTION_WIDTH: float = 3.0
 const SELECTION_SEGMENTS: int = 32
 
 @export var map_bounds:      Rect2  = Rect2(4.0, 4.0, 2040.0, 2040.0)
-@export var faction:         String = "enemy"
+@export var faction_id:      int    = 1
 @export var sprite_asset:    String = "enemy_soldier"
 @export var max_hp:          int    = 120
 
@@ -31,7 +31,7 @@ var _base_modulate: Color = Color(1, 1, 1, 1)
 func _ready() -> void:
 	add_to_group("soldiers")
 	add_to_group("combat_units")
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		add_to_group("player_units")
 	if _hp_bar_fg != null:
 		_hp_bar_width = _hp_bar_fg.offset_right - _hp_bar_fg.offset_left

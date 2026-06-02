@@ -8,7 +8,7 @@ const SELECTION_COLOR: Color = Color(0.27, 0.86, 0.50, 1.0)
 const SELECTION_WIDTH: float = 3.0
 const SELECTION_SEGMENTS: int = 32
 
-@export var faction: String = "player"
+@export var faction_id: int = 0
 @export var sprite_asset: String = "soldier"
 @export var max_hp: int = 120
 @export var sound_select: AudioStream
@@ -29,7 +29,7 @@ var _base_modulate: Color = Color(1, 1, 1, 1)
 func _ready() -> void:
 	add_to_group("soldiers")
 	add_to_group("combat_units")
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		add_to_group("player_units")
 	if hp_bar_fg != null:
 		hp_bar_width = hp_bar_fg.offset_right - hp_bar_fg.offset_left

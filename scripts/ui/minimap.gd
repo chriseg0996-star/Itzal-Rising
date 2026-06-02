@@ -56,10 +56,10 @@ func _rebuild_dots() -> void:
 	for b in get_tree().get_nodes_in_group("buildings"):
 		if not (is_instance_valid(b) and b is Node2D):
 			continue
-		var f: Variant = b.get("faction")
-		if f == "player":
+		var f: Variant = b.get("faction_id")
+		if f == FactionManager.PLAYER:
 			_add_dot((b as Node2D).global_position, PLAYER_BUILDING_COLOR, BUILDING_SIZE, ms)
-		elif f == "enemy":
+		elif f == FactionManager.ENEMY:
 			_add_dot((b as Node2D).global_position, ENEMY_BUILDING_COLOR, BUILDING_SIZE, ms)
 	for r in get_tree().get_nodes_in_group("resources"):
 		if is_instance_valid(r) and r is Node2D:

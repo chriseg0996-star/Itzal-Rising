@@ -15,7 +15,7 @@ train_unit_scene = ExtResource("2_evil")
 train_unit_label = "Villager"
 train_costs = {"comida": 50}
 train_duration = 10.0
-faction = "enemy"
+faction_id = 1
 
 [node name="Sprite" type="ColorRect" parent="."]
 offset_left = -48.0

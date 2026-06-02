@@ -7,7 +7,7 @@ const SPAWN_OFFSET: Vector2 = Vector2(0, 80)
 
 @export var building_name: String = "Building"
 @export var max_hp: int = 100
-@export var faction: String = "player"
+@export var faction_id: int = 0
 @export var sprite_asset: String = ""
 
 @export var train_unit_scene: PackedScene
@@ -32,13 +32,13 @@ var dying: bool = false
 
 func _ready() -> void:
 	add_to_group("buildings")
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		add_to_group("player_buildings")
 	else:
 		add_to_group("enemy_buildings")
 	hp = max_hp
 	_apply_sprite(sprite_asset)
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		AlertManager.register_building(self)
 
 func _apply_sprite(asset: String) -> void:
@@ -98,9 +98,9 @@ func try_queue_training(slot: int = 0) -> bool:
 		return false
 	if scene == null:
 		return false
-	if not ResourceManager.can_afford(costs, faction):
+	if not ResourceManager.can_afford(costs, faction_id):
 		return false
-	ResourceManager.spend(costs, faction)
+	ResourceManager.spend(costs, faction_id)
 	queue.append({"scene": scene, "duration": duration})
 	if queue.size() == 1:
 		production_timer = duration
@@ -110,7 +110,7 @@ func take_damage(amount: int) -> void:
 	if dying:
 		return
 	hp = max(0, hp - amount)
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		building_damaged.emit(self)
 	if hp <= 0:
 		_die()
@@ -152,8 +152,8 @@ func _find_enemy_in_range() -> Node:
 	for u in get_tree().get_nodes_in_group("combat_units"):
 		if not is_instance_valid(u):
 			continue
-		var f = u.get("faction")
-		if f == null or f == faction:
+		var tfid: Variant = u.get("faction_id")
+		if tfid == null or not FactionManager.is_hostile(faction_id, int(tfid)):
 			continue
 		if u.has_method("is_dying") and u.is_dying():
 			continue
@@ -173,5 +173,5 @@ func _spawn_unit(scene: PackedScene) -> void:
 	parent.add_child(unit)
 	if unit is Node2D:
 		(unit as Node2D).global_position = global_position + SPAWN_OFFSET
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		GameStats.units_trained += 1

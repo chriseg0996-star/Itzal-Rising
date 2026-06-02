@@ -93,9 +93,9 @@ func _phase_recolectar() -> void:
 func _phase_construir() -> void:
 	if _has_enemy_barracks():
 		return
-	if not ResourceManager.can_afford(BARRACKS_COST, "enemy"):
+	if not ResourceManager.can_afford(BARRACKS_COST, FactionManager.ENEMY):
 		return
-	ResourceManager.spend(BARRACKS_COST, "enemy")
+	ResourceManager.spend(BARRACKS_COST, FactionManager.ENEMY)
 	var pos: Vector2 = ENEMY_BASE_POS + Vector2(
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE),
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE)
@@ -131,7 +131,7 @@ func _get_enemy_buildings() -> Array:
 func _get_enemy_villagers() -> Array:
 	var result: Array = []
 	for v in get_tree().get_nodes_in_group("villagers"):
-		if is_instance_valid(v) and v.get("faction") == "enemy":
+		if is_instance_valid(v) and v.get("faction_id") == FactionManager.ENEMY:
 			result.append(v)
 	return result
 
@@ -140,7 +140,7 @@ func _get_enemy_soldiers() -> Array:
 	for s in get_tree().get_nodes_in_group("soldiers"):
 		if not is_instance_valid(s):
 			continue
-		if s.get("faction") != "enemy":
+		if s.get("faction_id") != FactionManager.ENEMY:
 			continue
 		if s.has_method("is_dying") and s.is_dying():
 			continue

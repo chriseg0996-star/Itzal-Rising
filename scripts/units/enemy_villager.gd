@@ -13,7 +13,7 @@ const SELECTION_SEGMENTS: int = 32
 
 @export var speed:        float  = 100.0
 @export var map_bounds:   Rect2  = Rect2(4.0, 4.0, 2040.0, 2040.0)
-@export var faction:      String = "enemy"
+@export var faction_id:   int    = 1
 @export var sprite_asset: String = "enemy_villager"
 
 @onready var _nav_agent:         NavigationAgent2D = $NavigationAgent2D
@@ -32,7 +32,7 @@ var _base_modulate: Color = Color(1, 1, 1, 1)
 func _ready() -> void:
 	add_to_group("villagers")
 	add_to_group("combat_units")
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		add_to_group("player_units")
 	_stat = get_node_or_null("StatComponent") as StatComponent
 	if _stat != null:
@@ -45,12 +45,12 @@ func _ready() -> void:
 	_apply_sprite(sprite_asset)
 	_base_modulate = modulate
 	await get_tree().physics_frame
-	_harvest_component.setup(_nav_agent, _home, faction)
+	_harvest_component.setup(_nav_agent, _home, faction_id)
 
 func _find_home() -> Node2D:
 	var town_centers: Array = get_tree().get_nodes_in_group("town_center")
 	for tc in town_centers:
-		if is_instance_valid(tc) and tc.get("faction") == faction:
+		if is_instance_valid(tc) and tc.get("faction_id") == faction_id:
 			return tc as Node2D
 	if not town_centers.is_empty():
 		return town_centers[0] as Node2D

@@ -16,7 +16,7 @@ collision_layer = 0
 collision_mask = 0
 motion_mode = 1
 script = ExtResource("1_sol_script")
-faction = "player"
+faction_id = 0
 sprite_asset = "archer"
 max_hp = 60
 

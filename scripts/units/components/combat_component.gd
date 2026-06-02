@@ -11,6 +11,10 @@ enum State { IDLE, CHASING, ATTACKING }
 @export var attack_range: float = 80.0
 @export var attack_cooldown: float = 1.0
 @export var scan_interval: float = 0.3
+## Broad group scanned for candidates; hostility is decided by FactionManager.
+@export var scan_group: String = "combat_units"
+## Deprecated: superseded by FactionManager.is_hostile(). Kept so existing scene
+## overrides that still set it don't raise load errors.
 @export var enemy_group: String = "enemy_units"
 
 var _state: State = State.IDLE
@@ -37,11 +41,15 @@ func _physics_process(delta: float) -> void:
 func _scan_for_target() -> void:
 	if _owner_unit == null:
 		return
+	var own_fid: int = int(_owner_unit.get("faction_id"))
 	var nearest: CharacterBody2D = null
 	var nearest_dist: float = INF
-	for node in get_tree().get_nodes_in_group(enemy_group):
+	for node in get_tree().get_nodes_in_group(scan_group):
 		var unit: CharacterBody2D = node as CharacterBody2D
-		if unit == null or not is_instance_valid(unit):
+		if unit == null or not is_instance_valid(unit) or unit == _owner_unit:
+			continue
+		var tfid: Variant = unit.get("faction_id")
+		if tfid == null or not FactionManager.is_hostile(own_fid, int(tfid)):
 			continue
 		if _is_unit_dead(unit):
 			continue

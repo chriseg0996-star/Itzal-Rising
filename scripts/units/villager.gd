@@ -12,7 +12,7 @@ const SELECTION_WIDTH: float = 3.0
 const SELECTION_SEGMENTS: int = 32
 
 @export var speed: float  = 120.0
-@export var faction:         String   = "player"
+@export var faction_id:      int      = 0
 @export var sprite_asset:    String   = "villager"
 @export var sound_select: AudioStream
 @export var sound_harvest: AudioStream
@@ -33,7 +33,7 @@ var _base_modulate: Color = Color(1, 1, 1, 1)
 func _ready() -> void:
 	add_to_group("villagers")
 	add_to_group("combat_units")
-	if faction == "player":
+	if faction_id == FactionManager.PLAYER:
 		add_to_group("player_units")
 	_stat = get_node_or_null("StatComponent") as StatComponent
 	if _stat != null:
@@ -43,7 +43,7 @@ func _ready() -> void:
 		_hp_bar_width = _hp_bar_fg.offset_right - _hp_bar_fg.offset_left
 	_update_hp_bar()
 	_home = _find_home()
-	_harvest_component.setup(_nav_agent, _home, faction)
+	_harvest_component.setup(_nav_agent, _home, faction_id)
 	_apply_sprite(sprite_asset)
 	_base_modulate = modulate
 	var _sfx := AudioStreamPlayer.new()
@@ -53,7 +53,7 @@ func _ready() -> void:
 func _find_home() -> Node2D:
 	var town_centers: Array = get_tree().get_nodes_in_group("town_center")
 	for tc in town_centers:
-		if is_instance_valid(tc) and tc.get("faction") == faction:
+		if is_instance_valid(tc) and tc.get("faction_id") == faction_id:
 			return tc as Node2D
 	if not town_centers.is_empty():
 		return town_centers[0] as Node2D
