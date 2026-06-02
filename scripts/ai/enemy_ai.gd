@@ -15,15 +15,32 @@ const MAP_MAX: float = 1968.0
 var tick_timer: float = 0.0
 var game_time: float = 0.0
 var initialized: bool = false
+var wave_interval: float = TICK_INTERVAL_INITIAL
+var max_soldiers: int = 0  # 0 = uncapped
 
 func _ready() -> void:
 	call_deferred("_bootstrap")
+	_apply_difficulty()
 
 func reset() -> void:
 	tick_timer = 0.0
 	game_time = 0.0
 	initialized = false
+	_apply_difficulty()
 	call_deferred("_bootstrap")
+
+func _apply_difficulty() -> void:
+	wave_interval = TICK_INTERVAL_INITIAL
+	max_soldiers = 0
+	match GameSettings.difficulty:
+		"easy":
+			wave_interval *= 1.5
+			max_soldiers = 3
+		"normal":
+			pass  # unchanged
+		"hard":
+			wave_interval *= 0.7
+			max_soldiers = 8
 
 func _bootstrap() -> void:
 	await get_tree().process_frame
@@ -43,7 +60,7 @@ func _process(delta: float) -> void:
 
 func _current_interval() -> float:
 	var ramps: int = int(game_time / RAMP_PERIOD)
-	var interval: float = TICK_INTERVAL_INITIAL - float(ramps) * RAMP_STEP
+	var interval: float = wave_interval - float(ramps) * RAMP_STEP
 	return max(interval, TICK_INTERVAL_MIN)
 
 func _ai_tick() -> void:
@@ -53,6 +70,8 @@ func _ai_tick() -> void:
 	_phase_atacar()
 
 func _phase_train_at_barracks() -> void:
+	if max_soldiers > 0 and _get_enemy_soldiers().size() >= max_soldiers:
+		return
 	for b in _get_enemy_buildings():
 		if b.building_name == "Barracks" and b.queue.size() < b.MAX_QUEUE:
 			b.try_queue_training()

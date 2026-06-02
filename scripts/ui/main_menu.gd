@@ -1,15 +1,20 @@
 extends Control
 
+const SKIRMISH_SCENE: String = "res://scenes/ui/SkirmishMenu.tscn"
+
 @onready var play_btn: Button = $Center/VBox/PlayBtn
+@onready var skirmish_btn: Button = $Center/VBox/SkirmishBtn
 @onready var settings_btn: Button = $Center/VBox/SettingsBtn
 @onready var quit_btn: Button = $Center/VBox/QuitBtn
 @onready var version_label: Label = $VersionLabel
 
 func _ready() -> void:
 	play_btn.pressed.connect(_on_play)
+	skirmish_btn.pressed.connect(_on_skirmish)
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
 	_setup_hover(play_btn)
+	_setup_hover(skirmish_btn)
 	_setup_hover(settings_btn)
 	_setup_hover(quit_btn)
 	version_label.text = "v" + str(ProjectSettings.get_setting("application/config/version", "1.0.0"))
@@ -26,6 +31,9 @@ func _on_play() -> void:
 	EnemyAI.reset()
 	GameStats.reset()
 	get_tree().change_scene_to_file("res://scenes/world/World.tscn")
+
+func _on_skirmish() -> void:
+	get_tree().change_scene_to_file(SKIRMISH_SCENE)
 
 func _on_settings() -> void:
 	var dialog: AcceptDialog = AcceptDialog.new()
