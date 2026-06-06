@@ -3,7 +3,16 @@
 [ext_resource type="Script" path="res://scripts/ui/command_panel.gd" id="1_cmd"]
 
 [sub_resource type="StyleBoxFlat" id="PanelBG"]
-bg_color = Color(0.06, 0.09, 0.13, 0.92)
+bg_color = Color(0.12, 0.15, 0.18, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.85, 0.85, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="CommandPanel" type="CanvasLayer"]
 script = ExtResource("1_cmd")
@@ -34,29 +43,47 @@ theme_override_constants/separation = 6
 [node name="MoveBtn" type="Button" parent="Panel/Margin/HBox"]
 flat = true
 text = "MOVE"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 12
 
 [node name="AttackBtn" type="Button" parent="Panel/Margin/HBox"]
 flat = true
 text = "ATTACK"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 12
 
 [node name="HoldBtn" type="Button" parent="Panel/Margin/HBox"]
 flat = true
 text = "HOLD"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 12
 
 [node name="StopBtn" type="Button" parent="Panel/Margin/HBox"]
 flat = true
 text = "STOP"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 12
 
 [node name="PatrolBtn" type="Button" parent="Panel/Margin/HBox"]
 flat = true
 text = "PATROL"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 12
 
 [node name="RallyBtn" type="Button" parent="Panel/Margin/HBox"]
 flat = true
 text = "RALLY"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 12

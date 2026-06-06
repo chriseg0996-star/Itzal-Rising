@@ -1,6 +1,59 @@
-[gd_scene format=3 uid="uid://bp4n7rax2m5k8"]
+[gd_scene load_steps=6 format=3 uid="uid://bp4n7rax2m5k8"]
 
 [ext_resource type="Script" path="res://scripts/ui/building_panel.gd" id="1_bp_script"]
+
+[sub_resource type="StyleBoxFlat" id="BottomBarStyle"]
+bg_color = Color(0.12, 0.15, 0.18, 0.96)
+border_width_top = 2
+border_color = Color(0, 0.85, 0.85, 0.7)
+
+[sub_resource type="StyleBoxFlat" id="SidePanelStyle"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.12, 0.15, 0.18, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.85, 0.85, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="BtnNormal"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.14, 0.17, 0.2, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.85, 0.85, 0.55)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="BtnHover"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0, 0.65, 0.65, 0.35)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.85, 0.85, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="BuildingPanel" type="CanvasLayer"]
 script = ExtResource("1_bp_script")
@@ -11,6 +64,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -56.0
 grow_vertical = 0
+theme_override_styles/panel = SubResource("BottomBarStyle")
 
 [node name="Margin" type="MarginContainer" parent="BottomBar"]
 theme_override_constants/margin_left = 12
@@ -24,12 +78,33 @@ theme_override_constants/separation = 12
 
 [node name="BarracksBtn" type="Button" parent="BottomBar/Margin/HBox"]
 text = "Barracks (B)"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="TCBtn" type="Button" parent="BottomBar/Margin/HBox"]
 text = "Town Center (T)"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="TowerBtn" type="Button" parent="BottomBar/Margin/HBox"]
 text = "Tower (Y)"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="SidePanel" type="PanelContainer" parent="."]
 visible = false
@@ -40,6 +115,7 @@ anchor_bottom = 0.75
 offset_left = -240.0
 offset_right = -8.0
 grow_horizontal = 0
+theme_override_styles/panel = SubResource("SidePanelStyle")
 
 [node name="Margin" type="MarginContainer" parent="SidePanel"]
 theme_override_constants/margin_left = 12
@@ -52,26 +128,40 @@ theme_override_constants/separation = 8
 
 [node name="NameLabel" type="Label" parent="SidePanel/Margin/VBox"]
 text = "Building"
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_font_sizes/font_size = 20
 
 [node name="HPLabel" type="Label" parent="SidePanel/Margin/VBox"]
 text = "HP: 0/0"
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.55, 0.65, 0.7, 1)
 theme_override_font_sizes/font_size = 16
 
 [node name="QueueLabel" type="Label" parent="SidePanel/Margin/VBox"]
 text = "Queue: 0/5"
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.55, 0.65, 0.7, 1)
 theme_override_font_sizes/font_size = 16
 
 [node name="TimerLabel" type="Label" parent="SidePanel/Margin/VBox"]
 text = "Idle"
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.55, 0.65, 0.7, 1)
 theme_override_font_sizes/font_size = 16
 
 [node name="TrainBtn" type="Button" parent="SidePanel/Margin/VBox"]
 text = "Train"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="Train2Btn" type="Button" parent="SidePanel/Margin/VBox"]
 text = "Train"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")

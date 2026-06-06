@@ -1,16 +1,71 @@
-[gd_scene format=3 uid="uid://cjb827tte0res"]
+[gd_scene load_steps=5 format=3 uid="uid://cjb827tte0res"]
 
 [ext_resource type="Script" path="res://scripts/ui/game_end_panel.gd" id="1_gep_script"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.12, 0.15, 0.18, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.85, 0.85, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="BtnNormal"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.14, 0.17, 0.2, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.85, 0.85, 0.55)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="BtnHover"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0, 0.65, 0.65, 0.35)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.85, 0.85, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="GameEndPanel" type="CanvasLayer"]
 layer = 10
 script = ExtResource("1_gep_script")
+
+[node name="BG" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.08, 0.1, 0.12, 0.7)
 
 [node name="Center" type="CenterContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="Panel" type="PanelContainer" parent="Center"]
+theme_override_styles/panel = SubResource("PanelStyle")
 
 [node name="Margin" type="MarginContainer" parent="Center/Panel"]
 theme_override_constants/margin_left = 32
@@ -25,19 +80,33 @@ alignment = 1
 [node name="Title" type="Label" parent="Center/Panel/Margin/VBox"]
 text = "..."
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0, 0.85, 0.85, 1)
 theme_override_font_sizes/font_size = 48
 
 [node name="StatsLabel" type="Label" parent="Center/Panel/Margin/VBox"]
 text = ""
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_colors/font_color = Color(0.55, 0.65, 0.7, 1)
 theme_override_font_sizes/font_size = 18
 
 [node name="RestartBtn" type="Button" parent="Center/Panel/Margin/VBox"]
-text = "Restart"
 custom_minimum_size = Vector2(160, 40)
+text = "Restart"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="MenuBtn" type="Button" parent="Center/Panel/Margin/VBox"]
-text = "Main Menu"
 custom_minimum_size = Vector2(160, 40)
+text = "Main Menu"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")

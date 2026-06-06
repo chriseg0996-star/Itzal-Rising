@@ -12,7 +12,7 @@ spacing_glyph = 4
 spacing_glyph = 3
 
 [sub_resource type="StyleBoxLine" id="SepLine"]
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 thickness = 1
 
 [sub_resource type="StyleBoxFlat" id="BtnNormal"]
@@ -25,7 +25,7 @@ border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0, 0.9, 0.78, 0.25)
+border_color = Color(0, 0.85, 0.85, 0.25)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -36,12 +36,12 @@ content_margin_left = 24.0
 content_margin_top = 0.0
 content_margin_right = 24.0
 content_margin_bottom = 0.0
-bg_color = Color(0, 0.9, 0.78, 0.08)
+bg_color = Color(0, 0.85, 0.85, 0.08)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0, 0.9, 0.78, 0.7)
+border_color = Color(0, 0.85, 0.85, 0.7)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -56,7 +56,7 @@ script = ExtResource("1_mm_script")
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.05, 0.07, 0.1, 1)
+color = Color(0.08, 0.1, 0.12, 1)
 
 [node name="Vignette" type="ColorRect" parent="."]
 anchor_right = 1.0
@@ -75,7 +75,7 @@ offset_top = 24.0
 offset_right = 44.0
 offset_bottom = 25.0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="TL_V" type="ColorRect" parent="Decor"]
 offset_left = 24.0
@@ -83,7 +83,7 @@ offset_top = 24.0
 offset_right = 25.0
 offset_bottom = 44.0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="TR_H" type="ColorRect" parent="Decor"]
 anchor_left = 1.0
@@ -94,7 +94,7 @@ offset_right = -24.0
 offset_bottom = 25.0
 grow_horizontal = 0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="TR_V" type="ColorRect" parent="Decor"]
 anchor_left = 1.0
@@ -105,7 +105,7 @@ offset_right = -24.0
 offset_bottom = 44.0
 grow_horizontal = 0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="BL_H" type="ColorRect" parent="Decor"]
 anchor_top = 1.0
@@ -116,7 +116,7 @@ offset_right = 44.0
 offset_bottom = -24.0
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="BL_V" type="ColorRect" parent="Decor"]
 anchor_top = 1.0
@@ -127,7 +127,7 @@ offset_right = 25.0
 offset_bottom = -24.0
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="BR_H" type="ColorRect" parent="Decor"]
 anchor_left = 1.0
@@ -141,7 +141,7 @@ offset_bottom = -24.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="BR_V" type="ColorRect" parent="Decor"]
 anchor_left = 1.0
@@ -155,7 +155,7 @@ offset_bottom = -24.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0, 0.9, 0.78, 0.3)
+color = Color(0, 0.85, 0.85, 0.3)
 
 [node name="Center" type="CenterContainer" parent="."]
 anchor_right = 1.0
@@ -175,7 +175,7 @@ theme_override_font_sizes/font_size = 64
 [node name="Subtitle" type="Label" parent="Center/VBox"]
 text = "MESOAMERICAN SCI-FI STRATEGY"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0, 0.9, 0.78, 0.8)
+theme_override_colors/font_color = Color(0, 0.85, 0.85, 0.8)
 theme_override_fonts/font = SubResource("SubFont")
 theme_override_font_sizes/font_size = 13
 
@@ -197,9 +197,9 @@ custom_minimum_size = Vector2(240, 44)
 size_flags_horizontal = 4
 text = "PLAY"
 theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_hover_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_focus_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
 theme_override_fonts/font = SubResource("BtnFont")
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("BtnNormal")
@@ -212,9 +212,9 @@ custom_minimum_size = Vector2(240, 44)
 size_flags_horizontal = 4
 text = "SKIRMISH"
 theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_hover_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_focus_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
 theme_override_fonts/font = SubResource("BtnFont")
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("BtnNormal")
@@ -227,9 +227,9 @@ custom_minimum_size = Vector2(240, 44)
 size_flags_horizontal = 4
 text = "SETTINGS"
 theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_hover_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_focus_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
 theme_override_fonts/font = SubResource("BtnFont")
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("BtnNormal")
@@ -242,9 +242,9 @@ custom_minimum_size = Vector2(240, 44)
 size_flags_horizontal = 4
 text = "QUIT"
 theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_hover_color = Color(0, 0.9, 0.78, 1)
-theme_override_colors/font_focus_color = Color(0, 0.9, 0.78, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
 theme_override_fonts/font = SubResource("BtnFont")
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("BtnNormal")

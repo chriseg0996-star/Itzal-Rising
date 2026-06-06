@@ -6,12 +6,12 @@ extends CanvasLayer
 const ROW_COUNT: int = 3
 const POLL_INTERVAL: float = 2.0
 
-const DOT_DONE: Color = Color(0, 0.9, 0.75, 1)
-const DOT_TODO: Color = Color(0.35, 0.4, 0.46, 1)
-const BAR_DONE: Color = Color(0, 0.9, 0.75, 1)
-const BAR_TODO: Color = Color(0.5, 0.5, 0.5, 0.8)
-const LABEL_DONE: Color = Color(0.6, 0.95, 0.85, 1)
-const LABEL_TODO: Color = Color(0.82, 0.88, 0.9, 1)
+const DOT_DONE: Color = Color(0, 0.85, 0.85, 1)
+const DOT_TODO: Color = Color(0.55, 0.65, 0.7, 1)
+const BAR_DONE: Color = Color(0, 0.85, 0.85, 1)
+const BAR_TODO: Color = Color(0.55, 0.65, 0.7, 0.8)
+const LABEL_DONE: Color = Color(0.92, 0.95, 0.98, 1)
+const LABEL_TODO: Color = Color(0.92, 0.95, 0.98, 1)
 
 var _rows: Array[VBoxContainer] = []
 var _dots: Array[ColorRect] = []

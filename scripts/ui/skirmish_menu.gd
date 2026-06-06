@@ -8,10 +8,10 @@ extends Control
 const WORLD_SCENE: String = "res://scenes/world/World.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/ui/MainMenu.tscn"
 
-const BG_COLOR: Color = Color(0.12, 0.13, 0.15, 1.0)
-const ACCENT_COLOR: Color = Color(0.0, 0.9, 0.8, 1.0)
-const PANEL_COLOR: Color = Color(0.16, 0.18, 0.21, 1.0)
-const TEXT_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
+const BG_COLOR: Color = Color(0.08, 0.1, 0.12, 1.0)
+const ACCENT_COLOR: Color = Color(0.0, 0.85, 0.85, 1.0)
+const PANEL_COLOR: Color = Color(0.12, 0.15, 0.18, 1.0)
+const TEXT_COLOR: Color = Color(0.92, 0.95, 0.98, 1.0)
 
 # Index -> data string. Order must match the OptionButton item order below.
 const DIFFICULTY_KEYS: Array[String] = ["easy", "normal", "hard"]

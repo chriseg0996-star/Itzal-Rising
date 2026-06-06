@@ -1,7 +1,7 @@
 extends CanvasLayer
 
-const EMPTY_COLOR: Color = Color(0.06, 0.09, 0.13, 0.5)
-const OCCUPIED_COLOR: Color = Color(0.10, 0.20, 0.18, 0.9)
+const EMPTY_COLOR: Color = Color(0.08, 0.1, 0.12, 0.5)
+const OCCUPIED_COLOR: Color = Color(0.0, 0.45, 0.45, 0.6)
 
 var _current_building: Node = null
 
