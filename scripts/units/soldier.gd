@@ -17,8 +17,14 @@ const SELECTION_SEGMENTS: int = 32
 @onready var hp_bar_fg: ColorRect = $HPBarFG
 @onready var detection_area: Area2D = $DetectionArea
 @onready var hitbox: Area2D = $Hitbox
+@onready var _anim_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-var state: int = State.IDLE
+var state: int = State.IDLE:
+	set(value):
+		var changed: bool = state != value
+		state = value
+		if changed:
+			_update_animation()
 var selected: bool = false
 var death_timer: float = 0.0
 var hp_bar_width: float = 32.0
@@ -33,7 +39,9 @@ func _ready() -> void:
 		add_to_group("player_units")
 	if hp_bar_fg != null:
 		hp_bar_width = hp_bar_fg.offset_right - hp_bar_fg.offset_left
-	_apply_sprite(sprite_asset)
+	var old_sprite := get_node_or_null("Sprite")
+	if old_sprite != null and old_sprite is CanvasItem:
+		(old_sprite as CanvasItem).visible = false
 	add_to_group("friendly_units")
 	_movement_component = get_node_or_null("MovementComponent") as MovementComponent
 	_stat = get_node_or_null("StatComponent") as StatComponent
@@ -47,9 +55,14 @@ func _ready() -> void:
 	var combat := get_node_or_null("CombatComponent") as CombatComponent
 	if combat != null:
 		combat.attack_landed.connect(_on_attack_landed)
+		combat.attack_started.connect(_on_attack_started)
+	if _anim_sprite != null:
+		_anim_sprite.animation_finished.connect(_on_anim_finished)
 	_update_hp_bar()
+	_update_animation()
 
 func _on_died(_owner_unit: CharacterBody2D = null) -> void:
+	state = State.DYING
 	if SelectionManager.has_method("deselect_unit"):
 		SelectionManager.deselect_unit(self)
 	set_physics_process(false)
@@ -183,6 +196,30 @@ func _update_hp_bar() -> void:
 		return
 	var ratio: float = _stat.get_health_ratio()
 	hp_bar_fg.offset_right = hp_bar_fg.offset_left + hp_bar_width * ratio
+
+func _update_animation() -> void:
+	if _anim_sprite == null:
+		return
+	match state:
+		State.IDLE, State.HOLDING:
+			_anim_sprite.play("idle")
+		State.MOVING, State.PATROLLING:
+			_anim_sprite.play("walk")
+		State.ATTACKING:
+			_anim_sprite.play("attack")
+		State.DYING:
+			_anim_sprite.play("death")
+
+func _on_attack_started(_target: CharacterBody2D) -> void:
+	if _anim_sprite == null or is_dying():
+		return
+	_anim_sprite.play("attack")
+
+func _on_anim_finished() -> void:
+	if _anim_sprite == null or is_dying():
+		return
+	if _anim_sprite.animation == &"attack":
+		_update_animation()
 
 func _enter_dying() -> void:
 	state = State.DYING

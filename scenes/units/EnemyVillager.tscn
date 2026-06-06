@@ -1,14 +1,122 @@
-[gd_scene load_steps=6 format=3 uid="uid://1upiobpikawh"]
+[gd_scene load_steps=20 format=3 uid="uid://1upiobpikawh"]
 
 [ext_resource type="Script" path="res://scripts/units/enemy_villager.gd" id="1_vil_script"]
 [ext_resource type="Script" path="res://scripts/units/harvest_component.gd" id="2_harvest"]
 [ext_resource type="Script" path="res://scripts/units/components/stat_component.gd" id="3_stat"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemy_villager_sheet.png" id="sheet_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_Click"]
 size = Vector2(32, 32)
 
 [sub_resource type="RectangleShape2D" id="RectShape_Body"]
 size = Vector2(28, 28)
+
+[sub_resource type="AtlasTexture" id="AT_idle_0"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(0, 0, 597, 592)
+
+[sub_resource type="AtlasTexture" id="AT_idle_1"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(597, 0, 598, 592)
+
+[sub_resource type="AtlasTexture" id="AT_walk_0"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(1195, 0, 597, 592)
+
+[sub_resource type="AtlasTexture" id="AT_walk_1"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(1792, 0, 597, 592)
+
+[sub_resource type="AtlasTexture" id="AT_walk_2"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(2389, 0, 598, 592)
+
+[sub_resource type="AtlasTexture" id="AT_walk_3"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(2987, 0, 597, 592)
+
+[sub_resource type="AtlasTexture" id="AT_harvest_0"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(0, 592, 597, 592)
+
+[sub_resource type="AtlasTexture" id="AT_harvest_1"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(597, 592, 598, 592)
+
+[sub_resource type="AtlasTexture" id="AT_harvest_2"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(1195, 592, 597, 592)
+
+[sub_resource type="AtlasTexture" id="AT_death_0"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(1792, 592, 597, 592)
+
+[sub_resource type="AtlasTexture" id="AT_death_1"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(2389, 592, 598, 592)
+
+[sub_resource type="AtlasTexture" id="AT_death_2"]
+atlas = ExtResource("sheet_tex")
+region = Rect2(2987, 592, 597, 592)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_unit"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_idle_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_idle_1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_walk_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_walk_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_walk_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_walk_3")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_harvest_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_harvest_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_harvest_2")
+}],
+"loop": true,
+"name": &"harvest",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_death_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_death_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_death_2")
+}],
+"loop": false,
+"name": &"death",
+"speed": 8.0
+}]
 
 [node name="EnemyVillager" type="CharacterBody2D"]
 collision_layer = 0
@@ -62,3 +170,9 @@ script = ExtResource("2_harvest")
 [node name="StatComponent" type="Node" parent="."]
 script = ExtResource("3_stat")
 max_health = 60.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_unit")
+animation = &"idle"
+centered = true
