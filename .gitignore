@@ -4,3 +4,6 @@
 export_presets.cfg
 builds/
 *.tmp
+
+# Local backups of original (un-stripped) sprite sheets
+assets/sprites/_original/
