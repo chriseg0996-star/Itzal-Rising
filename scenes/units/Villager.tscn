@@ -1,23 +1,123 @@
-[gd_scene load_steps=6 format=3 uid="uid://b4v7q9z2x5n8m"]
+[gd_scene format=3 uid="uid://b4v7ra02x5n8m"]
 
-[ext_resource type="Script" path="res://scripts/units/villager.gd" id="1_vil_script"]
-[ext_resource type="Script" path="res://scripts/units/harvest_component.gd" id="2_harvest"]
-[ext_resource type="Script" path="res://scripts/units/components/stat_component.gd" id="3_stat"]
-
-[sub_resource type="RectangleShape2D" id="RectShape_Click"]
-size = Vector2(32, 32)
+[ext_resource type="Script" uid="uid://dx5pe52j3ywmo" path="res://scripts/units/villager.gd" id="1_vil_script"]
+[ext_resource type="Script" uid="uid://dihatm3hnfmce" path="res://scripts/units/harvest_component.gd" id="2_harvest"]
+[ext_resource type="Script" uid="uid://by1if1bcqys0h" path="res://scripts/units/components/stat_component.gd" id="3_stat"]
+[ext_resource type="Texture2D" uid="uid://l2c15ybeanxt" path="res://assets/sprites/villager_sheet.png.png" id="4_khd7x"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_Body"]
 size = Vector2(28, 28)
 
-[node name="Villager" type="CharacterBody2D"]
+[sub_resource type="RectangleShape2D" id="RectShape_Click"]
+size = Vector2(32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_khd7x"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(1629, 768, 543, 768)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a6lo7"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(2112, 768, 704, 768)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5qme7"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(0, 768, 559, 768)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_325v5"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(559, 768, 559, 768)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4xpp0"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(1118, 768, 559, 768)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p42qj"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(0, 0, 463, 761)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idla0"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(463, 0, 463, 761)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bu76r"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(926, 0, 463, 761)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w45v2"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(1389, 0, 463, 761)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yqgi3"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(1852, 0, 463, 761)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8mq70"]
+atlas = ExtResource("4_khd7x")
+region = Rect2(2315, 0, 463, 761)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_w78xc"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_khd7x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a6lo7")
+}],
+"loop": true,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5qme7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_325v5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4xpp0")
+}],
+"loop": true,
+"name": &"harvest",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p42qj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idla0")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bu76r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w45v2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yqgi3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8mq70")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[node name="Villager" type="CharacterBody2D" unique_id=2046314460]
 collision_layer = 0
 collision_mask = 0
 motion_mode = 1
 script = ExtResource("1_vil_script")
-faction_id = 0
 
-[node name="Sprite" type="ColorRect" parent="."]
+[node name="Sprite" type="ColorRect" parent="." unique_id=2121874838]
 offset_left = -16.0
 offset_top = -16.0
 offset_right = 16.0
@@ -25,7 +125,7 @@ offset_bottom = 16.0
 mouse_filter = 2
 color = Color(0.9098, 0.7529, 0.4784, 1)
 
-[node name="HPBarBG" type="ColorRect" parent="."]
+[node name="HPBarBG" type="ColorRect" parent="." unique_id=1644071624]
 offset_left = -16.0
 offset_top = -28.0
 offset_right = 16.0
@@ -33,7 +133,7 @@ offset_bottom = -24.0
 mouse_filter = 2
 color = Color(0.8, 0.15, 0.15, 1)
 
-[node name="HPBarFG" type="ColorRect" parent="."]
+[node name="HPBarFG" type="ColorRect" parent="." unique_id=416848372]
 offset_left = -16.0
 offset_top = -28.0
 offset_right = 16.0
@@ -41,23 +141,27 @@ offset_bottom = -24.0
 mouse_filter = 2
 color = Color(0.25, 0.85, 0.35, 1)
 
-[node name="BodyShape" type="CollisionShape2D" parent="."]
+[node name="BodyShape" type="CollisionShape2D" parent="." unique_id=395329048]
 shape = SubResource("RectShape_Body")
 
-[node name="Area2D" type="Area2D" parent="."]
-collision_layer = 1
+[node name="Area2D" type="Area2D" parent="." unique_id=1742477032]
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1296768271]
 shape = SubResource("RectShape_Click")
 
-[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1455738794]
 path_desired_distance = 4.0
 target_desired_distance = 4.0
 
-[node name="HarvestComponent" type="Node" parent="."]
+[node name="HarvestComponent" type="Node" parent="." unique_id=1713658439]
 script = ExtResource("2_harvest")
 
-[node name="StatComponent" type="Node" parent="."]
+[node name="StatComponent" type="Node" parent="." unique_id=1680481900]
 script = ExtResource("3_stat")
 max_health = 60.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=259199292]
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_w78xc")
+animation = &"death"

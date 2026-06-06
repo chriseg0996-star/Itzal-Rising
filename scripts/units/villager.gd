@@ -21,8 +21,14 @@ const SELECTION_SEGMENTS: int = 32
 @onready var _harvest_component:  HarvestComponent  = $HarvestComponent
 @onready var _hitbox:             Area2D            = $Area2D
 @onready var _hp_bar_fg:          ColorRect         = $HPBarFG
+@onready var _anim_sprite:        AnimatedSprite2D  = $AnimatedSprite2D
 
-var _state:        State  = State.IDLE
+var _state:        State  = State.IDLE:
+	set(value):
+		var changed: bool = _state != value
+		_state = value
+		if changed:
+			_update_animation()
 var _home:         Node2D = null
 var selected:      bool   = false
 var _stat:         StatComponent = null
@@ -44,11 +50,14 @@ func _ready() -> void:
 	_update_hp_bar()
 	_home = _find_home()
 	_harvest_component.setup(_nav_agent, _home, faction_id)
-	_apply_sprite(sprite_asset)
+	var old_sprite := get_node_or_null("Sprite")
+	if old_sprite != null and old_sprite is CanvasItem:
+		(old_sprite as CanvasItem).visible = false
 	_base_modulate = modulate
 	var _sfx := AudioStreamPlayer.new()
 	_sfx.name = "SFX"
 	add_child(_sfx)
+	_update_animation()
 
 func _find_home() -> Node2D:
 	var town_centers: Array = get_tree().get_nodes_in_group("town_center")
@@ -105,6 +114,19 @@ func _update_hp_bar() -> void:
 		return
 	var ratio: float = _stat.get_health_ratio()
 	_hp_bar_fg.offset_right = _hp_bar_fg.offset_left + _hp_bar_width * ratio
+
+func _update_animation() -> void:
+	if _anim_sprite == null:
+		return
+	match _state:
+		State.IDLE:
+			_anim_sprite.play("idle")
+		State.MOVING:
+			_anim_sprite.play("walk")
+		State.HARVESTING:
+			_anim_sprite.play("harvest")
+		State.DYING:
+			_anim_sprite.play("death")
 
 func _physics_process(delta: float) -> void:
 	if _state == State.DYING:
