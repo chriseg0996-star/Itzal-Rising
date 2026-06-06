@@ -27,35 +27,46 @@ ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets" / "sprites"
 BACKUP_DIR = ASSETS_DIR / "_original"
 
 NEUTRAL_THRESHOLD = 20   # max RGB channel spread to count a pixel as "neutral grey"
-BAND_MIN = 70            # only neutral greys in this luminance band are checkerboard...
-BAND_MAX = 225           # ...this excludes pure white/black and most figure tones
+BAND_MIN = 20            # only neutral greys in this luminance band are checkerboard...
+BAND_MAX = 255           # ...this excludes near-black and most figure tones (white checker allowed)
 TOL = 10                 # expand the keyed band around the detected greys
 
 
-def _border_neutral_lums(arr: np.ndarray) -> np.ndarray:
-    """Luminances of opaque, neutral, mid-grey pixels on the 1px border."""
-    rows = np.concatenate([arr[0, :, :], arr[-1, :, :]], axis=0)
-    cols = np.concatenate([arr[:, 0, :], arr[:, -1, :]], axis=0)
-    border = np.concatenate([rows, cols], axis=0).astype(np.int16)
-    rgb = border[:, :3]
-    alpha = border[:, 3]
+def _checker_band(arr: np.ndarray):
+    """Return (dark_shade, light_shade) luminances of the checkerboard, detected
+    from the four corner blocks (guaranteed background). Uses the *dominant*
+    neutral shades by pixel count -- the flat checker squares have thousands of
+    pixels, while faint ghosts/shadows and figure edges do not -- so the floor
+    sits at the real dark checker, never on a sparse darker pixel. This protects
+    dark figure detail (e.g. Ix black armor) that is darker than the checker."""
+    h, w = arr.shape[0], arr.shape[1]
+    bs = max(8, min(200, h // 4, w // 8))
+    blocks = [arr[0:bs, 0:bs], arr[0:bs, w - bs:w], arr[h - bs:h, 0:bs], arr[h - bs:h, w - bs:w]]
+    samp = np.concatenate([b.reshape(-1, 4) for b in blocks], axis=0).astype(np.int16)
+    rgb = samp[:, :3]
+    alpha = samp[:, 3]
     spread = rgb.max(axis=1) - rgb.min(axis=1)
-    lum = rgb.mean(axis=1)
+    lum = np.rint(rgb.mean(axis=1)).astype(int)
     keep = (alpha > 0) & (spread <= NEUTRAL_THRESHOLD) & (lum >= BAND_MIN) & (lum <= BAND_MAX)
-    return lum[keep]
+    lums = lum[keep]
+    if lums.size == 0:
+        return None
+    vals, counts = np.unique(lums, return_counts=True)
+    dominant = vals[counts >= counts.max() * 0.2]
+    return float(dominant.min()), float(dominant.max())
 
 
 def strip(path: Path) -> bool:
     img = Image.open(path).convert("RGBA")
     arr = np.array(img)  # H x W x 4, uint8
 
-    border_lums = _border_neutral_lums(arr)
-    if border_lums.size == 0:
-        print(f"SKIP  {path.name}: no neutral mid-grey checkerboard on border")
+    band = _checker_band(arr)
+    if band is None:
+        print(f"SKIP  {path.name}: no neutral checkerboard in corners")
         return False
 
-    lo = float(border_lums.min()) - TOL
-    hi = float(border_lums.max()) + TOL
+    lo = band[0] - TOL
+    hi = band[1] + TOL
 
     rgb = arr[:, :, :3].astype(np.int16)
     alpha = arr[:, :, 3]
@@ -72,9 +83,14 @@ def strip(path: Path) -> bool:
 
 
 def main() -> None:
-    files = sorted(ASSETS_DIR.glob("*.png.png"))
+    import sys
+    args = sys.argv[1:]
+    if args:
+        files = [Path(a).resolve() for a in args if Path(a).exists()]
+    else:
+        files = sorted(ASSETS_DIR.glob("*.png.png"))
     if not files:
-        print(f"No *.png.png files found in {ASSETS_DIR}")
+        print(f"No input files (args or *.png.png in {ASSETS_DIR})")
         return
     BACKUP_DIR.mkdir(exist_ok=True)
     for f in files:
