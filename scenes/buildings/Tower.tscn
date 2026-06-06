@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d0yyl858yxpfk"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tower_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_TWR"]
 size = Vector2(48, 48)
@@ -9,13 +10,14 @@ size = Vector2(48, 48)
 script = ExtResource("1_bldg_script")
 building_name = "Tower"
 max_hp = 800
-sprite_asset = "tower"
+sprite_asset = ""
 faction_id = 0
 attack_damage = 18
 attack_range = 150.0
 attack_interval = 2.0
 
 [node name="Sprite" type="ColorRect" parent="."]
+visible = false
 offset_left = -24.0
 offset_top = -24.0
 offset_right = 24.0
@@ -24,6 +26,7 @@ mouse_filter = 2
 color = Color(0.4980, 0.5490, 0.5529, 1)
 
 [node name="Label" type="Label" parent="."]
+visible = false
 offset_left = -24.0
 offset_top = -44.0
 offset_right = 24.0
@@ -40,3 +43,8 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectShape_TWR")
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+texture = ExtResource("bld_tex")
+scale = Vector2(0.08, 0.08)
+offset = Vector2(0, -768)

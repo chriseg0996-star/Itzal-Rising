@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://tc4k8m2n5q9p3"]
+[gd_scene load_steps=6 format=3 uid="uid://tc4k8m2n5q9p3"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/Villager.tscn" id="2_vil"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tc_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_TC"]
 size = Vector2(96, 96)
@@ -10,13 +11,14 @@ size = Vector2(96, 96)
 script = ExtResource("1_bldg_script")
 building_name = "Town Center"
 max_hp = 1500
-sprite_asset = "town_center"
+sprite_asset = ""
 train_unit_scene = ExtResource("2_vil")
 train_unit_label = "Villager"
 train_costs = {"comida": 50}
 train_duration = 10.0
 
 [node name="Sprite" type="ColorRect" parent="."]
+visible = false
 offset_left = -48.0
 offset_top = -48.0
 offset_right = 48.0
@@ -25,6 +27,7 @@ mouse_filter = 2
 color = Color(0.5451, 0.4510, 0.3333, 1)
 
 [node name="Label" type="Label" parent="."]
+visible = false
 offset_left = -48.0
 offset_top = -68.0
 offset_right = 48.0
@@ -41,3 +44,8 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectShape_TC")
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+texture = ExtResource("bld_tex")
+scale = Vector2(0.08, 0.08)
+offset = Vector2(0, -768)

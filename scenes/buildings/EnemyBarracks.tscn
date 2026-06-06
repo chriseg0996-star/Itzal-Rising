@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemySoldier.tscn" id="2_esol"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemy_barracks_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_EBR"]
 size = Vector2(80, 80)
@@ -10,7 +11,7 @@ size = Vector2(80, 80)
 script = ExtResource("1_bldg_script")
 building_name = "Barracks"
 max_hp = 500
-sprite_asset = "enemy_barracks"
+sprite_asset = ""
 train_unit_scene = ExtResource("2_esol")
 train_unit_label = "Soldier"
 train_costs = {"madera": 50, "oro": 30}
@@ -18,6 +19,7 @@ train_duration = 8.0
 faction_id = 1
 
 [node name="Sprite" type="ColorRect" parent="."]
+visible = false
 offset_left = -40.0
 offset_top = -40.0
 offset_right = 40.0
@@ -26,6 +28,7 @@ mouse_filter = 2
 color = Color(0.3569, 0.1725, 0.4353, 1)
 
 [node name="Label" type="Label" parent="."]
+visible = false
 offset_left = -40.0
 offset_top = -60.0
 offset_right = 40.0
@@ -42,3 +45,8 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectShape_EBR")
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+texture = ExtResource("bld_tex")
+scale = Vector2(0.08, 0.08)
+offset = Vector2(0, -1024)
