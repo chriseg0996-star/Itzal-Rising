@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://1w5hic7i4gby"]
+[gd_scene load_steps=7 format=3 uid="uid://1w5hic7i4gby"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mm_script"]
 
@@ -6,46 +6,42 @@
 spacing_glyph = 8
 
 [sub_resource type="FontVariation" id="SubFont"]
-spacing_glyph = 4
+spacing_glyph = 6
 
 [sub_resource type="FontVariation" id="BtnFont"]
-spacing_glyph = 3
-
-[sub_resource type="StyleBoxLine" id="SepLine"]
-color = Color(0, 0.85, 0.85, 0.3)
-thickness = 1
+spacing_glyph = 2
 
 [sub_resource type="StyleBoxFlat" id="BtnNormal"]
-content_margin_left = 24.0
-content_margin_top = 0.0
-content_margin_right = 24.0
-content_margin_bottom = 0.0
-bg_color = Color(0.08, 0.12, 0.17, 0)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0, 0.85, 0.85, 0.25)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+content_margin_left = 48.0
+content_margin_top = 10.0
+content_margin_right = 48.0
+content_margin_bottom = 10.0
+bg_color = Color(0.05, 0.08, 0.1, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.85, 0.85, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="BtnHover"]
-content_margin_left = 24.0
-content_margin_top = 0.0
-content_margin_right = 24.0
-content_margin_bottom = 0.0
-bg_color = Color(0, 0.85, 0.85, 0.08)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0, 0.85, 0.85, 0.7)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+content_margin_left = 48.0
+content_margin_top = 10.0
+content_margin_right = 48.0
+content_margin_bottom = 10.0
+bg_color = Color(0.1, 0.16, 0.2, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 1, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="MainMenu" type="Control"]
 anchor_right = 1.0
@@ -56,197 +52,100 @@ script = ExtResource("1_mm_script")
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.08, 0.1, 0.12, 1)
+color = Color(0.05, 0.07, 0.09, 1)
 
-[node name="Vignette" type="ColorRect" parent="."]
+[node name="BGImage" type="TextureRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0, 0, 0, 0.4)
-
-[node name="Decor" type="Control" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-
-[node name="TL_H" type="ColorRect" parent="Decor"]
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 44.0
-offset_bottom = 25.0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
-
-[node name="TL_V" type="ColorRect" parent="Decor"]
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 25.0
-offset_bottom = 44.0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
-
-[node name="TR_H" type="ColorRect" parent="Decor"]
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -44.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = 25.0
-grow_horizontal = 0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
-
-[node name="TR_V" type="ColorRect" parent="Decor"]
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -25.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = 44.0
-grow_horizontal = 0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
-
-[node name="BL_H" type="ColorRect" parent="Decor"]
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = -25.0
-offset_right = 44.0
-offset_bottom = -24.0
-grow_vertical = 0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
-
-[node name="BL_V" type="ColorRect" parent="Decor"]
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = -44.0
-offset_right = 25.0
-offset_bottom = -24.0
-grow_vertical = 0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
-
-[node name="BR_H" type="ColorRect" parent="Decor"]
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -44.0
-offset_top = -25.0
-offset_right = -24.0
-offset_bottom = -24.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
-
-[node name="BR_V" type="ColorRect" parent="Decor"]
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -25.0
-offset_top = -44.0
-offset_right = -24.0
-offset_bottom = -24.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 2
-color = Color(0, 0.85, 0.85, 0.3)
+expand_mode = 1
+stretch_mode = 6
 
 [node name="Center" type="CenterContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="VBox" type="VBoxContainer" parent="Center"]
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 alignment = 1
 
 [node name="Title" type="Label" parent="Center/VBox"]
+visible = false
 text = "ITZAL RISING"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(1, 1, 1, 0.95)
+theme_override_colors/font_color = Color(0.85, 0.95, 0.96, 1)
+theme_override_colors/font_outline_color = Color(0, 0.85, 0.85, 1)
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = SubResource("TitleFont")
-theme_override_font_sizes/font_size = 64
+theme_override_font_sizes/font_size = 72
 
 [node name="Subtitle" type="Label" parent="Center/VBox"]
-text = "MESOAMERICAN SCI-FI STRATEGY"
+visible = false
+text = "MESOAMERICAN SCI-FI RTS"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0, 0.85, 0.85, 0.8)
+theme_override_colors/font_color = Color(0.55, 0.65, 0.7, 1)
 theme_override_fonts/font = SubResource("SubFont")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 
-[node name="Spacer1" type="Control" parent="Center/VBox"]
-custom_minimum_size = Vector2(0, 28)
-mouse_filter = 2
-
-[node name="Separator" type="HSeparator" parent="Center/VBox"]
-custom_minimum_size = Vector2(200, 0)
-size_flags_horizontal = 4
-theme_override_styles/separator = SubResource("SepLine")
-
-[node name="Spacer2" type="Control" parent="Center/VBox"]
-custom_minimum_size = Vector2(0, 20)
+[node name="Spacer" type="Control" parent="Center/VBox"]
+custom_minimum_size = Vector2(0, 120)
 mouse_filter = 2
 
 [node name="PlayBtn" type="Button" parent="Center/VBox"]
-custom_minimum_size = Vector2(240, 44)
+custom_minimum_size = Vector2(300, 52)
 size_flags_horizontal = 4
 text = "PLAY"
-theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
+theme_override_colors/font_color = Color(0.95, 0.97, 0.98, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("BtnFont")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("BtnNormal")
 theme_override_styles/hover = SubResource("BtnHover")
 theme_override_styles/pressed = SubResource("BtnHover")
 theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="SkirmishBtn" type="Button" parent="Center/VBox"]
-custom_minimum_size = Vector2(240, 44)
+custom_minimum_size = Vector2(300, 52)
 size_flags_horizontal = 4
 text = "SKIRMISH"
-theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
+theme_override_colors/font_color = Color(0.95, 0.97, 0.98, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("BtnFont")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("BtnNormal")
 theme_override_styles/hover = SubResource("BtnHover")
 theme_override_styles/pressed = SubResource("BtnHover")
 theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="SettingsBtn" type="Button" parent="Center/VBox"]
-custom_minimum_size = Vector2(240, 44)
+custom_minimum_size = Vector2(300, 52)
 size_flags_horizontal = 4
 text = "SETTINGS"
-theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
+theme_override_colors/font_color = Color(0.95, 0.97, 0.98, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("BtnFont")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("BtnNormal")
 theme_override_styles/hover = SubResource("BtnHover")
 theme_override_styles/pressed = SubResource("BtnHover")
 theme_override_styles/focus = SubResource("BtnHover")
 
 [node name="QuitBtn" type="Button" parent="Center/VBox"]
-custom_minimum_size = Vector2(240, 44)
+custom_minimum_size = Vector2(300, 52)
 size_flags_horizontal = 4
 text = "QUIT"
-theme_override_colors/font_color = Color(0.75, 0.88, 0.9, 1)
+theme_override_colors/font_color = Color(0.95, 0.97, 0.98, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_hover_color = Color(0, 0.85, 0.85, 1)
-theme_override_colors/font_focus_color = Color(0, 0.85, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("BtnFont")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("BtnNormal")
 theme_override_styles/hover = SubResource("BtnHover")
 theme_override_styles/pressed = SubResource("BtnHover")
@@ -257,7 +156,7 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -90.0
+offset_left = -110.0
 offset_top = -28.0
 offset_right = -12.0
 offset_bottom = -8.0
@@ -265,5 +164,5 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "v1.0.0"
 horizontal_alignment = 2
-theme_override_colors/font_color = Color(0.3, 0.4, 0.45, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.45, 0.55, 0.6, 1)
+theme_override_font_sizes/font_size = 12

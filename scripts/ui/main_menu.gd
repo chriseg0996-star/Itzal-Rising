@@ -1,7 +1,9 @@
 extends Control
 
 const SKIRMISH_SCENE: String = "res://scenes/ui/SkirmishMenu.tscn"
+const BG_IMAGE: String = "res://assets/sprites/mainmenu_reference.png"
 
+@onready var bg_image: TextureRect = $BGImage
 @onready var play_btn: Button = $Center/VBox/PlayBtn
 @onready var skirmish_btn: Button = $Center/VBox/SkirmishBtn
 @onready var settings_btn: Button = $Center/VBox/SettingsBtn
@@ -9,6 +11,10 @@ const SKIRMISH_SCENE: String = "res://scenes/ui/SkirmishMenu.tscn"
 @onready var version_label: Label = $VersionLabel
 
 func _ready() -> void:
+	# Background concept art is loaded at runtime so a missing file doesn't break
+	# the scene. Drop it at BG_IMAGE and it appears automatically.
+	if ResourceLoader.exists(BG_IMAGE):
+		bg_image.texture = load(BG_IMAGE)
 	play_btn.pressed.connect(_on_play)
 	skirmish_btn.pressed.connect(_on_skirmish)
 	settings_btn.pressed.connect(_on_settings)
