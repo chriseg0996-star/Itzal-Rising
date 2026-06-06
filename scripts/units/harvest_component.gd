@@ -86,7 +86,7 @@ func _tick_returning(unit_pos: Vector2) -> void:
 func _deposit_and_resume() -> void:
 	if _carrying > 0 and _carry_type != &"":
 		ResourceManager.add_resource(_carry_type, _carrying, _faction_id)
-		if _faction_id == FactionManager.PLAYER:
+		if FactionManager.is_player_faction(_faction_id):
 			GameStats.resources_gathered += _carrying
 		deposit_made.emit(_carry_type, _carrying)
 	_carrying   = 0

@@ -8,3 +8,4 @@ extends Resource
 @export var id: int = 0
 @export var display_name: String = ""
 @export var hostile_to: Array[int] = []
+@export var primary_color: Color = Color.WHITE

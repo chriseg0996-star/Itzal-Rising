@@ -16,10 +16,14 @@ func _create_image(asset: String) -> Image:
 			return _make_humanoid(Color(0.95, 0.82, 0.55), Color(0.91, 0.75, 0.48), Color(0.35, 0.25, 0.15))
 		"enemy_villager":
 			return _make_humanoid(Color(0.78, 0.62, 0.85), Color(0.65, 0.41, 0.74), Color(0.30, 0.18, 0.36))
+		"ix_weaver":
+			return _make_humanoid(Color(1.0, 0.78, 0.42), Color(1.0, 0.6, 0.1), Color(0.5, 0.3, 0.05))
 		"soldier":
 			return _make_soldier(Color(0.75, 0.22, 0.17), Color(0.55, 0.15, 0.10))
 		"enemy_soldier":
 			return _make_soldier(Color(0.56, 0.27, 0.68), Color(0.38, 0.18, 0.48))
+		"ix_lattice_guard":
+			return _make_soldier(Color(1.0, 0.6, 0.1), Color(0.7, 0.4, 0.05))
 		"archer":
 			return _make_archer()
 		"tree":

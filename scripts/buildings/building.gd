@@ -37,9 +37,26 @@ func _ready() -> void:
 	else:
 		add_to_group("enemy_buildings")
 	hp = max_hp
+	if faction_id == FactionManager.IX:
+		_apply_lattice_network()
 	_apply_sprite(sprite_asset)
 	if faction_id == FactionManager.PLAYER:
 		AlertManager.register_building(self)
+
+## Ix "Lattice Network": if an allied Ix building sits within 300px, this building
+## gains +20% max HP (and is restored to full). Evaluated once, on spawn.
+func _apply_lattice_network() -> void:
+	var allies: int = 0
+	for b in get_tree().get_nodes_in_group("buildings"):
+		if b == self or not is_instance_valid(b) or not (b is Node2D):
+			continue
+		if int(b.get("faction_id")) != faction_id:
+			continue
+		if global_position.distance_to((b as Node2D).global_position) <= 300.0:
+			allies += 1
+	if allies >= 1:
+		max_hp = int(round(float(max_hp) * 1.2))
+		hp = max_hp
 
 func _apply_sprite(asset: String) -> void:
 	if asset == "":

@@ -24,13 +24,8 @@ func _setup_hover(btn: Button) -> void:
 	btn.mouse_exited.connect(func() -> void: btn.modulate = Color.WHITE)
 
 func _on_play() -> void:
-	ResourceManager.reset()
-	SelectionManager.clear()
-	SelectionManager.deselect_building()
-	BuildingPlacer.cancel_placement()
-	EnemyAI.reset()
-	GameStats.reset()
-	get_tree().change_scene_to_file("res://scenes/world/World.tscn")
+	# Play now opens Skirmish setup (faction/difficulty chosen there before launch).
+	get_tree().change_scene_to_file(SKIRMISH_SCENE)
 
 func _on_skirmish() -> void:
 	get_tree().change_scene_to_file(SKIRMISH_SCENE)
