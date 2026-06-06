@@ -15,7 +15,8 @@ const TEXT_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
 
 # Index -> data string. Order must match the OptionButton item order below.
 const DIFFICULTY_KEYS: Array[String] = ["easy", "normal", "hard"]
-const FACTION_KEYS: Array[String] = ["itzal", "olmec", "xib"]
+const FACTION_KEYS: Array[String] = ["itzal", "ix"]
+const FACTION_PLAYER_IDS: Array[int] = [0, 2]  # player_faction_id per faction option
 const MAP_KEY: String = "jungle_basin"
 
 const DIFFICULTY_DEFAULT: int = 1  # "normal"
@@ -71,10 +72,7 @@ func _build_ui() -> void:
 	vbox.add_child(_make_caption("FACTION"))
 	_faction_option = _make_option()
 	_faction_option.add_item("Itzal")
-	_faction_option.add_item("Olmec")
-	_faction_option.add_item("Xib")
-	_faction_option.set_item_disabled(1, true)
-	_faction_option.set_item_disabled(2, true)
+	_faction_option.add_item("Ix Architects")
 	_faction_option.select(0)
 	vbox.add_child(_faction_option)
 
@@ -145,6 +143,7 @@ func _panel_style(accent: bool) -> StyleBoxFlat:
 func _on_start() -> void:
 	GameSettings.difficulty = DIFFICULTY_KEYS[_difficulty_option.selected]
 	GameSettings.faction = FACTION_KEYS[_faction_option.selected]
+	GameSettings.player_faction_id = FACTION_PLAYER_IDS[_faction_option.selected]
 	GameSettings.map = MAP_KEY
 	ResourceManager.reset()
 	SelectionManager.clear()
