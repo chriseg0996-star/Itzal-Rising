@@ -4,33 +4,24 @@ const SKIRMISH_SCENE: String = "res://scenes/ui/SkirmishMenu.tscn"
 const BG_IMAGE: String = "res://assets/sprites/mainmenu_reference.png"
 
 @onready var bg_image: TextureRect = $BGImage
-@onready var play_btn: Button = $Center/VBox/PlayBtn
-@onready var skirmish_btn: Button = $Center/VBox/SkirmishBtn
-@onready var settings_btn: Button = $Center/VBox/SettingsBtn
-@onready var quit_btn: Button = $Center/VBox/QuitBtn
-@onready var version_label: Label = $VersionLabel
+@onready var play_btn: Button = $PlayBtn
+@onready var skirmish_btn: Button = $SkirmishBtn
+@onready var settings_btn: Button = $SettingsBtn
+@onready var quit_btn: Button = $QuitBtn
 
 func _ready() -> void:
-	# Background concept art is loaded at runtime so a missing file doesn't break
-	# the scene. Drop it at BG_IMAGE and it appears automatically.
+	# The menu art (title + buttons) is the whole visual. These buttons are
+	# transparent hit-targets anchored exactly over the baked buttons; the bg
+	# is stretched to fill the viewport so the anchors stay aligned.
 	if ResourceLoader.exists(BG_IMAGE):
 		bg_image.texture = load(BG_IMAGE)
 	play_btn.pressed.connect(_on_play)
 	skirmish_btn.pressed.connect(_on_skirmish)
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
-	_setup_hover(play_btn)
-	_setup_hover(skirmish_btn)
-	_setup_hover(settings_btn)
-	_setup_hover(quit_btn)
-	version_label.text = "v" + str(ProjectSettings.get_setting("application/config/version", "1.0.0"))
-
-func _setup_hover(btn: Button) -> void:
-	btn.mouse_entered.connect(func() -> void: btn.modulate = Color(1, 1, 1, 1))
-	btn.mouse_exited.connect(func() -> void: btn.modulate = Color.WHITE)
 
 func _on_play() -> void:
-	# Play now opens Skirmish setup (faction/difficulty chosen there before launch).
+	# Play opens Skirmish setup (faction/difficulty chosen there before launch).
 	get_tree().change_scene_to_file(SKIRMISH_SCENE)
 
 func _on_skirmish() -> void:
