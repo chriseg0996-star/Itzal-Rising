@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/enemy_tc_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_ETC"]
-size = Vector2(96, 96)
+size = Vector2(158, 148)
 
 [node name="EnemyTownCenter" type="Node2D" groups=["town_center"]]
 script = ExtResource("1_bldg_script")
@@ -44,6 +44,7 @@ collision_layer = 4
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, -90)
 shape = SubResource("RectShape_ETC")
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]

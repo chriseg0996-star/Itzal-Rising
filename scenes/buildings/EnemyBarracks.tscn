@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/enemy_barracks_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_EBR"]
-size = Vector2(80, 80)
+size = Vector2(164, 161)
 
 [node name="EnemyBarracks" type="Node2D"]
 script = ExtResource("1_bldg_script")
@@ -44,6 +44,7 @@ collision_layer = 4
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, -84)
 shape = SubResource("RectShape_EBR")
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]

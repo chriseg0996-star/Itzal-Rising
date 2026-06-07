@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/tower_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_TWR"]
-size = Vector2(48, 48)
+size = Vector2(222, 120)
 
 [node name="Tower" type="Node2D"]
 script = ExtResource("1_bldg_script")
@@ -42,6 +42,7 @@ collision_layer = 4
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, -61)
 shape = SubResource("RectShape_TWR")
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]
