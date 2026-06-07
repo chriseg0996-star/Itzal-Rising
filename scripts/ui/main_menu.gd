@@ -1,6 +1,5 @@
 extends Control
 
-const SKIRMISH_SCENE: String = "res://scenes/ui/SkirmishMenu.tscn"
 const BG_IMAGE: String = "res://assets/sprites/mainmenu_reference.png"
 
 @onready var bg_image: TextureRect = $BGImage
@@ -22,10 +21,10 @@ func _ready() -> void:
 
 func _on_play() -> void:
 	# Play opens Skirmish setup (faction/difficulty chosen there before launch).
-	get_tree().change_scene_to_file(SKIRMISH_SCENE)
+	get_tree().change_scene_to_file("res://scenes/ui/SkirmishSetup.tscn")
 
 func _on_skirmish() -> void:
-	get_tree().change_scene_to_file(SKIRMISH_SCENE)
+	get_tree().change_scene_to_file("res://scenes/ui/SkirmishSetup.tscn")
 
 func _on_settings() -> void:
 	var dialog: AcceptDialog = AcceptDialog.new()
