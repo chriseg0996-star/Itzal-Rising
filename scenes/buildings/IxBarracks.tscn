@@ -1,0 +1,53 @@
+[gd_scene load_steps=5 format=3 uid="uid://d6ixbrk2n8j4r"]
+
+[ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+[ext_resource type="PackedScene" path="res://scenes/units/IxLatticeGuard.tscn" id="2_ixg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ix_barracks_sheet.png" id="bld_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_IXBRK"]
+size = Vector2(161, 151)
+
+[node name="IxBarracks" type="Node2D"]
+script = ExtResource("1_bldg_script")
+building_name = "Barracks"
+max_hp = 500
+sprite_asset = ""
+train_unit_scene = ExtResource("2_ixg")
+train_unit_label = "Lattice Guard"
+train_costs = {"madera": 50, "oro": 30}
+train_duration = 8.0
+faction_id = 2
+
+[node name="Sprite" type="ColorRect" parent="."]
+visible = false
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.16, 0.4, 0.42, 1)
+
+[node name="Label" type="Label" parent="."]
+visible = false
+offset_left = -40.0
+offset_top = -60.0
+offset_right = 40.0
+offset_bottom = -36.0
+mouse_filter = 2
+text = "BRK"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, -85)
+shape = SubResource("RectShape_IXBRK")
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+texture = ExtResource("bld_tex")
+scale = Vector2(0.08, 0.08)
+offset = Vector2(0, -1024)
