@@ -63,6 +63,8 @@ func _ready() -> void:
 
 func _on_died(_owner_unit: CharacterBody2D = null) -> void:
 	state = State.DYING
+	SoundManager.play("unit_death", -3.0)
+	Particles.spawn(get_parent(), "death_burst", global_position)
 	if SelectionManager.has_method("deselect_unit"):
 		SelectionManager.deselect_unit(self)
 	set_physics_process(false)
@@ -82,8 +84,10 @@ func _flash_hit() -> void:
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", _base_modulate, 0.1)
 
-func _on_attack_landed(_target: CharacterBody2D, _damage: float) -> void:
+func _on_attack_landed(target: CharacterBody2D, _damage: float) -> void:
 	_play_sound(sound_attack)
+	SoundManager.play("unit_attack", -4.0)
+	Particles.spawn(get_parent(), "attack_impact", target.global_position)
 
 func _play_sound(stream: AudioStream) -> void:
 	if stream == null:

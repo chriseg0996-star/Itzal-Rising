@@ -21,12 +21,18 @@ func select_only(unit: Node) -> void:
 	clear()
 	_add(unit)
 	selection_changed.emit(selected.duplicate())
+	SoundManager.play("unit_select")
+	if selected.size() <= 6:
+		for u in selected:
+			if is_instance_valid(u) and u is Node2D:
+				Particles.spawn((u as Node2D).get_parent(), "selection_pulse", (u as Node2D).global_position)
 
 func select_multiple(units: Array) -> void:
 	clear()
 	for u in units:
 		_add(u)
 	selection_changed.emit(selected.duplicate())
+	SoundManager.play("unit_select")
 
 func toggle_unit(unit: Node) -> void:
 	if unit == null or not is_instance_valid(unit):
@@ -85,6 +91,7 @@ func move_selected_to(target: Vector2, attack_move: bool = false) -> void:
 			u.attack_move(dest)
 		elif u.has_method("move_to"):
 			u.move_to(dest)
+	SoundManager.play("unit_move", -6.0)
 
 func harvest_with_selected(resource: Node) -> void:
 	if selected.is_empty():

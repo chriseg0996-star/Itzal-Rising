@@ -121,4 +121,6 @@ func _try_place() -> void:
 	target_parent.add_child(building)
 	if building is Node2D:
 		(building as Node2D).global_position = world_pos
+	SoundManager.play("building_place")
+	Particles.spawn(get_tree().current_scene, "building_place", world_pos)
 	cancel_placement()

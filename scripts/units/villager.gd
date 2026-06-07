@@ -50,6 +50,7 @@ func _ready() -> void:
 	_update_hp_bar()
 	_home = _find_home()
 	_harvest_component.setup(_nav_agent, _home, faction_id)
+	_harvest_component.deposit_made.connect(_on_deposit_made)
 	var old_sprite := get_node_or_null("Sprite")
 	if old_sprite != null and old_sprite is CanvasItem:
 		(old_sprite as CanvasItem).visible = false
@@ -91,7 +92,12 @@ func _on_health_changed(_current: float, _maximum: float) -> void:
 	_flash_hit()
 
 func _on_died(_owner_unit: CharacterBody2D = null) -> void:
+	Particles.spawn(get_parent(), "death_burst", global_position)
 	_enter_dying()
+
+func _on_deposit_made(_type: StringName, _amount: int) -> void:
+	SoundManager.play("resource_gather", -6.0)
+	Particles.spawn(get_parent(), "resource_gather", global_position)
 
 func _flash_hit() -> void:
 	if _state == State.DYING:

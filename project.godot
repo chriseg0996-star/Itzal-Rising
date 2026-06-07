@@ -28,6 +28,7 @@ AlertManager="*res://scripts/managers/alert_manager.gd"
 ObjectiveManager="*res://scripts/managers/objective_manager.gd"
 GameSettings="*res://scripts/managers/game_settings.gd"
 EnemyAI="*res://scripts/ai/enemy_ai.gd"
+SoundManager="*res://scripts/managers/sound_manager.gd"
 
 [display]
 

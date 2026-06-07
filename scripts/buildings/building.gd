@@ -127,6 +127,7 @@ func take_damage(amount: int) -> void:
 	if dying:
 		return
 	hp = max(0, hp - amount)
+	SoundManager.play("building_hit", -8.0)
 	if faction_id == FactionManager.PLAYER:
 		building_damaged.emit(self)
 	if hp <= 0:
