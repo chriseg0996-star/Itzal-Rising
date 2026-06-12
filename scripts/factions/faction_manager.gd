@@ -43,8 +43,13 @@ func is_hostile(faction_id: int, target_faction_id: int) -> bool:
 		return false
 	return target_faction_id in data.hostile_to
 
-## True for any faction the human player controls (default player or Ix).
+## True for the side the human player controls this match. When the player is
+## Decay (1), only Decay is player-aligned. Otherwise factions 0 and 2 are both
+## player-aligned: an Ix player's starting TC is still the faction-0 PlayerTC
+## node, so 0 must stay on the player's side in Itzal/Ix matches.
 func is_player_faction(faction_id: int) -> bool:
+	if GameSettings.player_faction_id == ENEMY:
+		return faction_id == ENEMY
 	return faction_id == PLAYER or faction_id == IX
 
 func display_name_of(faction_id: int) -> String:
