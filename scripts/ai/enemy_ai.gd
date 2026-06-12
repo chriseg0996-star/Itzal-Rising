@@ -25,6 +25,9 @@ var initialized: bool = false
 var wave_interval: float = TICK_INTERVAL_INITIAL
 var max_soldiers: int = 0  # 0 = uncapped
 var max_towers: int = 2
+## Resolved from the AI's town center at bootstrap so map layouts can move the
+## base; falls back to the legacy constant if no TC is found.
+var base_pos: Vector2 = ENEMY_BASE_POS
 
 func _ready() -> void:
 	call_deferred("_bootstrap")
@@ -56,8 +59,15 @@ func _apply_difficulty() -> void:
 func _bootstrap() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
+	base_pos = _resolve_base_pos()
 	initialized = true
 	_ai_tick()
+
+func _resolve_base_pos() -> Vector2:
+	for tc in get_tree().get_nodes_in_group("town_center"):
+		if is_instance_valid(tc) and tc is Node2D and tc.get("faction_id") == FactionManager.ENEMY:
+			return (tc as Node2D).global_position
+	return ENEMY_BASE_POS
 
 func _process(delta: float) -> void:
 	if not initialized:
@@ -111,7 +121,7 @@ func _try_build_barracks() -> void:
 	if not ResourceManager.can_afford(BARRACKS_COST, FactionManager.ENEMY):
 		return
 	ResourceManager.spend(BARRACKS_COST, FactionManager.ENEMY)
-	var pos: Vector2 = ENEMY_BASE_POS + Vector2(
+	var pos: Vector2 = base_pos + Vector2(
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE),
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE)
 	)
@@ -125,7 +135,7 @@ func _try_build_tower() -> void:
 	if not ResourceManager.can_afford(TOWER_COST, FactionManager.ENEMY):
 		return
 	ResourceManager.spend(TOWER_COST, FactionManager.ENEMY)
-	var pos: Vector2 = ENEMY_BASE_POS + TOWER_OFFSETS[towers % TOWER_OFFSETS.size()]
+	var pos: Vector2 = base_pos + TOWER_OFFSETS[towers % TOWER_OFFSETS.size()]
 	_place_enemy_building("res://scenes/buildings/EnemyTower.tscn", pos)
 
 func _place_enemy_building(scene_path: String, pos: Vector2) -> void:
