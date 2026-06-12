@@ -109,12 +109,14 @@ theme_override_styles/focus = SubResource("BtnHover")
 [node name="SidePanel" type="PanelContainer" parent="."]
 visible = false
 anchor_left = 1.0
-anchor_top = 0.25
+anchor_top = 0.0
 anchor_right = 1.0
-anchor_bottom = 0.75
-offset_left = -240.0
+anchor_bottom = 0.0
+offset_left = -248.0
+offset_top = 52.0
 offset_right = -8.0
 grow_horizontal = 0
+grow_vertical = 1
 theme_override_styles/panel = SubResource("SidePanelStyle")
 
 [node name="Margin" type="MarginContainer" parent="SidePanel"]

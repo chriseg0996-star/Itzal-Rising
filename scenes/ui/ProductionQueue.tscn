@@ -88,9 +88,9 @@ anchor_top = 1.0
 anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 8.0
-offset_top = -220.0
+offset_top = -160.0
 offset_right = 240.0
-offset_bottom = -145.0
+offset_bottom = -64.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("PanelMain")
 
