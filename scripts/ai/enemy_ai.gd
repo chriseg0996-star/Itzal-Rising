@@ -9,6 +9,13 @@ const ENEMY_BASE_POS: Vector2 = Vector2(1600, 1600)
 const BARRACKS_OFFSET_RANGE: float = 220.0
 const ATTACK_FORCE_MIN: int = 5
 const BARRACKS_COST: Dictionary = {"madera": 75}
+const TOWER_COST: Dictionary = {"madera": 150}
+## Fixed tower slots around the enemy TC, facing the player's approach.
+const TOWER_OFFSETS: Array[Vector2] = [
+	Vector2(-260.0, -60.0),
+	Vector2(-60.0, -260.0),
+	Vector2(-300.0, 180.0),
+]
 const MAP_MIN: float = 80.0
 const MAP_MAX: float = 1968.0
 
@@ -17,6 +24,7 @@ var game_time: float = 0.0
 var initialized: bool = false
 var wave_interval: float = TICK_INTERVAL_INITIAL
 var max_soldiers: int = 0  # 0 = uncapped
+var max_towers: int = 2
 
 func _ready() -> void:
 	call_deferred("_bootstrap")
@@ -32,15 +40,18 @@ func reset() -> void:
 func _apply_difficulty() -> void:
 	wave_interval = TICK_INTERVAL_INITIAL
 	max_soldiers = 0
+	max_towers = 2
 	match GameSettings.difficulty:
 		"easy":
 			wave_interval *= 1.5
 			max_soldiers = 3
+			max_towers = 1
 		"normal":
 			pass  # unchanged
 		"hard":
 			wave_interval *= 0.7
 			max_soldiers = 8
+			max_towers = 3
 
 func _bootstrap() -> void:
 	await get_tree().process_frame
@@ -91,8 +102,12 @@ func _phase_recolectar() -> void:
 			v.harvest(nearest)
 
 func _phase_construir() -> void:
-	if _has_enemy_barracks():
+	if not _has_enemy_barracks():
+		_try_build_barracks()
 		return
+	_try_build_tower()
+
+func _try_build_barracks() -> void:
 	if not ResourceManager.can_afford(BARRACKS_COST, FactionManager.ENEMY):
 		return
 	ResourceManager.spend(BARRACKS_COST, FactionManager.ENEMY)
@@ -100,9 +115,23 @@ func _phase_construir() -> void:
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE),
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE)
 	)
+	_place_enemy_building("res://scenes/buildings/EnemyBarracks.tscn", pos)
+
+## One tower per AI tick, at fixed slots around the TC, capped by difficulty.
+func _try_build_tower() -> void:
+	var towers: int = _count_enemy_towers()
+	if towers >= max_towers:
+		return
+	if not ResourceManager.can_afford(TOWER_COST, FactionManager.ENEMY):
+		return
+	ResourceManager.spend(TOWER_COST, FactionManager.ENEMY)
+	var pos: Vector2 = ENEMY_BASE_POS + TOWER_OFFSETS[towers % TOWER_OFFSETS.size()]
+	_place_enemy_building("res://scenes/buildings/EnemyTower.tscn", pos)
+
+func _place_enemy_building(scene_path: String, pos: Vector2) -> void:
 	pos.x = clamp(pos.x, MAP_MIN, MAP_MAX)
 	pos.y = clamp(pos.y, MAP_MIN, MAP_MAX)
-	var packed: PackedScene = load("res://scenes/buildings/EnemyBarracks.tscn")
+	var packed: PackedScene = load(scene_path)
 	if packed == null:
 		return
 	var building: Node = packed.instantiate()
@@ -152,6 +181,13 @@ func _has_enemy_barracks() -> bool:
 		if b.building_name == "Barracks":
 			return true
 	return false
+
+func _count_enemy_towers() -> int:
+	var count: int = 0
+	for b in _get_enemy_buildings():
+		if is_instance_valid(b) and b.building_name == "Tower":
+			count += 1
+	return count
 
 func _get_player_tc() -> Node:
 	for b in get_tree().get_nodes_in_group("player_buildings"):
