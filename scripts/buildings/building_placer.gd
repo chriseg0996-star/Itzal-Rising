@@ -121,7 +121,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _can_afford(cost: Dictionary) -> bool:
-	return ResourceManager.can_afford(cost)
+	return ResourceManager.can_afford(cost, GameSettings.player_faction_id)
 
 func _try_place() -> void:
 	var world_pos: Vector2 = preview_root.get_global_mouse_position()
@@ -134,7 +134,7 @@ func _try_place() -> void:
 	var packed: PackedScene = get_building_scene(GameSettings.player_faction_id, StringName(current_type))
 	if packed == null:
 		return
-	ResourceManager.spend(cost)
+	ResourceManager.spend(cost, GameSettings.player_faction_id)
 	var building: Node = packed.instantiate()
 	var target_parent: Node = get_tree().current_scene
 	if target_parent == null:

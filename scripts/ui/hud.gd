@@ -40,9 +40,10 @@ func _on_selection_changed(_units: Array) -> void:
 	_update_population()
 
 func _refresh() -> void:
-	wood_label.text = str(ResourceManager.get_resource(ResourceManager.WOOD))
-	food_label.text = str(ResourceManager.get_resource(ResourceManager.FOOD))
-	gold_label.text = str(ResourceManager.get_resource(ResourceManager.GOLD))
+	var pf: int = GameSettings.player_faction_id
+	wood_label.text = str(ResourceManager.get_resource(ResourceManager.WOOD, pf))
+	food_label.text = str(ResourceManager.get_resource(ResourceManager.FOOD, pf))
+	gold_label.text = str(ResourceManager.get_resource(ResourceManager.GOLD, pf))
 
 func _update_population() -> void:
 	var count: int = get_tree().get_nodes_in_group("player_units").size()
