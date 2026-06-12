@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://d8w3r5y6q1n2v"]
+[gd_scene load_steps=27 format=3 uid="uid://d8w3r5y6q1n2v"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/Ground.tscn" id="1_ground"]
 [ext_resource type="PackedScene" path="res://scenes/camera/RTSCamera.tscn" id="2_camscn"]
@@ -23,6 +23,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/ControlsPanel.tscn" id="21_ctrlp"]
 [ext_resource type="Script" path="res://scripts/world/map_loader.gd" id="22_maploader"]
 [ext_resource type="Script" path="res://scripts/world/decay_spawner.gd" id="23_decayspawn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/AbilityPanel.tscn" id="25_abilp"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemyVillager.tscn" id="24_evil"]
 
 [sub_resource type="NavigationPolygon" id="NavPoly_1"]
@@ -102,6 +103,8 @@ script = ExtResource("4_sel")
 [node name="GameEndPanel" parent="." instance=ExtResource("11_endp")]
 
 [node name="CommandPanel" parent="." instance=ExtResource("15_cmdp")]
+
+[node name="AbilityPanel" parent="." instance=ExtResource("25_abilp")]
 
 [node name="ProductionQueue" parent="." instance=ExtResource("16_prodq")]
 

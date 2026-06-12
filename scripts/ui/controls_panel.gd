@@ -14,6 +14,7 @@ const BINDINGS: Array[Array] = [
 	["Right click", "Move / harvest"],
 	["G + right click", "Attack-move"],
 	["B / T / Y", "Build Barracks / Town Center / Tower"],
+	["E", "Faction ability"],
 	["Right click while placing", "Cancel placement"],
 	["Esc", "Pause"],
 	["F1", "Toggle this panel"],
