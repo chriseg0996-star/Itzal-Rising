@@ -66,6 +66,15 @@ func add_resource(type, amount: int, faction_id: int = 0) -> void:
 func add(type, amount: int, faction_id: int = 0) -> void:
 	add_resource(type, amount, faction_id)
 
+## SaveManager hook: overwrite both pools and notify the HUD.
+func restore(player: Dictionary, enemy: Dictionary) -> void:
+	for key in player:
+		_resources[_normalize(key)] = int(player[key])
+	for key in enemy:
+		_enemy[_normalize(key)] = int(enemy[key])
+	for type: StringName in _resources:
+		resource_changed.emit(type, _resources[type])
+
 ## Plain-String copy of both pools, JSON-safe (StringName keys stringified).
 func snapshot() -> Dictionary:
 	var out: Dictionary = {"player": {}, "enemy": {}}

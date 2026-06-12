@@ -9,6 +9,18 @@ extends Node
 const SAVE_DIR: String = "user://saves"
 const SAVE_PATH: String = "user://saves/quicksave.json"
 const SAVE_VERSION: int = 1
+const WORLD_SCENE: String = "res://scenes/world/World.tscn"
+## World boot is fully settled by frame 4 (MapLoader frame 0, spawners
+## deferred, EnemyAI 2-frame bootstrap + first tick) — apply at 5.
+const APPLY_FRAME: int = 5
+
+var _pending: Dictionary = {}
+var _frames_in_world: int = 0
+var _applying: bool = false
+
+func _ready() -> void:
+	# Must keep counting frames even if something leaves the tree paused.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
@@ -24,6 +36,169 @@ func save_game() -> bool:
 	f.store_string(JSON.stringify(data, "\t"))
 	f.close()
 	return true
+
+## Parse the quicksave, restore the match config (the World's boot actors read
+## it), run the standard reset chain and reload the World; the snapshot is
+## applied over the freshly booted world a few frames later.
+func request_load() -> void:
+	if not has_save():
+		return
+	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if f == null:
+		return
+	var parsed: Variant = JSON.parse_string(f.get_as_text())
+	f.close()
+	if not (parsed is Dictionary):
+		return
+	var data: Dictionary = parsed
+	var settings: Dictionary = data.get("settings", {})
+	GameSettings.player_faction_id = int(settings.get("player_faction_id", 0))
+	GameSettings.selected_map = String(settings.get("selected_map", "Jungle Basin"))
+	GameSettings.difficulty = String(settings.get("difficulty", "normal"))
+	ResourceManager.reset()
+	SelectionManager.clear()
+	SelectionManager.deselect_building()
+	BuildingPlacer.cancel_placement()
+	EnemyAI.reset()
+	GameStats.reset()
+	ObjectiveManager.reset()
+	_pending = data
+	_frames_in_world = 0
+	get_tree().paused = false
+	get_tree().change_scene_to_file(WORLD_SCENE)
+
+func _process(_delta: float) -> void:
+	if _pending.is_empty() or _applying:
+		return
+	var cs: Node = get_tree().current_scene
+	if cs == null or cs.scene_file_path != WORLD_SCENE:
+		_frames_in_world = 0
+		return
+	_frames_in_world += 1
+	if _frames_in_world >= APPLY_FRAME:
+		_applying = true
+		var data: Dictionary = _pending
+		_pending = {}
+		_apply(data)
+
+func _apply(data: Dictionary) -> void:
+	var tree: SceneTree = get_tree()
+	# Pause freezes GameEndPanel's win checks (it would see the emptied
+	# enemy_buildings group as VICTORY mid-rebuild) and the AI.
+	tree.paused = true
+	for group in ["combat_units", "buildings", "resources"]:
+		for n in tree.get_nodes_in_group(group):
+			if is_instance_valid(n):
+				n.queue_free()
+	await tree.process_frame
+	await tree.process_frame
+
+	var stats: Dictionary = data.get("stats", {})
+	GameStats.game_time = float(stats.get("game_time", 0.0))
+	GameStats.units_trained = int(stats.get("units_trained", 0))
+	GameStats.resources_gathered = int(stats.get("resources_gathered", 0))
+	GameStats.atk_level = int(stats.get("atk_level", 0))
+	GameStats.armor_level = int(stats.get("armor_level", 0))
+	var res: Dictionary = data.get("resources", {})
+	ResourceManager.restore(res.get("player", {}), res.get("enemy", {}))
+	var completed: Array[String] = []
+	for id in (data.get("objectives_completed", []) as Array):
+		completed.append(String(id))
+	ObjectiveManager._completed = completed
+
+	var world: Node = tree.current_scene
+	if world == null:
+		tree.paused = false
+		_applying = false
+		return
+	# Buildings before units: villager _ready resolves its home TC.
+	for bentry in (data.get("buildings", []) as Array):
+		_spawn_building(bentry, world)
+	for rentry in (data.get("resource_nodes", []) as Array):
+		_spawn_simple(rentry, world)
+	for uentry in (data.get("units", []) as Array):
+		_spawn_unit(uentry, world)
+
+	var ai: Dictionary = data.get("enemy_ai", {})
+	EnemyAI.tick_timer = float(ai.get("tick_timer", 0.0))
+	EnemyAI.game_time = float(ai.get("game_time", GameStats.game_time))
+	EnemyAI._next_all_in = float(ai.get("next_all_in", EnemyAI._next_all_in))
+	EnemyAI.base_pos = EnemyAI._resolve_base_pos()
+
+	var ability: Node = tree.get_first_node_in_group("ability_panel")
+	if ability != null and data.has("ability"):
+		ability.set_cooldown(float((data["ability"] as Dictionary).get("cooldown_remaining", 0.0)))
+	var end_panel: Node = world.get_node_or_null("GameEndPanel")
+	if end_panel != null and data.has("monument"):
+		var mon: Dictionary = data["monument"]
+		end_panel.set_monument_state(bool(mon.get("countdown_active", false)), float(mon.get("time_left", 0.0)))
+	var fog: Node = tree.get_first_node_in_group("fog_of_war")
+	if fog != null and data.has("fog"):
+		fog.set_explored(Marshalls.base64_to_raw(String((data["fog"] as Dictionary).get("explored_b64", ""))))
+
+	tree.paused = false
+	_applying = false
+	AlertManager.push("Game loaded", "info")
+
+func _spawn_building(bentry: Dictionary, world: Node) -> void:
+	var packed: PackedScene = load(String(bentry.get("scene", "")))
+	if packed == null:
+		return
+	var building: Node = packed.instantiate()
+	building.set("faction_id", int(bentry.get("faction_id", 0)))
+	world.add_child(building)
+	if building is Node2D:
+		var pos: Array = bentry.get("pos", [0.0, 0.0])
+		(building as Node2D).global_position = Vector2(float(pos[0]), float(pos[1]))
+	# hp after add_child: _ready set hp = max_hp (and lattice may bump it).
+	building.set("hp", int(bentry.get("hp", building.get("max_hp"))))
+	var queue: Array = []
+	for q in (bentry.get("queue", []) as Array):
+		var qd: Dictionary = q
+		if qd.has("research_id"):
+			queue.append({"scene": null, "duration": float(qd["duration"]), "research_id": String(qd["research_id"])})
+		else:
+			var ps: PackedScene = load(String(qd.get("scene", "")))
+			if ps != null:
+				queue.append({"scene": ps, "duration": float(qd["duration"])})
+	building.set("queue", queue)
+	building.set("production_timer", float(bentry.get("production_timer", 0.0)))
+	if bentry.has("rally") and building.has_method("set_rally_point"):
+		var rp: Array = bentry["rally"]
+		building.set_rally_point(Vector2(float(rp[0]), float(rp[1])))
+
+func _spawn_simple(rentry: Dictionary, world: Node) -> void:
+	var packed: PackedScene = load(String(rentry.get("scene", "")))
+	if packed == null:
+		return
+	var node: Node = packed.instantiate()
+	world.add_child(node)
+	if node is Node2D:
+		var pos: Array = rentry.get("pos", [0.0, 0.0])
+		(node as Node2D).global_position = Vector2(float(pos[0]), float(pos[1]))
+	node.set("amount", int(rentry.get("amount", 0)))
+
+func _spawn_unit(uentry: Dictionary, world: Node) -> void:
+	var packed: PackedScene = load(String(uentry.get("scene", "")))
+	if packed == null:
+		return
+	var unit: Node = packed.instantiate()
+	world.add_child(unit)
+	if unit is Node2D:
+		var pos: Array = uentry.get("pos", [0.0, 0.0])
+		(unit as Node2D).global_position = Vector2(float(pos[0]), float(pos[1]))
+	if uentry.has("health"):
+		var stat: Node = unit.get_node_or_null("StatComponent")
+		if stat != null and stat.has_method("restore_health"):
+			stat.restore_health(float(uentry["health"]))
+	# Mid-carry villagers walk their load home via the existing RETURNING flow.
+	if int(uentry.get("carrying", 0)) > 0:
+		var hc: Node = unit.get_node_or_null("HarvestComponent")
+		if hc != null:
+			hc.set("_carrying", int(uentry["carrying"]))
+			hc.set("_carry_type", StringName(String(uentry.get("carry_type", ""))))
+			hc.call("_set_state", HarvestComponent.State.RETURNING)
+			unit.set("_state", 2)  # villager State.HARVESTING — drives component.tick
 
 func _snapshot() -> Dictionary:
 	var tree: SceneTree = get_tree()

@@ -35,6 +35,11 @@ func take_damage(amount: float) -> void:
 	if _current_health <= 0.0:
 		died.emit(_owner_unit)
 
+## SaveManager hook: set absolute health after _ready ran (load path).
+func restore_health(value: float) -> void:
+	_current_health = clampf(value, 0.0, max_health)
+	health_changed.emit(_current_health, max_health)
+
 func heal(amount: float) -> void:
 	if is_dead():
 		return
