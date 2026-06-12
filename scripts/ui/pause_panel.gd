@@ -2,6 +2,7 @@ extends CanvasLayer
 
 @onready var resume_btn: Button = $Center/Panel/Margin/VBox/ResumeBtn
 @onready var controls_btn: Button = $Center/Panel/Margin/VBox/ControlsBtn
+@onready var save_btn: Button = $Center/Panel/Margin/VBox/SaveBtn
 @onready var exit_btn: Button = $Center/Panel/Margin/VBox/ExitBtn
 @onready var quit_btn: Button = $Center/Panel/Margin/VBox/QuitBtn
 
@@ -10,10 +11,12 @@ func _ready() -> void:
 	visible = false
 	resume_btn.pressed.connect(_on_resume)
 	controls_btn.pressed.connect(_on_controls)
+	save_btn.pressed.connect(_on_save)
 	exit_btn.pressed.connect(_on_exit_to_menu)
 	quit_btn.pressed.connect(_on_quit_game)
 	_setup_hover(resume_btn)
 	_setup_hover(controls_btn)
+	_setup_hover(save_btn)
 	_setup_hover(exit_btn)
 	_setup_hover(quit_btn)
 
@@ -41,6 +44,12 @@ func _on_controls() -> void:
 	var panel: Node = get_tree().current_scene.get_node_or_null("ControlsPanel")
 	if panel != null and panel.has_method("open"):
 		panel.open()
+
+func _on_save() -> void:
+	if SaveManager.save_game():
+		AlertManager.push("Game saved", "info")
+	else:
+		AlertManager.push("Save failed", "error")
 
 func _on_exit_to_menu() -> void:
 	get_tree().paused = false

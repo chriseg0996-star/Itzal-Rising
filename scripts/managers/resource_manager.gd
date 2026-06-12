@@ -66,6 +66,15 @@ func add_resource(type, amount: int, faction_id: int = 0) -> void:
 func add(type, amount: int, faction_id: int = 0) -> void:
 	add_resource(type, amount, faction_id)
 
+## Plain-String copy of both pools, JSON-safe (StringName keys stringified).
+func snapshot() -> Dictionary:
+	var out: Dictionary = {"player": {}, "enemy": {}}
+	for key: StringName in _resources:
+		(out["player"] as Dictionary)[String(key)] = _resources[key]
+	for key: StringName in _enemy:
+		(out["enemy"] as Dictionary)[String(key)] = _enemy[key]
+	return out
+
 func spend(costs: Dictionary, faction_id: int = 0) -> bool:
 	if not can_afford(costs, faction_id):
 		for type in costs:
