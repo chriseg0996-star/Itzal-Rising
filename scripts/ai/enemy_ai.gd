@@ -5,6 +5,13 @@ const TICK_INTERVAL_MIN: float = 20.0
 const RAMP_PERIOD: float = 60.0
 const RAMP_STEP: float = 5.0
 
+## Late game: past ESCALATION_TIME the AI attacks with smaller forces, trains
+## past its difficulty cap and launches periodic all-in pushes.
+const ESCALATION_TIME: float = 360.0
+const ALL_IN_PERIOD: float = 150.0
+const ATTACK_FORCE_LATE: int = 3
+const LATE_CAP_BONUS: int = 6
+
 const ENEMY_BASE_POS: Vector2 = Vector2(1600, 1600)
 const BARRACKS_OFFSET_RANGE: float = 220.0
 const ATTACK_FORCE_MIN: int = 5
@@ -28,6 +35,7 @@ var max_towers: int = 2
 ## Resolved from the AI's town center at bootstrap so map layouts can move the
 ## base; falls back to the legacy constant if no TC is found.
 var base_pos: Vector2 = ENEMY_BASE_POS
+var _next_all_in: float = ESCALATION_TIME + ALL_IN_PERIOD
 
 func _ready() -> void:
 	call_deferred("_bootstrap")
@@ -37,6 +45,7 @@ func reset() -> void:
 	tick_timer = 0.0
 	game_time = 0.0
 	initialized = false
+	_next_all_in = ESCALATION_TIME + ALL_IN_PERIOD
 	_apply_difficulty()
 	call_deferred("_bootstrap")
 
@@ -89,10 +98,14 @@ func _ai_tick() -> void:
 	_phase_recolectar()
 	_phase_construir()
 	_phase_atacar()
+	_phase_all_in()
 
 func _phase_train_at_barracks() -> void:
 	var army: Array = _get_enemy_soldiers()
-	if max_soldiers > 0 and army.size() >= max_soldiers:
+	var cap: int = max_soldiers
+	if cap > 0 and game_time >= ESCALATION_TIME:
+		cap += LATE_CAP_BONUS
+	if cap > 0 and army.size() >= cap:
 		return
 	# Keep roughly 1 archer per 2 melee. Classified via sprite_asset (node
 	# names get auto-renamed on sibling conflicts, so they are unreliable).
@@ -163,7 +176,8 @@ func _place_enemy_building(scene_path: String, pos: Vector2) -> void:
 
 func _phase_atacar() -> void:
 	var soldiers: Array = _get_enemy_soldiers()
-	if soldiers.size() < ATTACK_FORCE_MIN:
+	var threshold: int = ATTACK_FORCE_MIN if game_time < ESCALATION_TIME else ATTACK_FORCE_LATE
+	if soldiers.size() < threshold:
 		return
 	var player_tc: Node = _get_player_tc()
 	if player_tc == null:
@@ -172,6 +186,23 @@ func _phase_atacar() -> void:
 	for s in soldiers:
 		if is_instance_valid(s) and s.has_method("attack_move"):
 			s.attack_move(target_pos)
+
+## Periodic late-game all-in: every soldier attacks regardless of force size.
+func _phase_all_in() -> void:
+	if game_time < _next_all_in:
+		return
+	_next_all_in += ALL_IN_PERIOD
+	var player_tc: Node = _get_player_tc()
+	if player_tc == null:
+		return
+	var target_pos: Vector2 = (player_tc as Node2D).global_position
+	var pushed: bool = false
+	for s in _get_enemy_soldiers():
+		if is_instance_valid(s) and s.has_method("attack_move"):
+			s.attack_move(target_pos)
+			pushed = true
+	if pushed:
+		AlertManager.push("Enemy all-in incoming!", "warning")
 
 func _get_enemy_buildings() -> Array:
 	return get_tree().get_nodes_in_group("enemy_buildings")
