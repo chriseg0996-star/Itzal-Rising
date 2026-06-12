@@ -23,6 +23,10 @@ var _scan_timer: float = 0.0
 
 func _ready() -> void:
 	_owner_unit = get_parent() as CharacterBody2D
+	if _owner_unit != null:
+		var fac: FactionData = FactionManager.get_faction(int(_owner_unit.get("faction_id")))
+		if fac != null:
+			attack_damage *= fac.atk_mult
 
 func _physics_process(delta: float) -> void:
 	if _cooldown_timer > 0.0:

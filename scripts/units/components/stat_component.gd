@@ -12,6 +12,13 @@ var _owner_unit: CharacterBody2D = null
 
 func _ready() -> void:
 	_owner_unit = get_parent() as CharacterBody2D
+	# Faction stat profile applies before health init so units spawn at the
+	# modified maximum (exports are assigned at instantiation, safe to read).
+	if _owner_unit != null:
+		var fac: FactionData = FactionManager.get_faction(int(_owner_unit.get("faction_id")))
+		if fac != null:
+			max_health *= fac.hp_mult
+			armor += fac.armor_bonus
 	_current_health = max_health
 	health_changed.emit(_current_health, max_health)
 

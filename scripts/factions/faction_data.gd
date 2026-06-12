@@ -9,3 +9,9 @@ extends Resource
 @export var display_name: String = ""
 @export var hostile_to: Array[int] = []
 @export var primary_color: Color = Color.WHITE
+
+## Combat stat modifiers applied to this faction's UNITS at spawn
+## (StatComponent/CombatComponent _ready). Buildings are unaffected.
+@export var atk_mult: float = 1.0
+@export var armor_bonus: float = 0.0
+@export var hp_mult: float = 1.0
