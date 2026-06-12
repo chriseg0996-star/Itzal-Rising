@@ -54,7 +54,34 @@ func _poll() -> void:
 		var fid: Variant = b.get("faction_id")
 		if fid != null and FactionManager.is_player_faction(int(fid)):
 			_stamp((b as Node2D).global_position, BUILDING_RADIUS)
+	_apply_visibility()
 	queue_redraw()
+
+## Centralized hostile-visibility writes: enemy units show only in visible
+## cells; enemy buildings and resources show once their cell is explored.
+## (Death fades use modulate.a — an independent channel — so no conflicts.)
+func _apply_visibility() -> void:
+	for u in get_tree().get_nodes_in_group("combat_units"):
+		if not (is_instance_valid(u) and u is Node2D) or u.is_in_group("player_units"):
+			continue
+		(u as Node2D).visible = get_cell_state((u as Node2D).global_position) == VISIBLE_STATE
+	for b in get_tree().get_nodes_in_group("buildings"):
+		if not (is_instance_valid(b) and b is Node2D):
+			continue
+		var fid: Variant = b.get("faction_id")
+		if fid == null or FactionManager.is_player_faction(int(fid)):
+			continue
+		(b as Node2D).visible = get_cell_state((b as Node2D).global_position) != UNEXPLORED
+	for r in get_tree().get_nodes_in_group("resources"):
+		if is_instance_valid(r) and r is Node2D:
+			(r as Node2D).visible = get_cell_state((r as Node2D).global_position) != UNEXPLORED
+
+func _exit_tree() -> void:
+	# Defensive: never leave entities hidden if the fog node goes away.
+	for group in ["combat_units", "buildings", "resources"]:
+		for n in get_tree().get_nodes_in_group(group):
+			if is_instance_valid(n) and n is Node2D:
+				(n as Node2D).visible = true
 
 func _stamp(world_pos: Vector2, radius: float) -> void:
 	var min_cx: int = maxi(int((world_pos.x - radius) / CELL), 0)
