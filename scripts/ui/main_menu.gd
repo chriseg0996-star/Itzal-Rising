@@ -18,6 +18,36 @@ func _ready() -> void:
 	skirmish_btn.pressed.connect(_on_skirmish)
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
+	_build_continue_button()
+
+## CONTINUE is code-built bottom-left so it never collides with the painted
+## center-stack buttons (anchors .398-.601 x .381-.735). Only shown when a
+## quicksave exists.
+func _build_continue_button() -> void:
+	if not SaveManager.has_save():
+		return
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.07, 0.11, 0.82)
+	sb.set_corner_radius_all(4)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(0.0, 0.90, 0.78, 0.35)
+	var sb_hover: StyleBoxFlat = sb.duplicate()
+	sb_hover.border_color = Color(0.0, 0.90, 0.78, 1.0)
+	var btn := Button.new()
+	btn.text = "CONTINUE"
+	btn.add_theme_color_override("font_color", Color(0.7, 0.75, 0.8, 1.0))
+	btn.add_theme_color_override("font_hover_color", Color(0.0, 0.90, 0.78, 1.0))
+	btn.add_theme_font_size_override("font_size", 16)
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("hover", sb_hover)
+	btn.add_theme_stylebox_override("pressed", sb_hover)
+	btn.pressed.connect(func() -> void: SaveManager.request_load())
+	add_child(btn)
+	btn.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	btn.offset_left = 24.0
+	btn.offset_top = -76.0
+	btn.offset_right = 220.0
+	btn.offset_bottom = -28.0
 
 func _on_play() -> void:
 	# Play opens Skirmish setup (faction/difficulty chosen there before launch).
