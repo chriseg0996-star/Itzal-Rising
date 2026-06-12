@@ -10,17 +10,30 @@ const BUILDING_DATA: Dictionary = {
 	"tc": {
 		"size": Vector2(96, 96),
 		"cost": {"madera": 100},
-		"scene_path": "res://scenes/buildings/TownCenter.tscn",
 	},
 	"barracks": {
 		"size": Vector2(80, 80),
 		"cost": {"madera": 100, "oro": 50},
-		"scene_path": "res://scenes/buildings/Barracks.tscn",
 	},
 	"tower": {
 		"size": Vector2(48, 48),
 		"cost": {"madera": 150, "oro": 50},
-		"scene_path": "res://scenes/buildings/Tower.tscn",
+	},
+}
+
+## Faction-routed building scenes. The one acceptable hardcoded-path location:
+## faction_id -> building key -> scene path. Factions without a buildable set
+## (Decay) fall back to faction 0's entry in get_building_scene().
+const FACTION_BUILDING_SCENES: Dictionary = {
+	0: {
+		&"tc": "res://scenes/buildings/TownCenter.tscn",
+		&"barracks": "res://scenes/buildings/Barracks.tscn",
+		&"tower": "res://scenes/buildings/Tower.tscn",
+	},
+	2: {
+		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
+		&"barracks": "res://scenes/buildings/IxBarracks.tscn",
+		&"tower": "res://scenes/buildings/IxTower.tscn",
 	},
 }
 
@@ -44,7 +57,16 @@ func _ready() -> void:
 func is_placing() -> bool:
 	return current_type != ""
 
-func start_placement(type: String) -> void:
+func get_building_scene(faction_id: int, key: StringName) -> PackedScene:
+	var by_faction: Dictionary = FACTION_BUILDING_SCENES.get(faction_id, {})
+	var path: String = String(by_faction.get(key, ""))
+	if path.is_empty():
+		path = String((FACTION_BUILDING_SCENES[0] as Dictionary).get(key, ""))
+	if path.is_empty():
+		return null
+	return load(path) as PackedScene
+
+func start_placement(type: StringName) -> void:
 	if not BUILDING_DATA.has(type):
 		return
 	current_type = type
@@ -109,8 +131,7 @@ func _try_place() -> void:
 	var cost: Dictionary = BUILDING_DATA[current_type].cost
 	if not _can_afford(cost):
 		return
-	var scene_path: String = BUILDING_DATA[current_type].scene_path
-	var packed: PackedScene = load(scene_path)
+	var packed: PackedScene = get_building_scene(GameSettings.player_faction_id, StringName(current_type))
 	if packed == null:
 		return
 	ResourceManager.spend(cost)

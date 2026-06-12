@@ -32,7 +32,7 @@ var dying: bool = false
 
 func _ready() -> void:
 	add_to_group("buildings")
-	if faction_id == FactionManager.PLAYER:
+	if FactionManager.is_player_faction(faction_id):
 		add_to_group("player_buildings")
 	else:
 		add_to_group("enemy_buildings")
