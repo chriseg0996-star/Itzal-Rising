@@ -101,8 +101,10 @@ func _count_player_buildings(building_type: String) -> int:
 	for node in get_tree().get_nodes_in_group("buildings"):
 		if not is_instance_valid(node):
 			continue
-		if int(node.get("faction_id")) != FactionManager.PLAYER:
+		if not FactionManager.is_player_faction(int(node.get("faction_id"))):
 			continue
-		if String(node.name).begins_with(building_type):
+		# Match the building_name property, not the node name — Ix/Decay scene
+		# roots are named IxBarracks/EnemyBarracks but share building_name.
+		if String(node.get("building_name")) == building_type:
 			count += 1
 	return count

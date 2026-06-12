@@ -43,7 +43,7 @@ func _ready() -> void:
 	if faction_id == FactionManager.IX:
 		_apply_lattice_network()
 	_apply_sprite(sprite_asset)
-	if faction_id == FactionManager.PLAYER:
+	if FactionManager.is_player_faction(faction_id):
 		AlertManager.register_building(self)
 
 ## Ix "Lattice Network": if an allied Ix building sits within 300px, this building
@@ -153,7 +153,7 @@ func take_damage(amount: int) -> void:
 		return
 	hp = max(0, hp - amount)
 	SoundManager.play("building_hit", -8.0)
-	if faction_id == FactionManager.PLAYER:
+	if FactionManager.is_player_faction(faction_id):
 		building_damaged.emit(self)
 	if hp <= 0:
 		_die()
@@ -219,7 +219,7 @@ func _spawn_unit(scene: PackedScene) -> void:
 	if has_rally_point and unit.has_method("move_to"):
 		# Deferred so the unit's _ready/nav setup runs before the move order.
 		unit.call_deferred("move_to", rally_point)
-	if faction_id == FactionManager.PLAYER:
+	if FactionManager.is_player_faction(faction_id):
 		GameStats.units_trained += 1
 
 class RallyMarker extends Node2D:
