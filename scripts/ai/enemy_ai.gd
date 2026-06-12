@@ -185,10 +185,10 @@ func _phase_atacar() -> void:
 	var threshold: int = ATTACK_FORCE_MIN if game_time < ESCALATION_TIME else ATTACK_FORCE_LATE
 	if soldiers.size() < threshold:
 		return
-	var player_tc: Node = _get_player_tc()
-	if player_tc == null:
+	var target: Node = _get_attack_target()
+	if target == null:
 		return
-	var target_pos: Vector2 = (player_tc as Node2D).global_position
+	var target_pos: Vector2 = (target as Node2D).global_position
 	for s in soldiers:
 		if is_instance_valid(s) and s.has_method("attack_move"):
 			s.attack_move(target_pos)
@@ -198,17 +198,35 @@ func _phase_all_in() -> void:
 	if game_time < _next_all_in:
 		return
 	_next_all_in += ALL_IN_PERIOD
-	var player_tc: Node = _get_player_tc()
-	if player_tc == null:
+	var target: Node = _get_attack_target()
+	if target == null:
 		return
-	var target_pos: Vector2 = (player_tc as Node2D).global_position
+	if force_attack((target as Node2D).global_position):
+		AlertManager.push("Enemy all-in incoming!", "warning")
+
+## Sends every AI soldier at a position immediately, ignoring force thresholds.
+## Used by the monument countdown so a fresh monument is contested right away
+## instead of waiting out the next AI tick.
+func force_attack(target_pos: Vector2) -> bool:
 	var pushed: bool = false
 	for s in _get_enemy_soldiers():
 		if is_instance_valid(s) and s.has_method("attack_move"):
 			s.attack_move(target_pos)
 			pushed = true
-	if pushed:
-		AlertManager.push("Enemy all-in incoming!", "warning")
+	return pushed
+
+## A player Monument outranks the TC as the AI's objective.
+func _get_attack_target() -> Node:
+	var monument: Node = _get_player_monument()
+	if monument != null:
+		return monument
+	return _get_player_tc()
+
+func _get_player_monument() -> Node:
+	for b in get_tree().get_nodes_in_group("player_buildings"):
+		if is_instance_valid(b) and b.building_name == "Monument":
+			return b
+	return null
 
 func _get_enemy_buildings() -> Array:
 	return get_tree().get_nodes_in_group("enemy_buildings")

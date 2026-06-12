@@ -73,6 +73,9 @@ func _check_conditions() -> void:
 		_alert_10_sent = false
 		_monument_label.visible = true
 		AlertManager.push("Monument raised — hold for 3:00!", "warning")
+		# The AI contests immediately — its ticks are 20-45s apart, which would
+		# otherwise gift a quarter of the countdown.
+		EnemyAI.force_attack((monument as Node2D).global_position)
 	elif monument == null and monument_countdown_active:
 		monument_countdown_active = false
 		_monument_label.visible = false
