@@ -104,5 +104,65 @@ func set_cooldown(value: float) -> void:
 
 func _execute_ability() -> void:
 	var def: Dictionary = ABILITIES.get(GameSettings.player_faction_id, ABILITIES[0])
+	match GameSettings.player_faction_id:
+		1:
+			_cast_burst()
+		2:
+			_cast_overcharge()
+		_:
+			_cast_vigor()
 	AlertManager.push("%s!" % def["name"], "info")
 	SoundManager.play("unit_select")
+
+## Itzal: heal every player unit.
+func _cast_vigor() -> void:
+	var shown: int = 0
+	for u in get_tree().get_nodes_in_group("player_units"):
+		if not is_instance_valid(u):
+			continue
+		var stat: Node = u.get_node_or_null("StatComponent")
+		if stat != null and stat.has_method("heal"):
+			stat.heal(VIGOR_HEAL)
+			if shown < 12 and u is Node2D:
+				Particles.spawn((u as Node2D).get_parent(), "selection_pulse", (u as Node2D).global_position)
+				shown += 1
+
+## Decay: damage every hostile unit near the player's TC.
+func _cast_burst() -> void:
+	var tc: Node2D = _find_player_tc()
+	if tc == null:
+		return
+	for u in get_tree().get_nodes_in_group("combat_units"):
+		if not is_instance_valid(u) or not (u is Node2D) or u.is_in_group("player_units"):
+			continue
+		var unit: Node2D = u as Node2D
+		if tc.global_position.distance_to(unit.global_position) > BURST_RADIUS:
+			continue
+		if unit.has_method("take_damage"):
+			unit.take_damage(BURST_DAMAGE)
+			Particles.spawn(unit.get_parent(), "attack_impact", unit.global_position)
+
+## Ix: temporary flat armor on every player unit, reverted after the duration.
+func _cast_overcharge() -> void:
+	if _buff_active:
+		return
+	_buff_active = true
+	var buffed: Array[StatComponent] = []
+	for u in get_tree().get_nodes_in_group("player_units"):
+		if not is_instance_valid(u):
+			continue
+		var stat: StatComponent = u.get_node_or_null("StatComponent") as StatComponent
+		if stat != null:
+			stat.armor += OVERCHARGE_ARMOR
+			buffed.append(stat)
+	await get_tree().create_timer(OVERCHARGE_DURATION).timeout
+	for stat in buffed:
+		if is_instance_valid(stat):
+			stat.armor -= OVERCHARGE_ARMOR
+	_buff_active = false
+
+func _find_player_tc() -> Node2D:
+	for b in get_tree().get_nodes_in_group("player_buildings"):
+		if is_instance_valid(b) and b is Node2D and String(b.get("building_name")) == "Town Center":
+			return b as Node2D
+	return null
