@@ -180,7 +180,6 @@ armor = 2.0
 
 [node name="CombatComponent" type="Node" parent="."]
 script = ExtResource("3_combat")
-enemy_group = "enemy_units"
 attack_range = 160.0
 aggro_range = 350.0
 

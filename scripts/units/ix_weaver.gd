@@ -221,16 +221,3 @@ func _draw() -> void:
 	if not selected or _state == State.DYING:
 		return
 	draw_arc(Vector2.ZERO, SELECTION_RADIUS, 0.0, TAU, SELECTION_SEGMENTS, SELECTION_COLOR, SELECTION_WIDTH, true)
-
-func _apply_sprite(asset: String) -> void:
-	if asset == "":
-		return
-	var existing := get_node_or_null("Sprite")
-	if existing != null and existing is CanvasItem:
-		(existing as CanvasItem).visible = false
-	var sprite_2d := Sprite2D.new()
-	sprite_2d.texture = TextureGenerator.get_texture(asset)
-	sprite_2d.centered = true
-	add_child(sprite_2d)
-	if existing != null:
-		move_child(sprite_2d, existing.get_index() + 1)

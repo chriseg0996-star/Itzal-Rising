@@ -178,7 +178,6 @@ max_health = 120.0
 
 [node name="CombatComponent" type="Node" parent="."]
 script = ExtResource("3_combat")
-enemy_group = "friendly_units"
 
 [node name="MovementComponent" type="Node" parent="."]
 script = ExtResource("4_move")

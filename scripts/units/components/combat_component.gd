@@ -13,9 +13,6 @@ enum State { IDLE, CHASING, ATTACKING }
 @export var scan_interval: float = 0.3
 ## Broad group scanned for candidates; hostility is decided by FactionManager.
 @export var scan_group: String = "combat_units"
-## Deprecated: superseded by FactionManager.is_hostile(). Kept so existing scene
-## overrides that still set it don't raise load errors.
-@export var enemy_group: String = "enemy_units"
 
 var _state: State = State.IDLE
 var _owner_unit: CharacterBody2D = null

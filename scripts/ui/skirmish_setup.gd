@@ -454,7 +454,6 @@ func _update_map_preview() -> void:
 # ---------------------------------------------------------------------------
 func _on_start_pressed() -> void:
 	GameSettings.selected_map = selected_map
-	GameSettings.faction_id = selected_faction_id
 	GameSettings.difficulty = selected_difficulty
 	# The match systems read player_faction_id (ix_spawner) — keep it in sync so
 	# the chosen faction actually fields.

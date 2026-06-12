@@ -43,9 +43,6 @@ func is_hostile(faction_id: int, target_faction_id: int) -> bool:
 		return false
 	return target_faction_id in data.hostile_to
 
-func is_player(faction_id: int) -> bool:
-	return faction_id == PLAYER
-
 ## True for any faction the human player controls (default player or Ix).
 func is_player_faction(faction_id: int) -> bool:
 	return faction_id == PLAYER or faction_id == IX

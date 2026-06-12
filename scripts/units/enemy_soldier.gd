@@ -44,7 +44,6 @@ func _ready() -> void:
 	var old_sprite := get_node_or_null("Sprite")
 	if old_sprite != null and old_sprite is CanvasItem:
 		(old_sprite as CanvasItem).visible = false
-	add_to_group("enemy_units")
 	_movement_component = get_node_or_null("MovementComponent") as MovementComponent
 	_stat = get_node_or_null("StatComponent") as StatComponent
 	if _stat != null:
@@ -180,16 +179,3 @@ func _draw() -> void:
 	if not selected or _state == State.DYING:
 		return
 	draw_arc(Vector2.ZERO, SELECTION_RADIUS, 0.0, TAU, SELECTION_SEGMENTS, SELECTION_COLOR, SELECTION_WIDTH, true)
-
-func _apply_sprite(asset: String) -> void:
-	if asset == "":
-		return
-	var existing := get_node_or_null("Sprite")
-	if existing != null and existing is CanvasItem:
-		(existing as CanvasItem).visible = false
-	var sprite_2d := Sprite2D.new()
-	sprite_2d.texture = TextureGenerator.get_texture(asset)
-	sprite_2d.centered = true
-	add_child(sprite_2d)
-	if existing != null:
-		move_child(sprite_2d, existing.get_index() + 1)
