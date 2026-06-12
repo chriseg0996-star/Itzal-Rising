@@ -36,6 +36,9 @@ var max_towers: int = 2
 ## base; falls back to the legacy constant if no TC is found.
 var base_pos: Vector2 = ENEMY_BASE_POS
 var _next_all_in: float = ESCALATION_TIME + ALL_IN_PERIOD
+## The faction this AI drives. Decay by default; when the human plays Decay,
+## the AI takes over Itzal instead.
+var ai_faction_id: int = FactionManager.ENEMY
 
 func _ready() -> void:
 	call_deferred("_bootstrap")
@@ -68,13 +71,17 @@ func _apply_difficulty() -> void:
 func _bootstrap() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
+	if GameSettings.player_faction_id == FactionManager.ENEMY:
+		ai_faction_id = FactionManager.PLAYER
+	else:
+		ai_faction_id = FactionManager.ENEMY
 	base_pos = _resolve_base_pos()
 	initialized = true
 	_ai_tick()
 
 func _resolve_base_pos() -> Vector2:
 	for tc in get_tree().get_nodes_in_group("town_center"):
-		if is_instance_valid(tc) and tc is Node2D and tc.get("faction_id") == FactionManager.ENEMY:
+		if is_instance_valid(tc) and tc is Node2D and tc.get("faction_id") == ai_faction_id:
 			return (tc as Node2D).global_position
 	return ENEMY_BASE_POS
 
@@ -140,30 +147,29 @@ func _phase_construir() -> void:
 	_try_build_tower()
 
 func _try_build_barracks() -> void:
-	if not ResourceManager.can_afford(BARRACKS_COST, FactionManager.ENEMY):
+	if not ResourceManager.can_afford(BARRACKS_COST, ai_faction_id):
 		return
-	ResourceManager.spend(BARRACKS_COST, FactionManager.ENEMY)
+	ResourceManager.spend(BARRACKS_COST, ai_faction_id)
 	var pos: Vector2 = base_pos + Vector2(
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE),
 		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE)
 	)
-	_place_enemy_building("res://scenes/buildings/EnemyBarracks.tscn", pos)
+	_place_enemy_building(BuildingPlacer.get_building_scene(ai_faction_id, &"barracks"), pos)
 
 ## One tower per AI tick, at fixed slots around the TC, capped by difficulty.
 func _try_build_tower() -> void:
 	var towers: int = _count_enemy_towers()
 	if towers >= max_towers:
 		return
-	if not ResourceManager.can_afford(TOWER_COST, FactionManager.ENEMY):
+	if not ResourceManager.can_afford(TOWER_COST, ai_faction_id):
 		return
-	ResourceManager.spend(TOWER_COST, FactionManager.ENEMY)
+	ResourceManager.spend(TOWER_COST, ai_faction_id)
 	var pos: Vector2 = base_pos + TOWER_OFFSETS[towers % TOWER_OFFSETS.size()]
-	_place_enemy_building("res://scenes/buildings/EnemyTower.tscn", pos)
+	_place_enemy_building(BuildingPlacer.get_building_scene(ai_faction_id, &"tower"), pos)
 
-func _place_enemy_building(scene_path: String, pos: Vector2) -> void:
+func _place_enemy_building(packed: PackedScene, pos: Vector2) -> void:
 	pos.x = clamp(pos.x, MAP_MIN, MAP_MAX)
 	pos.y = clamp(pos.y, MAP_MIN, MAP_MAX)
-	var packed: PackedScene = load(scene_path)
 	if packed == null:
 		return
 	var building: Node = packed.instantiate()
@@ -210,7 +216,7 @@ func _get_enemy_buildings() -> Array:
 func _get_enemy_villagers() -> Array:
 	var result: Array = []
 	for v in get_tree().get_nodes_in_group("villagers"):
-		if is_instance_valid(v) and v.get("faction_id") == FactionManager.ENEMY:
+		if is_instance_valid(v) and v.get("faction_id") == ai_faction_id:
 			result.append(v)
 	return result
 
@@ -219,7 +225,7 @@ func _get_enemy_soldiers() -> Array:
 	for s in get_tree().get_nodes_in_group("soldiers"):
 		if not is_instance_valid(s):
 			continue
-		if s.get("faction_id") != FactionManager.ENEMY:
+		if s.get("faction_id") != ai_faction_id:
 			continue
 		if s.has_method("is_dying") and s.is_dying():
 			continue
