@@ -83,7 +83,7 @@ func _flash_hit() -> void:
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", _base_modulate, 0.1)
 
-func _on_attack_landed(target: CharacterBody2D, _damage: float) -> void:
+func _on_attack_landed(target: Node2D, _damage: float) -> void:
 	_play_sound(sound_attack)
 	SoundManager.play("unit_attack", -4.0)
 	Particles.spawn(get_parent(), "attack_impact", target.global_position)
@@ -200,7 +200,7 @@ func _update_animation() -> void:
 		State.DYING:
 			_anim_sprite.play("death")
 
-func _on_attack_started(_target: CharacterBody2D) -> void:
+func _on_attack_started(_target: Node2D) -> void:
 	if _anim_sprite == null or is_dying():
 		return
 	_anim_sprite.play("attack")

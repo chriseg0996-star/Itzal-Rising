@@ -1,8 +1,8 @@
 class_name CombatComponent
 extends Node
 
-signal attack_started(target: CharacterBody2D)
-signal attack_landed(target: CharacterBody2D, damage: float)
+signal attack_started(target: Node2D)
+signal attack_landed(target: Node2D, damage: float)
 
 enum State { IDLE, CHASING, ATTACKING }
 
@@ -16,7 +16,7 @@ enum State { IDLE, CHASING, ATTACKING }
 
 var _state: State = State.IDLE
 var _owner_unit: CharacterBody2D = null
-var _target: CharacterBody2D = null
+var _target: Node2D = null
 var _forced_target: bool = false
 var _cooldown_timer: float = 0.0
 var _scan_timer: float = 0.0
@@ -58,6 +58,28 @@ func _scan_for_target() -> void:
 			nearest = unit
 	if nearest != null:
 		_target = nearest
+		return
+	# No hostile unit in aggro: fall back to hostile buildings (lets armies
+	# raze bases instead of idling next to them). Units always take priority.
+	var nearest_building: Node2D = null
+	nearest_dist = INF
+	for node in get_tree().get_nodes_in_group("buildings"):
+		var building: Node2D = node as Node2D
+		if building == null or not is_instance_valid(building):
+			continue
+		var bfid: Variant = building.get("faction_id")
+		if bfid == null or not FactionManager.is_hostile(own_fid, int(bfid)):
+			continue
+		if _is_unit_dead(building):
+			continue
+		var d: float = _owner_unit.global_position.distance_to(building.global_position)
+		if d > aggro_range:
+			continue
+		if d < nearest_dist:
+			nearest_dist = d
+			nearest_building = building
+	if nearest_building != null:
+		_target = nearest_building
 
 func _validate_target() -> void:
 	if _target == null:
@@ -91,21 +113,30 @@ func _attack() -> void:
 	if _target == null or not is_instance_valid(_target):
 		return
 	var stat: Node = _target.get_node_or_null("StatComponent")
-	if stat == null or not stat.has_method("take_damage"):
-		return
-	_cooldown_timer = attack_cooldown
-	attack_started.emit(_target)
-	stat.take_damage(attack_damage)
-	attack_landed.emit(_target, attack_damage)
-	_spawn_impact(_target.global_position)
+	if stat != null and stat.has_method("take_damage"):
+		_cooldown_timer = attack_cooldown
+		attack_started.emit(_target)
+		stat.take_damage(attack_damage)
+		attack_landed.emit(_target, attack_damage)
+		_spawn_impact(_target.global_position)
+	elif _target.has_method("take_damage"):
+		# Buildings carry hp on the node itself (building.gd), no StatComponent.
+		_cooldown_timer = attack_cooldown
+		attack_started.emit(_target)
+		_target.take_damage(int(attack_damage))
+		attack_landed.emit(_target, attack_damage)
+		_spawn_impact(_target.global_position)
 
 func _is_unit_dead(unit: Node) -> bool:
 	var stat: Node = unit.get_node_or_null("StatComponent")
 	if stat != null and stat.has_method("is_dead"):
 		return stat.is_dead()
+	var dying: Variant = unit.get("dying")
+	if dying != null:
+		return bool(dying)
 	return false
 
-func force_target(unit: CharacterBody2D) -> void:
+func force_target(unit: Node2D) -> void:
 	_target = unit
 	_forced_target = true
 

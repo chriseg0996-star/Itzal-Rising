@@ -144,7 +144,7 @@ func _update_animation() -> void:
 		State.DYING:
 			_anim_sprite.play("death")
 
-func _on_attack_started(_target: CharacterBody2D) -> void:
+func _on_attack_started(_target: Node2D) -> void:
 	if _anim_sprite == null or is_dying():
 		return
 	_anim_sprite.play("attack")
