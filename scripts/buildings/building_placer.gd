@@ -22,13 +22,18 @@ const BUILDING_DATA: Dictionary = {
 }
 
 ## Faction-routed building scenes. The one acceptable hardcoded-path location:
-## faction_id -> building key -> scene path. Factions without a buildable set
-## (Decay) fall back to faction 0's entry in get_building_scene().
+## faction_id -> building key -> scene path. Unknown factions fall back to
+## faction 0's entry in get_building_scene().
 const FACTION_BUILDING_SCENES: Dictionary = {
 	0: {
 		&"tc": "res://scenes/buildings/TownCenter.tscn",
 		&"barracks": "res://scenes/buildings/Barracks.tscn",
 		&"tower": "res://scenes/buildings/Tower.tscn",
+	},
+	1: {
+		&"tc": "res://scenes/buildings/EnemyTownCenter.tscn",
+		&"barracks": "res://scenes/buildings/EnemyBarracks.tscn",
+		&"tower": "res://scenes/buildings/EnemyTower.tscn",
 	},
 	2: {
 		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
