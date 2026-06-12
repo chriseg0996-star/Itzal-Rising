@@ -16,6 +16,7 @@ const WHITE: Color = Color(0.95, 0.97, 0.98, 1.0)
 
 var _master_value: Label = null
 var _sfx_value: Label = null
+var _music_value: Label = null
 
 @onready var _bg: TextureRect = $BGImage
 
@@ -67,6 +68,9 @@ func _build_panel() -> void:
 	var sfx_slider := sfx_row.get_meta("slider") as HSlider
 	sfx_slider.drag_ended.connect(_on_sfx_drag_ended)
 	v.add_child(sfx_row)
+	var music_row := _slider_row("Music Volume", GameSettings.music_volume, _on_music_changed)
+	_music_value = music_row.get_meta("value_label") as Label
+	v.add_child(music_row)
 
 	v.add_child(_header("DISPLAY"))
 	var fs := CheckButton.new()
@@ -122,6 +126,12 @@ func _on_sfx_changed(value: float) -> void:
 
 func _on_sfx_drag_ended(_changed: bool) -> void:
 	SoundManager.play("unit_select")
+
+func _on_music_changed(value: float) -> void:
+	GameSettings.music_volume = value
+	GameSettings.apply_settings()
+	if _music_value != null:
+		_music_value.text = "%d%%" % int(round(value * 100.0))
 
 func _on_fullscreen_toggled(pressed: bool) -> void:
 	GameSettings.fullscreen = pressed
