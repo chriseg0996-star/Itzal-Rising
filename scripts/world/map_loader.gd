@@ -34,7 +34,11 @@ func _ready() -> void:
 		_spawn(GOLD_SCENE, world, p as Vector2)
 	var cam: Node = world.get_node_or_null("RTSCamera")
 	if cam != null and cam is Node2D:
-		(cam as Node2D).position = player_start
+		# A Decay player starts at the enemy base — open the camera there.
+		if GameSettings.player_faction_id == FactionManager.ENEMY:
+			(cam as Node2D).position = cfg.get("enemy_tc", MapConfig.DEFAULT_ENEMY_TC) as Vector2
+		else:
+			(cam as Node2D).position = player_start
 
 func _move(world: Node, node_name: String, pos: Vector2) -> void:
 	var n: Node = world.get_node_or_null(NodePath(node_name))
