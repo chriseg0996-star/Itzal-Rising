@@ -91,11 +91,20 @@ func _ai_tick() -> void:
 	_phase_atacar()
 
 func _phase_train_at_barracks() -> void:
-	if max_soldiers > 0 and _get_enemy_soldiers().size() >= max_soldiers:
+	var army: Array = _get_enemy_soldiers()
+	if max_soldiers > 0 and army.size() >= max_soldiers:
 		return
+	# Keep roughly 1 archer per 2 melee. Classified via sprite_asset (node
+	# names get auto-renamed on sibling conflicts, so they are unreliable).
+	var archers: int = 0
+	for s in army:
+		if String(s.get("sprite_asset")).contains("archer"):
+			archers += 1
+	var melee: int = army.size() - archers
 	for b in _get_enemy_buildings():
 		if b.building_name == "Barracks" and b.queue.size() < b.MAX_QUEUE:
-			b.try_queue_training()
+			var slot: int = 1 if (b.has_train_slot(1) and archers * 2 < melee) else 0
+			b.try_queue_training(slot)
 
 func _phase_recolectar() -> void:
 	var villagers: Array = _get_enemy_villagers()
