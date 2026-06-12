@@ -94,7 +94,7 @@ func _refresh() -> void:
 		var current: int = int(round(progress * float(target)))
 
 		_rows[i].visible = true
-		_name_labels[i].text = String(obj.get("label", ""))
+		_name_labels[i].text = ObjectiveManager.get_label(obj)
 		_status_labels[i].text = "✓" if done else "%d/%d" % [current, target]
 		_dots[i].color = DOT_DONE if done else DOT_TODO
 		_name_labels[i].add_theme_color_override("font_color", LABEL_DONE if done else LABEL_TODO)

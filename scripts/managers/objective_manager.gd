@@ -11,18 +11,21 @@ const OBJECTIVES: Array[Dictionary] = [
 	{
 		"id": "train_first_soldier",
 		"label": "Train your first soldier",
+		"label_by_faction": {1: "Corrupt your first warrior", 2: "Weave your first guard"},
 		"check": "soldiers_trained",
 		"target": 1,
 	},
 	{
 		"id": "gather_500_resources",
 		"label": "Gather 500 resources",
+		"label_by_faction": {1: "Drain 500 resources", 2: "Harvest 500 resources"},
 		"check": "resources_gathered",
 		"target": 500,
 	},
 	{
 		"id": "build_barracks",
 		"label": "Build a Barracks",
+		"label_by_faction": {1: "Raise a corrupted Barracks", 2: "Lattice a Barracks"},
 		"check": "building_count",
 		"target": 1,
 		"building_type": "Barracks",
@@ -30,6 +33,7 @@ const OBJECTIVES: Array[Dictionary] = [
 	{
 		"id": "train_5_soldiers",
 		"label": "Train 5 soldiers",
+		"label_by_faction": {1: "Corrupt 5 warriors", 2: "Weave 5 guards"},
 		"check": "soldiers_trained",
 		"target": 5,
 	},
@@ -55,7 +59,12 @@ func _process(delta: float) -> void:
 			continue
 		if get_progress(obj) >= 1.0:
 			_completed.append(id)
-			objective_completed.emit(id, String(obj.get("label", "")))
+			objective_completed.emit(id, get_label(obj))
+
+## Objective text, flavored for the faction the human is playing.
+func get_label(obj: Dictionary) -> String:
+	var by_faction: Dictionary = obj.get("label_by_faction", {})
+	return String(by_faction.get(GameSettings.player_faction_id, obj.get("label", "")))
 
 ## Returns the first 3 not-yet-completed objectives.
 func get_active_objectives() -> Array[Dictionary]:
