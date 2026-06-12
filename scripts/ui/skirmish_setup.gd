@@ -24,19 +24,21 @@ var _maps: Array[Dictionary] = [
 	{"name": "Volcanic Crags", "color": Color(0.22, 0.08, 0.06, 1.0)},
 ]
 
+# atk/armor/hp chips mirror the REAL FactionData modifiers set in
+# faction_manager.gd _ready — keep both in sync when rebalancing.
 var _factions: Array[Dictionary] = [
 	{"id": 0, "name": "Itzal Resistance", "accent": Color(0.0, 0.90, 0.78, 1.0), "playable": true,
-	 "atk": 30, "def": 55, "bonus": 10,
+	 "atk": "ATK ×1.0", "armor": "ARM +1", "hp": "HP ×1.0",
 	 "icon": "res://assets/ui/faction_itzal.png", "units": "res://assets/ui/units_itzal.png",
-	 "desc": "Warriors of Itzal: villagers, soldiers and jaguar riders."},
+	 "desc": "Balanced warriors of Itzal. Ability: Jaguar's Vigor (mass heal)."},
 	{"id": 1, "name": "Enemy Decay", "accent": Color(0.65, 0.15, 0.90, 1.0), "playable": true,
-	 "atk": 30, "def": 5, "bonus": 10,
+	 "atk": "ATK ×1.1", "armor": "ARM +0", "hp": "HP ×0.9",
 	 "icon": "res://assets/ui/faction_decay.png", "units": "res://assets/ui/units_decay.png",
-	 "desc": "Corrupted units that spread decay and corruption damage."},
+	 "desc": "Glass-cannon corruption. Ability: Corruption Burst (AoE damage)."},
 	{"id": 2, "name": "Ix Architects", "accent": Color(0.85, 0.60, 0.10, 1.0), "playable": true,
-	 "atk": 60, "def": 35, "bonus": 10,
+	 "atk": "ATK ×1.15", "armor": "ARM +1", "hp": "HP ×1.0",
 	 "icon": "res://assets/ui/faction_ix.png", "units": "res://assets/ui/units_ix.png",
-	 "desc": "Technologically advanced units forged from obsidian lattice."},
+	 "desc": "Elite obsidian-lattice strikers. Ability: Lattice Overcharge (armor surge)."},
 ]
 
 var _difficulties: Array[Dictionary] = [
@@ -224,9 +226,9 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 	var chips := HBoxContainer.new()
 	chips.alignment = BoxContainer.ALIGNMENT_CENTER
 	chips.add_theme_constant_override("separation", 6)
-	chips.add_child(_chip("ATK %d" % int(data["atk"]), Color(0.9, 0.35, 0.2, 1.0)))
-	chips.add_child(_chip("DEF %d" % int(data["def"]), accent))
-	chips.add_child(_chip("+%d" % int(data["bonus"]), Color(0.4, 0.8, 0.4, 1.0)))
+	chips.add_child(_chip(String(data["atk"]), Color(0.9, 0.35, 0.2, 1.0)))
+	chips.add_child(_chip(String(data["armor"]), accent))
+	chips.add_child(_chip(String(data["hp"]), Color(0.4, 0.8, 0.4, 1.0)))
 	v.add_child(chips)
 
 	var desc := Label.new()
