@@ -57,7 +57,11 @@ func _refresh() -> void:
 			_slot_styles[i].bg_color = OCCUPIED_COLOR if occupied else EMPTY_COLOR
 		var lbl: Label = _slot_labels[i]
 		if occupied:
-			lbl.text = _abbrev(_current_building.get_train_label(0)) if i == 0 else "•"
+			var entry: Dictionary = queue[i]
+			if entry.has("research_id"):
+				lbl.text = "UPG" if i == 0 else "•"
+			else:
+				lbl.text = _abbrev(_current_building.get_train_label(0)) if i == 0 else "•"
 		else:
 			lbl.text = ""
 	if count > 0:

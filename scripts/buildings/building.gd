@@ -5,6 +5,26 @@ signal building_damaged(building: Node)
 const MAX_QUEUE: int = 5
 const SPAWN_OFFSET: Vector2 = Vector2(0, 80)
 
+## Research available at the Town Center. Each id has 2 tiers; current levels
+## live in GameStats (per-match, reset with it). Research shares the training
+## queue via entries shaped {"scene": null, "duration": d, "research_id": id}.
+const RESEARCH: Dictionary = {
+	"atk": {
+		"label": "Attack",
+		"levels": [
+			{"cost": {"madera": 100, "oro": 100}, "duration": 20.0},
+			{"cost": {"madera": 200, "oro": 250}, "duration": 30.0},
+		],
+	},
+	"armor": {
+		"label": "Armor",
+		"levels": [
+			{"cost": {"madera": 100, "oro": 100}, "duration": 20.0},
+			{"cost": {"madera": 200, "oro": 250}, "duration": 30.0},
+		],
+	},
+}
+
 @export var building_name: String = "Building"
 @export var max_hp: int = 100
 @export var faction_id: int = 0
@@ -121,9 +141,33 @@ func try_queue_training(slot: int = 0) -> bool:
 	if not ResourceManager.can_afford(costs, faction_id):
 		return false
 	ResourceManager.spend(costs, faction_id)
-	queue.append({"scene": scene, "duration": duration})
+	_enqueue({"scene": scene, "duration": duration})
+	return true
+
+func _enqueue(entry: Dictionary) -> void:
+	queue.append(entry)
 	if queue.size() == 1:
-		production_timer = duration
+		production_timer = float(entry.get("duration", train_duration))
+
+func try_queue_research(research_id: String) -> bool:
+	if dying or not RESEARCH.has(research_id):
+		return false
+	if queue.size() >= MAX_QUEUE:
+		return false
+	var level: int = GameStats.get_research_level(research_id)
+	var levels: Array = RESEARCH[research_id]["levels"]
+	if level >= levels.size():
+		return false
+	# One of each research id in flight at a time.
+	for entry in queue:
+		if String(entry.get("research_id", "")) == research_id:
+			return false
+	var tier: Dictionary = levels[level]
+	var costs: Dictionary = tier["cost"]
+	if not ResourceManager.can_afford(costs, faction_id):
+		return false
+	ResourceManager.spend(costs, faction_id)
+	_enqueue({"scene": null, "duration": float(tier["duration"]), "research_id": research_id})
 	return true
 
 ## Persistent rally point: units finishing training walk here. The marker is a
@@ -172,7 +216,10 @@ func _process(delta: float) -> void:
 	production_timer -= delta
 	if production_timer <= 0.0:
 		var entry: Dictionary = queue[0]
-		_spawn_unit(entry.get("scene"))
+		if entry.has("research_id"):
+			GameStats.complete_research(String(entry["research_id"]))
+		else:
+			_spawn_unit(entry.get("scene"))
 		queue.pop_front()
 		if not queue.is_empty():
 			production_timer = float(queue[0].get("duration", train_duration))
