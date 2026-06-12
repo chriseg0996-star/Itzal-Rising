@@ -22,18 +22,19 @@ var sfx_volume: float = 1.0
 var fullscreen: bool = true
 
 func _ready() -> void:
-	# This autoload runs before SoundManager, so the SFX bus exists before the
-	# pool players pick their bus.
-	_ensure_sfx_bus()
+	# This autoload runs before SoundManager, so the SFX/MUSIC buses exist
+	# before the pool players pick their bus.
+	_ensure_bus(&"SFX")
+	_ensure_bus(&"MUSIC")
 	load_settings()
 	apply_settings()
 
-func _ensure_sfx_bus() -> void:
-	if AudioServer.get_bus_index("SFX") != -1:
+func _ensure_bus(bus_name: StringName) -> void:
+	if AudioServer.get_bus_index(bus_name) != -1:
 		return
 	var idx: int = AudioServer.bus_count
 	AudioServer.add_bus(idx)
-	AudioServer.set_bus_name(idx, "SFX")
+	AudioServer.set_bus_name(idx, bus_name)
 	AudioServer.set_bus_send(idx, &"Master")
 
 func apply_settings() -> void:
