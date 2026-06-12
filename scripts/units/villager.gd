@@ -11,6 +11,8 @@ const SELECTION_COLOR: Color = Color(0.27, 0.86, 0.50, 1.0)
 const SELECTION_WIDTH: float = 3.0
 const SELECTION_SEGMENTS: int = 32
 
+var _selection_color: Color = SELECTION_COLOR
+
 @export var speed: float  = 120.0
 @export var faction_id:      int      = 0
 @export var sprite_asset:    String   = "villager"
@@ -39,6 +41,9 @@ var _base_modulate: Color = Color(1, 1, 1, 1)
 func _ready() -> void:
 	add_to_group("villagers")
 	add_to_group("combat_units")
+	var fac: FactionData = FactionManager.get_faction(faction_id)
+	if fac != null:
+		_selection_color = fac.primary_color
 	if FactionManager.is_player_faction(faction_id):
 		add_to_group("player_units")
 	_stat = get_node_or_null("StatComponent") as StatComponent
@@ -220,4 +225,4 @@ func die() -> void:
 func _draw() -> void:
 	if not selected or _state == State.DYING:
 		return
-	draw_arc(Vector2.ZERO, SELECTION_RADIUS, 0.0, TAU, SELECTION_SEGMENTS, SELECTION_COLOR, SELECTION_WIDTH, true)
+	draw_arc(Vector2.ZERO, SELECTION_RADIUS, 0.0, TAU, SELECTION_SEGMENTS, _selection_color, SELECTION_WIDTH, true)
