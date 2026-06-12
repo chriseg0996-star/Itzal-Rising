@@ -93,26 +93,59 @@ def make_sfx() -> None:
 
 
 def make_ambient() -> None:
-    """~75s seamless drone: every component frequency is an integer number of
-    cycles over the duration, so the loop point is mathematically continuous."""
+    """~96s seamless ambient piece (not a drone): a slow 8-chord pad
+    progression in A minor with 2s equal-power crossfades, a quiet sub root,
+    and sparse pentatonic bell plucks. Everything is written circularly
+    (indices wrap modulo n), so the loop point is continuous."""
     sr = 22050
-    dur = 75.0
+    dur = 96.0
     n = int(dur * sr)
-    t = np.arange(n) / sr
-
-    def locked(freq: float) -> float:
-        return round(freq * dur) / dur  # snap to integer cycles over dur
-
     sig = np.zeros(n)
-    for freq, amp in [(55.0, 0.30), (110.0, 0.22), (164.8, 0.14), (220.0, 0.08)]:
-        f = locked(freq)
-        # slow amplitude swell, also integer-cycle so it loops
-        lfo = 0.5 + 0.5 * np.sin(2 * np.pi * locked(1.0 / 25.0) * t + freq)
-        sig += amp * np.sin(2 * np.pi * f * t) * (0.55 + 0.45 * lfo)
-    # faint shimmering high partial
-    sig += 0.04 * np.sin(2 * np.pi * locked(659.2) * t) * (
-        0.5 + 0.5 * np.sin(2 * np.pi * locked(1.0 / 37.5) * t)
-    )
+    rng = np.random.default_rng(42)
+
+    # Am F C G Am C F Em — root + third + fifth (Hz)
+    chords = [
+        [110.0, 130.8, 164.8],
+        [87.3, 110.0, 130.8],
+        [130.8, 164.8, 196.0],
+        [98.0, 123.5, 146.8],
+        [110.0, 130.8, 164.8],
+        [130.8, 164.8, 196.0],
+        [87.3, 110.0, 130.8],
+        [82.4, 98.0, 123.5],
+    ]
+    seg = n // len(chords)
+    xfade = int(2.0 * sr)
+    for ci, chord in enumerate(chords):
+        length = seg + xfade
+        tt = np.arange(length) / sr
+        win = np.ones(length)
+        win[:xfade] = 0.5 - 0.5 * np.cos(np.pi * np.arange(xfade) / xfade)
+        win[-xfade:] = 0.5 + 0.5 * np.cos(np.pi * np.arange(xfade) / xfade)
+        wave = np.zeros(length)
+        for f in chord:
+            phase = rng.uniform(0.0, 2.0 * np.pi)
+            wave += 0.10 * np.sin(2 * np.pi * f * tt + phase)
+            wave += 0.07 * np.sin(2 * np.pi * f * 1.004 * tt + phase * 0.7)
+        wave += 0.09 * np.sin(2 * np.pi * (chord[0] / 2.0) * tt)  # sub root
+        idx = (ci * seg + np.arange(length)) % n
+        sig[idx] += wave * win
+
+    # Sparse bell plucks on the A minor pentatonic, ~1 every 3s.
+    penta = [220.0, 261.6, 293.7, 329.6, 392.0, 440.0]
+    for t0 in np.sort(rng.uniform(0.0, dur, 30)):
+        f = penta[int(rng.integers(len(penta)))]
+        plen = int(2.5 * sr)
+        tt = np.arange(plen) / sr
+        env = np.exp(-2.2 * tt)
+        bell = (
+            np.sin(2 * np.pi * f * tt)
+            + 0.35 * np.sin(2 * np.pi * 2.0 * f * tt)
+            + 0.15 * np.sin(2 * np.pi * 3.01 * f * tt)
+        ) * env
+        idx = (int(t0 * sr) + np.arange(plen)) % n
+        sig[idx] += 0.16 * bell
+
     write_wav(MUSIC_DIR / "ambient_loop.wav", sig, sr)
 
 

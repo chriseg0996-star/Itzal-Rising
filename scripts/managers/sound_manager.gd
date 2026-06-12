@@ -53,6 +53,8 @@ func play_music(track: String) -> void:
 		wav.loop_begin = 0
 		wav.loop_end = wav.data.size() / 2
 	_music_player.stream = stream
+	# Music sits well under the SFX; the MUSIC bus slider scales from here.
+	_music_player.volume_db = -10.0
 	_music_player.play()
 
 func stop_music() -> void:
