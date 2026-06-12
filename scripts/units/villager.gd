@@ -39,7 +39,7 @@ var _base_modulate: Color = Color(1, 1, 1, 1)
 func _ready() -> void:
 	add_to_group("villagers")
 	add_to_group("combat_units")
-	if faction_id == FactionManager.PLAYER:
+	if FactionManager.is_player_faction(faction_id):
 		add_to_group("player_units")
 	_stat = get_node_or_null("StatComponent") as StatComponent
 	if _stat != null:

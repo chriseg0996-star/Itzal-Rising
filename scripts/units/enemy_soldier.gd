@@ -37,7 +37,7 @@ var _base_modulate: Color = Color(1, 1, 1, 1)
 func _ready() -> void:
 	add_to_group("soldiers")
 	add_to_group("combat_units")
-	if faction_id == FactionManager.PLAYER:
+	if FactionManager.is_player_faction(faction_id):
 		add_to_group("player_units")
 	if _hp_bar_fg != null:
 		_hp_bar_width = _hp_bar_fg.offset_right - _hp_bar_fg.offset_left
