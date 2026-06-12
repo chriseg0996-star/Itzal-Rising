@@ -4,19 +4,59 @@ extends CanvasLayer
 @onready var stats_label: Label = $Center/Panel/Margin/VBox/StatsLabel
 @onready var restart_btn: Button = $Center/Panel/Margin/VBox/RestartBtn
 
+const MONUMENT_DURATION: float = 180.0
+
 var game_over: bool = false
 var player_had_tc: bool = false
+var monument_countdown_active: bool = false
+var monument_time_left: float = 0.0
+var _alert_60_sent: bool = false
+var _alert_10_sent: bool = false
+var _monument_label: Label = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	restart_btn.pressed.connect(_on_restart)
 	$Center/Panel/Margin/VBox/MenuBtn.pressed.connect(_on_menu)
+	_build_monument_label()
 
-func _process(_delta: float) -> void:
+func _build_monument_label() -> void:
+	_monument_label = Label.new()
+	_monument_label.visible = false
+	_monument_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_monument_label.add_theme_color_override("font_color", Color(0.0, 0.90, 0.78, 1.0))
+	_monument_label.add_theme_font_size_override("font_size", 22)
+	add_child(_monument_label)
+	_monument_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_monument_label.offset_top = 44.0
+	_monument_label.offset_bottom = 72.0
+	_monument_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+func _process(delta: float) -> void:
+	# process_mode is ALWAYS so the end panel works while paused — the
+	# monument clock and win checks must NOT advance then.
+	if get_tree().paused:
+		return
 	if game_over:
 		return
+	_tick_monument(delta)
 	_check_conditions()
+
+func _tick_monument(delta: float) -> void:
+	if not monument_countdown_active:
+		return
+	monument_time_left = maxf(monument_time_left - delta, 0.0)
+	var t: int = int(monument_time_left)
+	_monument_label.text = "MONUMENT  %02d:%02d" % [int(float(t) / 60.0), t % 60]
+	if monument_time_left <= 60.0 and not _alert_60_sent:
+		_alert_60_sent = true
+		AlertManager.push("Monument: 1:00 remaining", "warning")
+	if monument_time_left <= 10.0 and not _alert_10_sent:
+		_alert_10_sent = true
+		AlertManager.push("Monument: 10 seconds!", "warning")
+	if monument_time_left <= 0.0:
+		_show("MONUMENT VICTORY")
 
 func _check_conditions() -> void:
 	var player_tc: Node = _find_player_tc()
@@ -25,8 +65,37 @@ func _check_conditions() -> void:
 	elif player_had_tc:
 		_show("DEFEAT")
 		return
+	var monument: Node = _find_player_monument()
+	if monument != null and not monument_countdown_active:
+		monument_countdown_active = true
+		monument_time_left = MONUMENT_DURATION
+		_alert_60_sent = false
+		_alert_10_sent = false
+		_monument_label.visible = true
+		AlertManager.push("Monument raised — hold for 3:00!", "warning")
+	elif monument == null and monument_countdown_active:
+		monument_countdown_active = false
+		_monument_label.visible = false
+		AlertManager.push("Monument destroyed!", "error")
 	if get_tree().get_nodes_in_group("enemy_buildings").is_empty():
 		_show("VICTORY")
+
+func _find_player_monument() -> Node:
+	for b in get_tree().get_nodes_in_group("player_buildings"):
+		if is_instance_valid(b) and b.building_name == "Monument" and not b.get("dying"):
+			return b
+	return null
+
+## SaveManager hooks.
+func get_monument_state() -> Dictionary:
+	return {"countdown_active": monument_countdown_active, "time_left": monument_time_left}
+
+func set_monument_state(active: bool, time_left: float) -> void:
+	monument_countdown_active = active
+	monument_time_left = time_left
+	_monument_label.visible = active
+	_alert_60_sent = time_left <= 60.0
+	_alert_10_sent = time_left <= 10.0
 
 func _find_player_tc() -> Node:
 	for b in get_tree().get_nodes_in_group("player_buildings"):
@@ -55,6 +124,9 @@ func _on_restart() -> void:
 	GameStats.reset()
 	game_over = false
 	player_had_tc = false
+	monument_countdown_active = false
+	monument_time_left = 0.0
+	_monument_label.visible = false
 	visible = false
 	get_tree().reload_current_scene()
 
