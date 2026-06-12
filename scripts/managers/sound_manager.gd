@@ -5,13 +5,13 @@ extends Node
 ## Never crashes on missing audio files. Registered as the "SoundManager" autoload.
 
 const SOUNDS: Dictionary = {
-	"unit_select":     "res://assets/sfx/unit_select.ogg",
-	"unit_move":       "res://assets/sfx/unit_move.ogg",
-	"unit_attack":     "res://assets/sfx/unit_attack.ogg",
-	"unit_death":      "res://assets/sfx/unit_death.ogg",
-	"building_place":  "res://assets/sfx/building_place.ogg",
-	"building_hit":    "res://assets/sfx/building_hit.ogg",
-	"resource_gather": "res://assets/sfx/resource_gather.ogg",
+	"unit_select":     "res://assets/sfx/unit_select.wav",
+	"unit_move":       "res://assets/sfx/unit_move.wav",
+	"unit_attack":     "res://assets/sfx/unit_attack.wav",
+	"unit_death":      "res://assets/sfx/unit_death.wav",
+	"building_place":  "res://assets/sfx/building_place.wav",
+	"building_hit":    "res://assets/sfx/building_hit.wav",
+	"resource_gather": "res://assets/sfx/resource_gather.wav",
 }
 
 # Pool of AudioStreamPlayer nodes for overlap support.
