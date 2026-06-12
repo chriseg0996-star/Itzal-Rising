@@ -47,11 +47,16 @@ func _draw() -> void:
 func _rebuild_dots() -> void:
 	_dots.clear()
 	var ms: Vector2 = size
+	# Fog filter (absent in menus/tests → behave as before): enemy units need
+	# live vision (state 2); enemy buildings/resources need exploration (>0).
+	var fog: Node = get_tree().get_first_node_in_group("fog_of_war")
 	for u in get_tree().get_nodes_in_group("player_units"):
 		if is_instance_valid(u) and u is Node2D:
 			_add_dot((u as Node2D).global_position, PLAYER_UNIT_COLOR, UNIT_SIZE, ms)
 	for e in get_tree().get_nodes_in_group("combat_units"):
 		if is_instance_valid(e) and e is Node2D and not (e as Node).is_in_group("player_units"):
+			if fog != null and fog.get_cell_state((e as Node2D).global_position) < 2:
+				continue
 			_add_dot((e as Node2D).global_position, ENEMY_UNIT_COLOR, UNIT_SIZE, ms)
 	for b in get_tree().get_nodes_in_group("buildings"):
 		if not (is_instance_valid(b) and b is Node2D):
@@ -61,10 +66,12 @@ func _rebuild_dots() -> void:
 			continue
 		if FactionManager.is_player_faction(int(f)):
 			_add_dot((b as Node2D).global_position, PLAYER_BUILDING_COLOR, BUILDING_SIZE, ms)
-		else:
+		elif fog == null or fog.get_cell_state((b as Node2D).global_position) > 0:
 			_add_dot((b as Node2D).global_position, ENEMY_BUILDING_COLOR, BUILDING_SIZE, ms)
 	for r in get_tree().get_nodes_in_group("resources"):
 		if is_instance_valid(r) and r is Node2D:
+			if fog != null and fog.get_cell_state((r as Node2D).global_position) == 0:
+				continue
 			_add_dot((r as Node2D).global_position, RESOURCE_COLOR, RESOURCE_SIZE, ms)
 	_update_camera_rect(ms)
 
