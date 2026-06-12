@@ -27,12 +27,15 @@ var _maps: Array[Dictionary] = [
 var _factions: Array[Dictionary] = [
 	{"id": 0, "name": "Itzal Resistance", "accent": Color(0.0, 0.90, 0.78, 1.0), "playable": true,
 	 "atk": 30, "def": 55, "bonus": 10,
+	 "icon": "res://assets/ui/faction_itzal.png", "units": "res://assets/ui/units_itzal.png",
 	 "desc": "Warriors of Itzal: villagers, soldiers and jaguar riders."},
 	{"id": 1, "name": "Enemy Decay", "accent": Color(0.65, 0.15, 0.90, 1.0), "playable": false,
 	 "atk": 30, "def": 5, "bonus": 10,
+	 "icon": "res://assets/ui/faction_decay.png", "units": "res://assets/ui/units_decay.png",
 	 "desc": "Corrupted units that spread decay and corruption damage."},
 	{"id": 2, "name": "Ix Architects", "accent": Color(0.85, 0.60, 0.10, 1.0), "playable": true,
 	 "atk": 60, "def": 35, "bonus": 10,
+	 "icon": "res://assets/ui/faction_ix.png", "units": "res://assets/ui/units_ix.png",
 	 "desc": "Technologically advanced units forged from obsidian lattice."},
 ]
 
@@ -50,6 +53,7 @@ var selected_faction_id: int = 0
 var selected_difficulty: String = "normal"
 
 var _map_preview: ColorRect = null
+var _map_preview_tex: TextureRect = null
 var _map_name_label: Label = null
 var _map_button_styles: Dictionary = {}    # name -> StyleBoxFlat
 var _faction_card_styles: Dictionary = {}  # id -> StyleBoxFlat
@@ -116,6 +120,14 @@ func _build_map_column() -> PanelContainer:
 	_map_preview.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(_map_preview)
 
+	_map_preview_tex = TextureRect.new()
+	_map_preview_tex.custom_minimum_size = Vector2(200, 150)
+	_map_preview_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_map_preview_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_map_preview_tex.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_map_preview_tex.visible = false
+	v.add_child(_map_preview_tex)
+
 	_map_name_label = Label.new()
 	_map_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_map_name_label.add_theme_color_override("font_color", WHITE)
@@ -178,11 +190,20 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 	v.add_theme_constant_override("separation", 6)
 	card.add_child(v)
 
-	var icon := ColorRect.new()
-	icon.color = accent
-	icon.custom_minimum_size = Vector2(72, 72)
-	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	v.add_child(icon)
+	var icon_path: String = String(data.get("icon", ""))
+	if icon_path != "" and ResourceLoader.exists(icon_path):
+		var icon_tex := TextureRect.new()
+		icon_tex.texture = load(icon_path)
+		icon_tex.custom_minimum_size = Vector2(0, 110)
+		icon_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		v.add_child(icon_tex)
+	else:
+		var icon := ColorRect.new()
+		icon.color = accent
+		icon.custom_minimum_size = Vector2(72, 72)
+		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(icon)
 
 	var name_lbl := Label.new()
 	name_lbl.text = data["name"]
@@ -190,6 +211,15 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 	name_lbl.add_theme_color_override("font_color", accent)
 	name_lbl.add_theme_font_size_override("font_size", 14)
 	v.add_child(name_lbl)
+
+	var units_path: String = String(data.get("units", ""))
+	if units_path != "" and ResourceLoader.exists(units_path):
+		var units_tex := TextureRect.new()
+		units_tex.texture = load(units_path)
+		units_tex.custom_minimum_size = Vector2(0, 54)
+		units_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		units_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		v.add_child(units_tex)
 
 	var chips := HBoxContainer.new()
 	chips.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -216,11 +246,12 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 		var locked := Label.new()
 		locked.text = "Not playable yet"
 		locked.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		locked.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		locked.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		locked.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55, 1.0))
 		locked.add_theme_font_size_override("font_size", 11)
 		ov.add_child(locked)
 		locked.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		locked.offset_bottom = -10.0
 
 	return card
 
@@ -402,6 +433,14 @@ func _refresh_difficulty_styles() -> void:
 			sb.border_color = DIM_BORDER
 
 func _update_map_preview() -> void:
+	var tex_path: String = "res://assets/ui/map_%s.png" % selected_map.to_lower().replace(" ", "_")
+	var has_tex: bool = ResourceLoader.exists(tex_path)
+	if _map_preview_tex != null:
+		_map_preview_tex.visible = has_tex
+		if has_tex:
+			_map_preview_tex.texture = load(tex_path)
+	if _map_preview != null:
+		_map_preview.visible = not has_tex
 	for m in _maps:
 		if m["name"] == selected_map:
 			if _map_preview != null:
