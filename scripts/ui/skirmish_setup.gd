@@ -29,7 +29,7 @@ var _factions: Array[Dictionary] = [
 	 "atk": 30, "def": 55, "bonus": 10,
 	 "icon": "res://assets/ui/faction_itzal.png", "units": "res://assets/ui/units_itzal.png",
 	 "desc": "Warriors of Itzal: villagers, soldiers and jaguar riders."},
-	{"id": 1, "name": "Enemy Decay", "accent": Color(0.65, 0.15, 0.90, 1.0), "playable": false,
+	{"id": 1, "name": "Enemy Decay", "accent": Color(0.65, 0.15, 0.90, 1.0), "playable": true,
 	 "atk": 30, "def": 5, "bonus": 10,
 	 "icon": "res://assets/ui/faction_decay.png", "units": "res://assets/ui/units_decay.png",
 	 "desc": "Corrupted units that spread decay and corruption damage."},
