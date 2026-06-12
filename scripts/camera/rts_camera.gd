@@ -1,5 +1,7 @@
 extends Camera2D
 
+const WORLD_SIZE: Vector2 = Vector2(2048, 2048)
+
 @export var pan_speed: float = 400.0
 @export var edge_margin: int = 20
 @export var min_zoom: float = 0.5
@@ -38,6 +40,7 @@ func _process(delta: float) -> void:
 	if direction != Vector2.ZERO:
 		direction = direction.normalized()
 		position += direction * pan_speed * delta / zoom.x
+	_clamp_to_world()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -52,3 +55,15 @@ func _unhandled_input(event: InputEvent) -> void:
 func _apply_zoom(amount: float) -> void:
 	var new_zoom: float = clampf(zoom.x + amount, min_zoom, max_zoom)
 	zoom = Vector2(new_zoom, new_zoom)
+	_clamp_to_world()
+
+## Keep the view inside the world; if the view is wider than the world on an
+## axis (possible at min zoom), center that axis instead — clampf would get
+## min > max there.
+func _clamp_to_world() -> void:
+	var half_view: Vector2 = get_viewport().get_visible_rect().size * 0.5 / zoom
+	for axis in 2:
+		if half_view[axis] * 2.0 >= WORLD_SIZE[axis]:
+			position[axis] = WORLD_SIZE[axis] * 0.5
+		else:
+			position[axis] = clampf(position[axis], half_view[axis], WORLD_SIZE[axis] - half_view[axis])
