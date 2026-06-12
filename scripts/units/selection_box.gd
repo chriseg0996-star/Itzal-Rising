@@ -80,7 +80,15 @@ func _resource_at(world_pos: Vector2) -> Node:
 	return _node_at(world_pos, RESOURCE_LAYER_MASK, "resources")
 
 func _building_at(world_pos: Vector2) -> Node:
-	return _node_at(world_pos, BUILDING_LAYER_MASK, "buildings")
+	var b: Node = _node_at(world_pos, BUILDING_LAYER_MASK, "buildings")
+	if b == null:
+		return null
+	# Only the player's own buildings are selectable — selecting the AI's
+	# barracks would let the player queue units from the AI's pool.
+	var fid: Variant = b.get("faction_id")
+	if fid == null or not FactionManager.is_player_faction(int(fid)):
+		return null
+	return b
 
 func _node_at(world_pos: Vector2, mask: int, group: String) -> Node:
 	var space := get_world_2d().direct_space_state
