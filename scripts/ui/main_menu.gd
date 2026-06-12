@@ -27,13 +27,7 @@ func _on_skirmish() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/SkirmishSetup.tscn")
 
 func _on_settings() -> void:
-	var dialog: AcceptDialog = AcceptDialog.new()
-	dialog.title = "Settings"
-	dialog.dialog_text = "Settings coming soon.\n\nPlanned: Volume sliders, difficulty, key bindings."
-	dialog.confirmed.connect(func() -> void: dialog.queue_free())
-	dialog.canceled.connect(func() -> void: dialog.queue_free())
-	add_child(dialog)
-	dialog.popup_centered()
+	get_tree().change_scene_to_file("res://scenes/ui/SettingsMenu.tscn")
 
 func _on_quit() -> void:
 	get_tree().quit()
