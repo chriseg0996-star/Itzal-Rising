@@ -116,19 +116,23 @@ func _attack() -> void:
 		return
 	if _target == null or not is_instance_valid(_target):
 		return
+	# Player-side units carry the match's attack research bonus.
+	var dmg: float = attack_damage
+	if _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id"))):
+		dmg += GameStats.player_atk_bonus()
 	var stat: Node = _target.get_node_or_null("StatComponent")
 	if stat != null and stat.has_method("take_damage"):
 		_cooldown_timer = attack_cooldown
 		attack_started.emit(_target)
-		stat.take_damage(attack_damage)
-		attack_landed.emit(_target, attack_damage)
+		stat.take_damage(dmg)
+		attack_landed.emit(_target, dmg)
 		_spawn_impact(_target.global_position)
 	elif _target.has_method("take_damage"):
 		# Buildings carry hp on the node itself (building.gd), no StatComponent.
 		_cooldown_timer = attack_cooldown
 		attack_started.emit(_target)
-		_target.take_damage(int(attack_damage))
-		attack_landed.emit(_target, attack_damage)
+		_target.take_damage(int(dmg))
+		attack_landed.emit(_target, dmg)
 		_spawn_impact(_target.global_position)
 
 func _is_unit_dead(unit: Node) -> bool:
