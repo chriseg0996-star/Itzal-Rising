@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_MON"]
+size = Vector2(64, 80)
+
+[node name="Monument" type="Node2D"]
+script = ExtResource("1_bldg_script")
+building_name = "Monument"
+max_hp = 600
+sprite_asset = "monument"
+faction_id = 0
+
+[node name="Sprite" type="ColorRect" parent="."]
+visible = false
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+color = Color(0.1, 0.11, 0.14, 1)
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_MON")

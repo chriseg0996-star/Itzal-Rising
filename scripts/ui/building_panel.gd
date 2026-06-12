@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var _barracks_btn: Button = $BottomBar/Margin/HBox/BarracksBtn
 @onready var _tc_btn: Button = $BottomBar/Margin/HBox/TCBtn
 @onready var _tower_btn: Button = $BottomBar/Margin/HBox/TowerBtn
+@onready var _monument_btn: Button = $BottomBar/Margin/HBox/MonumentBtn
 
 var _selected_building: Node = null
 
@@ -20,6 +21,7 @@ func _ready() -> void:
 	_barracks_btn.pressed.connect(func(): BuildingPlacer.start_placement("barracks"))
 	_tc_btn.pressed.connect(func(): BuildingPlacer.start_placement("tc"))
 	_tower_btn.pressed.connect(func(): BuildingPlacer.start_placement("tower"))
+	_monument_btn.pressed.connect(func(): BuildingPlacer.start_placement("monument"))
 	_train_btn.pressed.connect(func(): _try_train(0))
 	_train2_btn.pressed.connect(func(): _try_train(1))
 	_research_atk_btn.pressed.connect(func(): _try_research("atk"))

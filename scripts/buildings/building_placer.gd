@@ -5,6 +5,7 @@ const MAP_BOUNDS: Rect2 = Rect2(0, 0, 2048, 2048)
 const ACTION_BARRACKS: StringName = &"build_barracks"
 const ACTION_TC: StringName = &"build_town_center"
 const ACTION_TOWER: StringName = &"build_tower"
+const ACTION_MONUMENT: StringName = &"build_monument"
 
 const BUILDING_DATA: Dictionary = {
 	"tc": {
@@ -19,6 +20,10 @@ const BUILDING_DATA: Dictionary = {
 		"size": Vector2(48, 48),
 		"cost": {"madera": 150, "oro": 50},
 	},
+	"monument": {
+		"size": Vector2(64, 64),
+		"cost": {"madera": 400, "oro": 300},
+	},
 }
 
 ## Faction-routed building scenes. The one acceptable hardcoded-path location:
@@ -29,16 +34,19 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"tc": "res://scenes/buildings/TownCenter.tscn",
 		&"barracks": "res://scenes/buildings/Barracks.tscn",
 		&"tower": "res://scenes/buildings/Tower.tscn",
+		&"monument": "res://scenes/buildings/Monument.tscn",
 	},
 	1: {
 		&"tc": "res://scenes/buildings/EnemyTownCenter.tscn",
 		&"barracks": "res://scenes/buildings/EnemyBarracks.tscn",
 		&"tower": "res://scenes/buildings/EnemyTower.tscn",
+		&"monument": "res://scenes/buildings/Monument.tscn",
 	},
 	2: {
 		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
 		&"barracks": "res://scenes/buildings/IxBarracks.tscn",
 		&"tower": "res://scenes/buildings/IxTower.tscn",
+		&"monument": "res://scenes/buildings/Monument.tscn",
 	},
 }
 
@@ -110,6 +118,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		start_placement("tower")
 		get_viewport().set_input_as_handled()
 		return
+	if event.is_action_pressed(ACTION_MONUMENT):
+		start_placement("monument")
+		get_viewport().set_input_as_handled()
+		return
 	if not is_placing():
 		return
 	if event is InputEventMouseButton:
@@ -141,6 +153,9 @@ func _try_place() -> void:
 		return
 	ResourceManager.spend(cost, GameSettings.player_faction_id)
 	var building: Node = packed.instantiate()
+	# Faction-shared scenes (Monument) need the owner stamped before _ready
+	# derives groups; per-faction scenes already carry it baked — no-op there.
+	building.set("faction_id", GameSettings.player_faction_id)
 	var target_parent: Node = get_tree().current_scene
 	if target_parent == null:
 		return

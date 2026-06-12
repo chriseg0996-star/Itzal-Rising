@@ -40,6 +40,8 @@ func _create_image(asset: String) -> Image:
 			return _make_barracks(Color(0.36, 0.17, 0.44), Color(0.25, 0.10, 0.30), Color(0.18, 0.05, 0.22), Color(0.45, 0.30, 0.50))
 		"tower":
 			return _make_tower()
+		"monument":
+			return _make_monument()
 		"menu_bg":
 			return _make_gradient(Color(0.039, 0.051, 0.078, 1), Color(0.106, 0.129, 0.188, 1), 128, 256)
 	return _make_blank()
@@ -192,6 +194,30 @@ func _make_barracks(wall: Color, accent: Color, door: Color, window: Color) -> I
 	img.fill_rect(Rect2i(56, 28, 10, 10), window)
 	img.fill_rect(Rect2i(6, 68, 6, 4), accent)
 	img.fill_rect(Rect2i(68, 68, 6, 4), accent)
+	return img
+
+func _make_monument() -> Image:
+	var img: Image = Image.create(64, 96, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var basalt: Color = Color(0.10, 0.11, 0.14)
+	var basalt_dark: Color = Color(0.06, 0.07, 0.09)
+	var glyph: Color = Color(0.0, 0.90, 0.78)
+	# Stepped base
+	img.fill_rect(Rect2i(8, 84, 48, 10), basalt_dark)
+	img.fill_rect(Rect2i(14, 76, 36, 10), basalt)
+	# Obelisk column, tapering to a point
+	for y in range(8, 78):
+		var t: float = float(y - 8) / 70.0
+		var half: int = 4 + int(t * 10.0)
+		for x in range(32 - half, 32 + half):
+			img.set_pixel(x, y, basalt if ((x + y) % 9) > 0 else basalt_dark)
+	# Neon glyph bands
+	for band_y in [24, 44, 64]:
+		var t: float = float(band_y - 8) / 70.0
+		var half: int = 3 + int(t * 9.0)
+		img.fill_rect(Rect2i(32 - half, band_y, half * 2, 3), glyph)
+	# Glowing apex
+	img.fill_rect(Rect2i(30, 4, 4, 6), glyph)
 	return img
 
 func _make_tower() -> Image:
