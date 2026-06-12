@@ -98,6 +98,17 @@ theme_override_styles/hover = SubResource("BtnHover")
 theme_override_styles/pressed = SubResource("BtnHover")
 theme_override_styles/focus = SubResource("BtnHover")
 
+[node name="ControlsBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(220, 44)
+text = "Controls"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
+
 [node name="ExitBtn" type="Button" parent="Center/Panel/Margin/VBox"]
 custom_minimum_size = Vector2(220, 44)
 text = "Exit to Main Menu"
