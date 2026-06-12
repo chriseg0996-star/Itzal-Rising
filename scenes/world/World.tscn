@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://d8w3r5y6q1n2v"]
+[gd_scene load_steps=28 format=3 uid="uid://d8w3r5y6q1n2v"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/Ground.tscn" id="1_ground"]
 [ext_resource type="PackedScene" path="res://scenes/camera/RTSCamera.tscn" id="2_camscn"]
@@ -24,6 +24,7 @@
 [ext_resource type="Script" path="res://scripts/world/map_loader.gd" id="22_maploader"]
 [ext_resource type="Script" path="res://scripts/world/decay_spawner.gd" id="23_decayspawn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/AbilityPanel.tscn" id="25_abilp"]
+[ext_resource type="Script" path="res://scripts/world/fog_of_war.gd" id="26_fog"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemyVillager.tscn" id="24_evil"]
 
 [sub_resource type="NavigationPolygon" id="NavPoly_1"]
@@ -91,6 +92,9 @@ position = Vector2(1450, 1500)
 
 [node name="SelectionBox" type="Node2D" parent="."]
 script = ExtResource("4_sel")
+
+[node name="FogOfWar" type="Node2D" parent="."]
+script = ExtResource("26_fog")
 
 [node name="HUD" parent="." instance=ExtResource("6_hud")]
 
