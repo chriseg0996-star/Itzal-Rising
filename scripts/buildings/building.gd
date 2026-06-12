@@ -29,6 +29,9 @@ var queue: Array = []
 var production_timer: float = 0.0
 var attack_timer: float = 0.0
 var dying: bool = false
+var rally_point: Vector2 = Vector2.ZERO
+var has_rally_point: bool = false
+var _rally_marker: Node2D = null
 
 func _ready() -> void:
 	add_to_group("buildings")
@@ -123,6 +126,28 @@ func try_queue_training(slot: int = 0) -> bool:
 		production_timer = duration
 	return true
 
+## Persistent rally point: units finishing training walk here. The marker is a
+## child Node2D so it moves/dies with the building.
+func set_rally_point(world_pos: Vector2) -> void:
+	rally_point = world_pos
+	has_rally_point = true
+	if _rally_marker == null:
+		var marker := RallyMarker.new()
+		marker.z_index = 50
+		var fac: FactionData = FactionManager.get_faction(faction_id)
+		if fac != null:
+			marker.color = fac.primary_color
+		add_child(marker)
+		_rally_marker = marker
+	_rally_marker.position = world_pos - global_position
+	_rally_marker.queue_redraw()
+
+func clear_rally_point() -> void:
+	has_rally_point = false
+	if _rally_marker != null:
+		_rally_marker.queue_free()
+		_rally_marker = null
+
 func take_damage(amount: int) -> void:
 	if dying:
 		return
@@ -191,5 +216,18 @@ func _spawn_unit(scene: PackedScene) -> void:
 	parent.add_child(unit)
 	if unit is Node2D:
 		(unit as Node2D).global_position = global_position + SPAWN_OFFSET
+	if has_rally_point and unit.has_method("move_to"):
+		# Deferred so the unit's _ready/nav setup runs before the move order.
+		unit.call_deferred("move_to", rally_point)
 	if faction_id == FactionManager.PLAYER:
 		GameStats.units_trained += 1
+
+class RallyMarker extends Node2D:
+	var color: Color = Color(0.0, 0.85, 0.85, 1.0)
+
+	func _draw() -> void:
+		draw_line(Vector2.ZERO, Vector2(0, -18), color, 2.0, true)
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(0, -18), Vector2(12, -14), Vector2(0, -10),
+		]), color)
+		draw_circle(Vector2.ZERO, 3.0, color)

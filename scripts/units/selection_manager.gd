@@ -111,6 +111,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if mb.button_index != MOUSE_BUTTON_RIGHT or not mb.pressed:
 		return
 	var world_pos: Vector2 = _screen_to_world(mb.position)
+	# No units selected but a production building is: right-click sets its rally.
+	if selected.is_empty() and selected_building != null and is_instance_valid(selected_building) \
+			and selected_building.has_method("set_rally_point") and selected_building.has_train_slot(0) \
+			and FactionManager.is_player_faction(int(selected_building.get("faction_id"))):
+		selected_building.set_rally_point(world_pos.clamp(MAP_CLAMP_MIN, MAP_CLAMP_MAX))
+		get_viewport().set_input_as_handled()
+		return
 	var resource := _resource_at(world_pos)
 	if resource != null:
 		harvest_with_selected(resource)
