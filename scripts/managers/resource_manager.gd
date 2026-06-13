@@ -17,9 +17,9 @@ const _ALIASES: Dictionary = {
 }
 
 const _INITIAL: Dictionary = {
-	&"wood": 200,
-	&"food": 200,
-	&"gold": 100,
+	&"wood": 300,
+	&"food": 250,
+	&"gold": 150,
 }
 
 var _resources: Dictionary = {}

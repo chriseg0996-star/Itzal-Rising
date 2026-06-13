@@ -5,7 +5,7 @@ const ALERT_SLOTS: int = 5
 const PULSE_COOLDOWN: float = 2.0
 const PULSE_COLOR: Color = Color(0.85, 0.2, 0.15, 1.0)
 
-@export var max_population: int = 80
+@export var max_population: int = 120
 
 @onready var wood_label: Label = $TopBar/Margin/HBox/Wood/Label
 @onready var food_label: Label = $TopBar/Margin/HBox/Food/Label
