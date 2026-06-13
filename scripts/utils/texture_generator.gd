@@ -28,6 +28,8 @@ func _create_image(asset: String) -> Image:
 			return _make_archer()
 		"tree":
 			return _make_tree()
+		"berry":
+			return _make_berry()
 		"goldmine":
 			return _make_goldmine()
 		"town_center":
@@ -132,6 +134,30 @@ func _make_tree() -> Image:
 			if x >= 0 and x < 48:
 				var c: Color = mid_green if ((x * 3 + y * 5) % 7) < 3 else dark_green
 				img.set_pixel(x, y, c)
+	return img
+
+func _make_berry() -> Image:
+	var img: Image = Image.create(48, 48, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var leaf: Color = Color(0.18, 0.45, 0.20)
+	var leaf_dark: Color = Color(0.10, 0.32, 0.13)
+	var berry: Color = Color(0.82, 0.16, 0.28)
+	# Rounded bush
+	for y in range(14, 44):
+		var ny: float = float(y - 30) / 16.0
+		var w: int = int(18.0 * sqrt(max(0.0, 1.0 - ny * ny)))
+		for x in range(24 - w, 24 + w):
+			if x >= 0 and x < 48:
+				img.set_pixel(x, y, leaf if ((x * 3 + y * 5) % 7) < 4 else leaf_dark)
+	# Berry clusters
+	var spots: Array = [Vector2i(18, 24), Vector2i(28, 22), Vector2i(22, 30), Vector2i(31, 32), Vector2i(16, 34), Vector2i(26, 38)]
+	for s in spots:
+		for dx in range(2):
+			for dy in range(2):
+				var px: int = s.x + dx
+				var py: int = s.y + dy
+				if px >= 0 and px < 48 and py >= 0 and py < 48:
+					img.set_pixel(px, py, berry)
 	return img
 
 func _make_goldmine() -> Image:

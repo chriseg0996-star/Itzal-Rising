@@ -9,6 +9,7 @@ extends Node
 
 const TREE_SCENE: PackedScene = preload("res://scenes/world/ResourceNode.tscn")
 const GOLD_SCENE: PackedScene = preload("res://scenes/world/GoldMine.tscn")
+const FOOD_SCENE: PackedScene = preload("res://scenes/world/BerryBush.tscn")
 
 func _ready() -> void:
 	# Swap menu music for the match playlist (silent if the match folder is empty).
@@ -38,6 +39,8 @@ func _ready() -> void:
 		_spawn(TREE_SCENE, world, p as Vector2)
 	for p in cfg.get("extra_gold_mines", []) as Array:
 		_spawn(GOLD_SCENE, world, p as Vector2)
+	for p in cfg.get("food_nodes", []) as Array:
+		_spawn(FOOD_SCENE, world, p as Vector2)
 	var cam: Node = world.get_node_or_null("RTSCamera")
 	if cam != null and cam is Node2D:
 		# A Decay player starts at the enemy base — open the camera there.

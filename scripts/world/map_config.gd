@@ -26,8 +26,9 @@ const MAPS: Dictionary = {
 		"enemy_soldiers": [Vector2(1400, 1400), Vector2(1500, 1400), Vector2(1450, 1500)],
 		"trees": [Vector2(600, 500), Vector2(1200, 400), Vector2(800, 1100), Vector2(1500, 1300), Vector2(350, 1500)],
 		"gold_mines": [Vector2(900, 700), Vector2(1700, 900), Vector2(250, 1100)],
-		"extra_trees": [],
-		"extra_gold_mines": [],
+		"food_nodes": [Vector2(450, 380), Vector2(700, 650), Vector2(1750, 1500), Vector2(1450, 1750)],
+		"extra_trees": [Vector2(1000, 900), Vector2(450, 800)],
+		"extra_gold_mines": [Vector2(1300, 1100)],
 	},
 	"Sunken Reef": {
 		"ground_tint": Color(0.75, 0.92, 1.05, 1.0),
@@ -38,8 +39,9 @@ const MAPS: Dictionary = {
 		"enemy_soldiers": [Vector2(600, 1450), Vector2(700, 1450), Vector2(650, 1550)],
 		"trees": [Vector2(1400, 500), Vector2(900, 400), Vector2(1200, 1100), Vector2(500, 1300), Vector2(1700, 1500)],
 		"gold_mines": [Vector2(1500, 650), Vector2(350, 1300), Vector2(1100, 900)],
-		"extra_trees": [Vector2(300, 700), Vector2(1800, 1200)],
-		"extra_gold_mines": [],
+		"food_nodes": [Vector2(1600, 480), Vector2(1300, 700), Vector2(500, 1550), Vector2(750, 1400)],
+		"extra_trees": [Vector2(300, 700), Vector2(1800, 1200), Vector2(1000, 1000)],
+		"extra_gold_mines": [Vector2(800, 1100)],
 	},
 	"Azure Coast": {
 		"ground_tint": Color(0.85, 0.95, 1.1, 1.0),
@@ -50,8 +52,9 @@ const MAPS: Dictionary = {
 		"enemy_soldiers": [Vector2(1550, 900), Vector2(1600, 1000), Vector2(1550, 1150)],
 		"trees": [Vector2(700, 600), Vector2(700, 1400), Vector2(1200, 300), Vector2(1200, 1750), Vector2(1000, 1024)],
 		"gold_mines": [Vector2(450, 1300), Vector2(1650, 1450), Vector2(1024, 700)],
-		"extra_trees": [Vector2(350, 500), Vector2(1500, 600)],
-		"extra_gold_mines": [],
+		"food_nodes": [Vector2(420, 900), Vector2(620, 1100), Vector2(1620, 920), Vector2(1500, 1150)],
+		"extra_trees": [Vector2(350, 500), Vector2(1500, 600), Vector2(900, 1500)],
+		"extra_gold_mines": [Vector2(1024, 1350)],
 	},
 	"Volcanic Crags": {
 		"ground_tint": Color(1.1, 0.85, 0.8, 1.0),
@@ -63,7 +66,8 @@ const MAPS: Dictionary = {
 		# Lean wood (3 of the 5 baked trees survive), rich gold (4 mines).
 		"trees": [Vector2(800, 500), Vector2(500, 1000), Vector2(1300, 800)],
 		"gold_mines": [Vector2(550, 550), Vector2(1500, 1500), Vector2(1100, 1150)],
-		"extra_trees": [],
+		"food_nodes": [Vector2(400, 450), Vector2(620, 700), Vector2(1650, 1600), Vector2(1450, 1850)],
+		"extra_trees": [Vector2(950, 650), Vector2(1200, 1300)],
 		"extra_gold_mines": [Vector2(1450, 350)],
 	},
 }
