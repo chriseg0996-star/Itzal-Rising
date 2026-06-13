@@ -112,5 +112,9 @@ func _on_gui_input(event: InputEvent) -> void:
 	world_pos.y = clampf(world_pos.y, 0.0, WORLD_SIZE.y)
 	var cam: Node = get_tree().get_first_node_in_group("rts_camera")
 	if cam != null and cam is Camera2D:
-		(cam as Camera2D).global_position = world_pos
+		# Glide instead of snap; the camera's per-frame _clamp_to_world keeps
+		# every tweened frame inside the map bounds.
+		var tween := (cam as Camera2D).create_tween()
+		tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(cam, "global_position", world_pos, 0.25)
 	accept_event()
