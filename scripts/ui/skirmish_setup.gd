@@ -30,15 +30,15 @@ var _factions: Array[Dictionary] = [
 	{"id": 0, "name": "Itzal Resistance", "accent": Color(0.0, 0.90, 0.78, 1.0), "playable": true,
 	 "atk": "ATK ×1.0", "armor": "ARM +1", "hp": "HP ×1.0",
 	 "icon": "res://assets/ui/faction_itzal.png", "units": "res://assets/ui/units_itzal.png",
-	 "desc": "Balanced warriors of Itzal. Ability: Jaguar's Vigor (mass heal)."},
+	 "desc": "Balanced warriors of Itzal. Ability: Jaguar's Vigor (mass heal). Cavalry: Jaguar Rider. Tech: Jaguar Fury."},
 	{"id": 1, "name": "Enemy Decay", "accent": Color(0.65, 0.15, 0.90, 1.0), "playable": true,
 	 "atk": "ATK ×1.1", "armor": "ARM +0", "hp": "HP ×0.9",
 	 "icon": "res://assets/ui/faction_decay.png", "units": "res://assets/ui/units_decay.png",
-	 "desc": "Glass-cannon corruption. Ability: Corruption Burst (AoE damage)."},
+	 "desc": "Glass-cannon corruption. Ability: Corruption Burst (AoE). Cavalry: Decay Stalker. Tech: Blight Surge."},
 	{"id": 2, "name": "Ix Architects", "accent": Color(0.85, 0.60, 0.10, 1.0), "playable": true,
 	 "atk": "ATK ×1.15", "armor": "ARM +1", "hp": "HP ×1.0",
 	 "icon": "res://assets/ui/faction_ix.png", "units": "res://assets/ui/units_ix.png",
-	 "desc": "Elite obsidian-lattice strikers. Ability: Lattice Overcharge (armor surge)."},
+	 "desc": "Elite obsidian-lattice strikers. Ability: Lattice Overcharge (armor surge). Cavalry: Lattice Lancer. Tech: Lattice Charge. No archers."},
 ]
 
 var _difficulties: Array[Dictionary] = [
