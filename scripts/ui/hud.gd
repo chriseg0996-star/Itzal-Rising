@@ -2,6 +2,8 @@ extends CanvasLayer
 
 const POLL_INTERVAL: float = 1.0
 const ALERT_SLOTS: int = 5
+const PULSE_COOLDOWN: float = 2.0
+const PULSE_COLOR: Color = Color(0.85, 0.2, 0.15, 1.0)
 
 @export var max_population: int = 80
 
@@ -13,12 +15,15 @@ const ALERT_SLOTS: int = 5
 
 var _poll_timer: float = 0.0
 var _alert_labels: Array[Label] = []
+var _pulse_overlay: ColorRect = null
+var _pulse_cooldown: float = 0.0
 
 func _ready() -> void:
 	ResourceManager.resource_changed.connect(_on_resource_changed)
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	AlertManager.alert_pushed.connect(_on_alert_pushed)
 	AlertManager.alert_cleared.connect(_on_alert_cleared)
+	_build_pulse_overlay()
 	for i in range(ALERT_SLOTS):
 		var lbl: Label = _alert_box.get_node_or_null("Alert%d" % i) as Label
 		if lbl != null:
@@ -32,6 +37,26 @@ func _process(delta: float) -> void:
 	if _poll_timer >= POLL_INTERVAL:
 		_poll_timer = 0.0
 		_update_population()
+	if _pulse_cooldown > 0.0:
+		_pulse_cooldown -= delta
+
+## Full-screen red tint that blinks when the base is threatened. Sits behind
+## the rest of the HUD and ignores mouse input.
+func _build_pulse_overlay() -> void:
+	_pulse_overlay = ColorRect.new()
+	_pulse_overlay.color = Color(PULSE_COLOR.r, PULSE_COLOR.g, PULSE_COLOR.b, 0.0)
+	_pulse_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_pulse_overlay)
+	move_child(_pulse_overlay, 0)
+	_pulse_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+func _pulse_screen() -> void:
+	if _pulse_overlay == null or _pulse_cooldown > 0.0:
+		return
+	_pulse_cooldown = PULSE_COOLDOWN
+	var tween := create_tween()
+	tween.tween_property(_pulse_overlay, "color:a", 0.16, 0.2)
+	tween.tween_property(_pulse_overlay, "color:a", 0.0, 0.4)
 
 func _on_resource_changed(_type: StringName, _new_amount: int) -> void:
 	_refresh()
@@ -53,8 +78,10 @@ func _update_population() -> void:
 		col = Color(1.0, 0.33, 0.22, 1)
 	pop_label.add_theme_color_override("font_color", col)
 
-func _on_alert_pushed(_text: String, _level: String) -> void:
+func _on_alert_pushed(_text: String, level: String) -> void:
 	_refresh_alerts()
+	if level == "warning" or level == "error":
+		_pulse_screen()
 
 func _on_alert_cleared(_index: int) -> void:
 	_refresh_alerts()
