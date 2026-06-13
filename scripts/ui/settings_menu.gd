@@ -26,6 +26,7 @@ func _ready() -> void:
 	_build_title()
 	_build_panel()
 	_build_bottom_bar()
+	SoundManager.start_menu_music()
 
 func _build_title() -> void:
 	var title := Label.new()

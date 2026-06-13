@@ -13,14 +13,8 @@ func _process(_delta: float) -> bool:
 		return false
 	var sm: Node = root.get_node("/root/SoundManager")
 	var failed: bool = false
-	var paths: Dictionary = {}
 	for key in sm.SOUNDS:
-		paths[key] = sm.SOUNDS[key]
-	if "MUSIC_TRACKS" in sm:
-		for key in sm.get("MUSIC_TRACKS"):
-			paths["music:" + String(key)] = sm.get("MUSIC_TRACKS")[key]
-	for key in paths:
-		var path: String = String(paths[key])
+		var path: String = String(sm.SOUNDS[key])
 		if not ResourceLoader.exists(path):
 			print("FAIL missing: %s -> %s" % [key, path])
 			failed = true
@@ -35,6 +29,8 @@ func _process(_delta: float) -> bool:
 			failed = true
 	for key in sm.SOUNDS:
 		sm.play(String(key))
+	# Menu music: must not error with an empty (or populated) playlist folder.
+	sm.start_menu_music()
 	if failed:
 		print("GATE_AUDIO_FAIL")
 		quit(1)

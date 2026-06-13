@@ -19,6 +19,7 @@ func _ready() -> void:
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
 	_build_continue_button()
+	SoundManager.start_menu_music()
 
 ## CONTINUE is code-built bottom-left so it never collides with the painted
 ## center-stack buttons (anchors .398-.601 x .381-.735). Only shown when a

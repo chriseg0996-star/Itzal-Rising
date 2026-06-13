@@ -73,6 +73,7 @@ func _ready() -> void:
 	_refresh_faction_styles()
 	_refresh_difficulty_styles()
 	_update_map_preview()
+	SoundManager.start_menu_music()
 
 # ---------------------------------------------------------------------------
 # Title

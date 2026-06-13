@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Generate the game's procedural SFX pack (and optional ambient music loop).
+"""Generate the game's procedural SFX pack.
 
 Synthesizes short 16-bit mono WAVs with numpy + stdlib wave — no external
 audio assets or downloads. Output paths match SoundManager.SOUNDS.
 
-Usage:  python tools/make_sfx.py            # the 7 SFX into assets/sfx/
-        python tools/make_sfx.py --ambient  # also assets/music/ambient_loop.wav
+Music is NOT generated here: it is real files the user drops into
+assets/music/menu/ (synthesized music hit a quality ceiling). SFX only.
+
+Usage:  python tools/make_sfx.py   # the 7 SFX into assets/sfx/
 """
 
 from __future__ import annotations
 
-import sys
 import wave
 from pathlib import Path
 
@@ -18,7 +19,6 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 SFX_DIR = ROOT / "assets" / "sfx"
-MUSIC_DIR = ROOT / "assets" / "music"
 SR = 44100
 
 
@@ -92,64 +92,5 @@ def make_sfx() -> None:
     write_wav(SFX_DIR / "resource_gather.wav", np.concatenate([tick1, gap, tick2]))
 
 
-def make_ambient() -> None:
-    """~96s seamless ambient piece (not a drone): a slow 8-chord pad
-    progression in A minor with 2s equal-power crossfades, a quiet sub root,
-    and sparse pentatonic bell plucks. Everything is written circularly
-    (indices wrap modulo n), so the loop point is continuous."""
-    sr = 22050
-    dur = 96.0
-    n = int(dur * sr)
-    sig = np.zeros(n)
-    rng = np.random.default_rng(42)
-
-    # Am F C G Am C F Em — root + third + fifth (Hz)
-    chords = [
-        [110.0, 130.8, 164.8],
-        [87.3, 110.0, 130.8],
-        [130.8, 164.8, 196.0],
-        [98.0, 123.5, 146.8],
-        [110.0, 130.8, 164.8],
-        [130.8, 164.8, 196.0],
-        [87.3, 110.0, 130.8],
-        [82.4, 98.0, 123.5],
-    ]
-    seg = n // len(chords)
-    xfade = int(2.0 * sr)
-    for ci, chord in enumerate(chords):
-        length = seg + xfade
-        tt = np.arange(length) / sr
-        win = np.ones(length)
-        win[:xfade] = 0.5 - 0.5 * np.cos(np.pi * np.arange(xfade) / xfade)
-        win[-xfade:] = 0.5 + 0.5 * np.cos(np.pi * np.arange(xfade) / xfade)
-        wave = np.zeros(length)
-        for f in chord:
-            phase = rng.uniform(0.0, 2.0 * np.pi)
-            wave += 0.10 * np.sin(2 * np.pi * f * tt + phase)
-            wave += 0.07 * np.sin(2 * np.pi * f * 1.004 * tt + phase * 0.7)
-        wave += 0.09 * np.sin(2 * np.pi * (chord[0] / 2.0) * tt)  # sub root
-        idx = (ci * seg + np.arange(length)) % n
-        sig[idx] += wave * win
-
-    # Sparse bell plucks on the A minor pentatonic, ~1 every 3s.
-    penta = [220.0, 261.6, 293.7, 329.6, 392.0, 440.0]
-    for t0 in np.sort(rng.uniform(0.0, dur, 30)):
-        f = penta[int(rng.integers(len(penta)))]
-        plen = int(2.5 * sr)
-        tt = np.arange(plen) / sr
-        env = np.exp(-2.2 * tt)
-        bell = (
-            np.sin(2 * np.pi * f * tt)
-            + 0.35 * np.sin(2 * np.pi * 2.0 * f * tt)
-            + 0.15 * np.sin(2 * np.pi * 3.01 * f * tt)
-        ) * env
-        idx = (int(t0 * sr) + np.arange(plen)) % n
-        sig[idx] += 0.16 * bell
-
-    write_wav(MUSIC_DIR / "ambient_loop.wav", sig, sr)
-
-
 if __name__ == "__main__":
     make_sfx()
-    if "--ambient" in sys.argv:
-        make_ambient()

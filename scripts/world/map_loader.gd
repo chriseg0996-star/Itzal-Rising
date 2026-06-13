@@ -11,6 +11,8 @@ const TREE_SCENE: PackedScene = preload("res://scenes/world/ResourceNode.tscn")
 const GOLD_SCENE: PackedScene = preload("res://scenes/world/GoldMine.tscn")
 
 func _ready() -> void:
+	# Matches are SFX-only; silence any menu track as the world loads.
+	SoundManager.stop_music()
 	var cfg: Dictionary = MapConfig.get_map(GameSettings.selected_map)
 	var world: Node = get_parent()
 	if world == null:
