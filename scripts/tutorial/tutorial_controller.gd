@@ -28,6 +28,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_panel()
 	_refresh_text()
+	# Snappier advance on the selection step.
+	SelectionManager.selection_changed.connect(_on_selection_changed)
 
 func _build_panel() -> void:
 	var sb := StyleBoxFlat.new()
@@ -80,7 +82,12 @@ func _process(delta: float) -> void:
 	if _is_step_done(STEPS[_step]["id"]):
 		_advance()
 
+func _on_selection_changed(_units: Array) -> void:
+	if _label != null and _is_step_done(STEPS[_step]["id"]):
+		_advance()
+
 func _advance() -> void:
+	_flash_done()
 	if _step >= STEPS.size() - 1:
 		_finish()
 		return
@@ -91,10 +98,50 @@ func _refresh_text() -> void:
 	if _label != null:
 		_label.text = String(STEPS[_step]["text"])
 
+func _flash_done() -> void:
+	if _label == null:
+		return
+	_label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.5, 1.0))
+	var tw := create_tween()
+	tw.tween_callback(func() -> void:
+		if _label != null:
+			_label.add_theme_color_override("font_color", Color(0.95, 0.97, 0.98, 1.0))
+	).set_delay(0.25)
+
 func _finish() -> void:
 	ProfileManager.clear_first_run()
 	queue_free()
 
-## Per-step completion checks against live game state. Implemented in D3.
-func _is_step_done(_step_id: String) -> bool:
+## Per-step completion checks against live game state.
+func _is_step_done(step_id: String) -> bool:
+	match step_id:
+		"select":
+			for u in SelectionManager.selected:
+				if is_instance_valid(u) and u.is_in_group("villagers"):
+					return true
+			return false
+		"gather":
+			for v in get_tree().get_nodes_in_group("villagers"):
+				if is_instance_valid(v) and FactionManager.is_player_faction(int(v.get("faction_id"))) \
+						and v.has_method("is_harvesting") and v.is_harvesting():
+					return true
+			return false
+		"barracks":
+			return _player_has_building("Barracks")
+		"train":
+			return GameStats.units_trained >= 1
+		"ability":
+			var ap: Node = get_tree().get_first_node_in_group("ability_panel")
+			return ap != null and ap.has_method("get_cooldown") and ap.get_cooldown() > 0.0
+		"done":
+			return true
+	return false
+
+func _player_has_building(building_name: String) -> bool:
+	for b in get_tree().get_nodes_in_group("buildings"):
+		if not is_instance_valid(b):
+			continue
+		if String(b.get("building_name")) == building_name \
+				and FactionManager.is_player_faction(int(b.get("faction_id"))):
+			return true
 	return false
