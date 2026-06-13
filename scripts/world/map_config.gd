@@ -12,9 +12,14 @@ const DEFAULT_MAP: String = "Jungle Basin"
 ## (enemy_tc - this) relocates the whole base while children keep relative pos.
 const DEFAULT_ENEMY_TC: Vector2 = Vector2(1600, 1600)
 
+## Biome ground texture per map (tiled by the Ground Sprite2D). Falls back to
+## grass for unknown maps (e.g. campaign missions reusing a base map name).
+const DEFAULT_GROUND_TEXTURE: String = "res://assets/terrain/grass.png"
+
 const MAPS: Dictionary = {
 	"Jungle Basin": {
 		"ground_tint": Color(1.0, 1.0, 1.0, 1.0),
+		"ground_texture": "res://assets/terrain/grass.png",
 		"player_start": Vector2(300, 500),
 		"villagers": [Vector2(200, 200), Vector2(300, 200), Vector2(400, 200)],
 		"enemy_tc": Vector2(1600, 1600),
@@ -25,7 +30,8 @@ const MAPS: Dictionary = {
 		"extra_gold_mines": [],
 	},
 	"Sunken Reef": {
-		"ground_tint": Color(0.55, 0.85, 1.05, 1.0),
+		"ground_tint": Color(0.75, 0.92, 1.05, 1.0),
+		"ground_texture": "res://assets/terrain/sand_reef.png",
 		"player_start": Vector2(1700, 350),
 		"villagers": [Vector2(1600, 200), Vector2(1700, 200), Vector2(1800, 200)],
 		"enemy_tc": Vector2(420, 1650),
@@ -36,7 +42,8 @@ const MAPS: Dictionary = {
 		"extra_gold_mines": [],
 	},
 	"Azure Coast": {
-		"ground_tint": Color(0.70, 0.90, 1.15, 1.0),
+		"ground_tint": Color(0.85, 0.95, 1.1, 1.0),
+		"ground_texture": "res://assets/terrain/azure_coast.png",
 		"player_start": Vector2(280, 1024),
 		"villagers": [Vector2(180, 860), Vector2(280, 860), Vector2(380, 860)],
 		"enemy_tc": Vector2(1750, 1050),
@@ -47,7 +54,8 @@ const MAPS: Dictionary = {
 		"extra_gold_mines": [],
 	},
 	"Volcanic Crags": {
-		"ground_tint": Color(1.15, 0.72, 0.55, 1.0),
+		"ground_tint": Color(1.1, 0.85, 0.8, 1.0),
+		"ground_texture": "res://assets/terrain/volcanic.png",
 		"player_start": Vector2(300, 300),
 		"villagers": [Vector2(200, 450), Vector2(300, 470), Vector2(400, 450)],
 		"enemy_tc": Vector2(1720, 1720),

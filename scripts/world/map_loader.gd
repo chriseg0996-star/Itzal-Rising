@@ -30,6 +30,10 @@ func _ready() -> void:
 	var ground: Node = world.get_node_or_null("Ground")
 	if ground != null and ground is CanvasItem:
 		(ground as CanvasItem).modulate = cfg.get("ground_tint", Color.WHITE) as Color
+	if ground != null and ground is Sprite2D:
+		var tex_path: String = String(cfg.get("ground_texture", MapConfig.DEFAULT_GROUND_TEXTURE))
+		if ResourceLoader.exists(tex_path):
+			(ground as Sprite2D).texture = load(tex_path)
 	for p in cfg.get("extra_trees", []) as Array:
 		_spawn(TREE_SCENE, world, p as Vector2)
 	for p in cfg.get("extra_gold_mines", []) as Array:
