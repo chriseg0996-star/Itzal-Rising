@@ -181,6 +181,7 @@ armor = 2.0
 script = ExtResource("3_combat")
 attack_range = 160.0
 aggro_range = 350.0
+unit_class = &"ranged"
 
 [node name="MovementComponent" type="Node" parent="."]
 script = ExtResource("4_move")

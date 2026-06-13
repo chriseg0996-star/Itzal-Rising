@@ -10,11 +10,16 @@ enum State { IDLE, CHASING, ATTACKING }
 ## instant hitscan — archers/ranged read as ranged; melee stays instant.
 const RANGED_THRESHOLD: float = 120.0
 
+## Rock-paper-scissors: each class deals COUNTER_MULT vs the class it counters.
+const COUNTERS: Dictionary = {&"cavalry": &"ranged", &"ranged": &"infantry", &"infantry": &"cavalry"}
+const COUNTER_MULT: float = 1.5
+
 @export var aggro_range: float = 250.0
 @export var attack_damage: float = 10.0
 @export var attack_range: float = 80.0
 @export var attack_cooldown: float = 1.0
 @export var scan_interval: float = 0.3
+@export var unit_class: StringName = &"infantry"
 ## Broad group scanned for candidates; hostility is decided by FactionManager.
 @export var scan_group: String = "combat_units"
 
@@ -124,6 +129,10 @@ func _attack() -> void:
 	var dmg: float = attack_damage
 	if _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id"))):
 		dmg += GameStats.player_atk_bonus()
+	# Rock-paper-scissors counter bonus vs the class this unit counters.
+	var is_counter: bool = COUNTERS.get(unit_class, &"") == _target_class(_target)
+	if is_counter:
+		dmg *= COUNTER_MULT
 	# Ranged: launch a projectile that applies the damage on impact. We must NOT
 	# also apply damage or spawn an impact here — the projectile owns both.
 	if attack_range > RANGED_THRESHOLD:
@@ -151,6 +160,16 @@ func _attack() -> void:
 		_target.take_damage(int(dmg))
 		attack_landed.emit(_target, dmg)
 		_spawn_impact(_target.global_position)
+
+## The combat class of a target, or &"none" if it has no CombatComponent
+## (workers, buildings) — those are never countered.
+func _target_class(target: Node) -> StringName:
+	if target == null or not is_instance_valid(target):
+		return &"none"
+	var cc: Node = target.get_node_or_null("CombatComponent")
+	if cc != null:
+		return StringName(cc.get("unit_class"))
+	return &"none"
 
 func _is_unit_dead(unit: Node) -> bool:
 	var stat: Node = unit.get_node_or_null("StatComponent")
