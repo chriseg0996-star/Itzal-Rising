@@ -70,6 +70,7 @@ var production_timer: float = 0.0
 var attack_timer: float = 0.0
 var dying: bool = false
 var _food_accum: float = 0.0
+var _damage_reduction: float = 0.0
 var rally_point: Vector2 = Vector2.ZERO
 var has_rally_point: bool = false
 var _rally_marker: Node2D = null
@@ -234,15 +235,31 @@ func clear_rally_point() -> void:
 func take_damage(amount: int) -> void:
 	if dying:
 		return
-	hp = max(0, hp - amount)
+	# Aegis shield (Ix ability) reduces incoming damage while active.
+	var actual: int = maxi(int(round(float(amount) * (1.0 - _damage_reduction))), 1)
+	hp = max(0, hp - actual)
 	SoundManager.play("building_hit", -8.0)
 	_flash_hit()
 	queue_redraw()
-	DamageNumbers.spawn(get_tree().current_scene, float(amount), global_position + Vector2(0, HP_BAR_Y), Color(0.95, 0.95, 0.95))
+	DamageNumbers.spawn(get_tree().current_scene, float(actual), global_position + Vector2(0, HP_BAR_Y), Color(0.95, 0.95, 0.95))
 	if FactionManager.is_player_faction(faction_id):
 		building_damaged.emit(self)
 	if hp <= 0:
 		_die()
+
+## Ability hook: restore HP up to the maximum.
+func repair(amount: int) -> void:
+	if dying:
+		return
+	hp = mini(hp + amount, max_hp)
+	queue_redraw()
+
+## Ability hook: temporary incoming-damage reduction (0..0.95) for `duration`.
+func apply_shield(reduction: float, duration: float) -> void:
+	_damage_reduction = clampf(reduction, 0.0, 0.95)
+	await get_tree().create_timer(duration).timeout
+	if is_instance_valid(self):
+		_damage_reduction = 0.0
 
 ## Brief white flash on hit (mirrors villager.gd _flash_hit). modulate is an
 ## independent channel from the fog's visibility writes, so they don't fight.
