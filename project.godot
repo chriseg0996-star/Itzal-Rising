@@ -31,6 +31,7 @@ EnemyAI="*res://scripts/ai/enemy_ai.gd"
 SoundManager="*res://scripts/managers/sound_manager.gd"
 SaveManager="*res://scripts/managers/save_manager.gd"
 ProfileManager="*res://scripts/managers/profile_manager.gd"
+ActiveMission="*res://scripts/campaign/active_mission.gd"
 
 [display]
 
