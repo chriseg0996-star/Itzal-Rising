@@ -15,6 +15,7 @@ var monument_time_left: float = 0.0
 var _alert_60_sent: bool = false
 var _alert_10_sent: bool = false
 var _monument_label: Label = null
+var _campaign_btn: Button = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -133,8 +134,41 @@ func _show(text: String) -> void:
 	if won and bool(_match_deltas.get("new_best", false)):
 		summary += "\n★ NEW BEST TIME on %s!" % GameSettings.selected_map
 	stats_label.text = summary
+	_setup_campaign_button(won)
 	visible = true
 	game_over = true
+
+## In a campaign mission, unlock the next mission on a win and offer a Next /
+## Retry button alongside Restart/Menu. No-op in plain skirmish.
+func _setup_campaign_button(won: bool) -> void:
+	if _campaign_btn != null:
+		_campaign_btn.queue_free()
+		_campaign_btn = null
+	if not ActiveMission.is_active():
+		return
+	var mid: String = ActiveMission.current_id
+	var label: String = ""
+	var target: String = ""
+	if won:
+		ProfileManager.mark_mission_cleared(mid)
+		var nxt: String = MissionConfig.next_id(mid)
+		if nxt != "":
+			label = "Next Mission"
+			target = nxt
+		else:
+			title.text = "CAMPAIGN COMPLETE"
+	else:
+		label = "Retry Mission"
+		target = mid
+	if label == "":
+		return
+	_campaign_btn = restart_btn.duplicate()
+	_campaign_btn.text = label
+	restart_btn.get_parent().add_child(_campaign_btn)
+	restart_btn.get_parent().move_child(_campaign_btn, restart_btn.get_index())
+	_campaign_btn.pressed.connect(func() -> void:
+		visible = false
+		MissionLoader.start(target))
 
 func _on_restart() -> void:
 	get_tree().paused = false
@@ -156,4 +190,5 @@ func _on_restart() -> void:
 
 func _on_menu() -> void:
 	get_tree().paused = false
+	ActiveMission.clear()
 	get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
