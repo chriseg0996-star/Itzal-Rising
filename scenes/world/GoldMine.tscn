@@ -8,7 +8,7 @@ size = Vector2(48, 48)
 [node name="GoldMine" type="Node2D"]
 script = ExtResource("1_res_script")
 resource_type = "oro"
-amount = 200
+amount = 2000
 sprite_asset = "goldmine"
 
 [node name="Sprite" type="ColorRect" parent="."]
