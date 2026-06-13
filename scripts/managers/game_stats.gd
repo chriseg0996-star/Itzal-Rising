@@ -9,6 +9,12 @@ var game_time: float = 0.0
 var units_trained: int = 0
 var resources_gathered: int = 0
 
+## Combat tallies (player's perspective): hostiles killed, own units lost,
+## enemy buildings razed.
+var enemies_killed: int = 0
+var units_lost: int = 0
+var buildings_destroyed: int = 0
+
 ## Per-match research levels (player side only), keyed by research id.
 var atk_level: int = 0
 var armor_level: int = 0
@@ -18,6 +24,9 @@ func reset() -> void:
 	game_time = 0.0
 	units_trained = 0
 	resources_gathered = 0
+	enemies_killed = 0
+	units_lost = 0
+	buildings_destroyed = 0
 	atk_level = 0
 	armor_level = 0
 	cavalry_level = 0

@@ -97,6 +97,9 @@ func _apply(data: Dictionary) -> void:
 	GameStats.game_time = float(stats.get("game_time", 0.0))
 	GameStats.units_trained = int(stats.get("units_trained", 0))
 	GameStats.resources_gathered = int(stats.get("resources_gathered", 0))
+	GameStats.enemies_killed = int(stats.get("enemies_killed", 0))
+	GameStats.units_lost = int(stats.get("units_lost", 0))
+	GameStats.buildings_destroyed = int(stats.get("buildings_destroyed", 0))
 	GameStats.atk_level = int(stats.get("atk_level", 0))
 	GameStats.armor_level = int(stats.get("armor_level", 0))
 	GameStats.cavalry_level = int(stats.get("cavalry_level", 0))
@@ -215,6 +218,9 @@ func _snapshot() -> Dictionary:
 			"game_time": GameStats.game_time,
 			"units_trained": GameStats.units_trained,
 			"resources_gathered": GameStats.resources_gathered,
+			"enemies_killed": GameStats.enemies_killed,
+			"units_lost": GameStats.units_lost,
+			"buildings_destroyed": GameStats.buildings_destroyed,
 			"atk_level": GameStats.atk_level,
 			"armor_level": GameStats.armor_level,
 			"cavalry_level": GameStats.cavalry_level,
