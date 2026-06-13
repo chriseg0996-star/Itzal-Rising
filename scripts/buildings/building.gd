@@ -23,6 +23,14 @@ const RESEARCH: Dictionary = {
 			{"cost": {"madera": 200, "oro": 250}, "duration": 30.0},
 		],
 	},
+	# Signature tech: a single powerful cavalry-charge upgrade (faction-flavoured
+	# name in the UI). One tier.
+	"cavalry": {
+		"label": "Cavalry Charge",
+		"levels": [
+			{"cost": {"madera": 150, "oro": 150}, "duration": 25.0},
+		],
+	},
 }
 
 @export var building_name: String = "Building"

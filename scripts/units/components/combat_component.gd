@@ -125,10 +125,13 @@ func _attack() -> void:
 		return
 	if _target == null or not is_instance_valid(_target):
 		return
-	# Player-side units carry the match's attack research bonus.
+	# Player-side units carry the match's attack research bonus, and player
+	# cavalry the signature charge multiplier.
 	var dmg: float = attack_damage
 	if _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id"))):
 		dmg += GameStats.player_atk_bonus()
+		if unit_class == &"cavalry":
+			dmg *= GameStats.player_cavalry_mult()
 	# Rock-paper-scissors counter bonus vs the class this unit counters.
 	var is_counter: bool = COUNTERS.get(unit_class, &"") == _target_class(_target)
 	if is_counter:

@@ -11,6 +11,10 @@ extends CanvasLayer
 @onready var _research_label: Label = $SidePanel/Margin/VBox/ResearchLabel
 @onready var _research_atk_btn: Button = $SidePanel/Margin/VBox/ResearchAtkBtn
 @onready var _research_armor_btn: Button = $SidePanel/Margin/VBox/ResearchArmorBtn
+@onready var _research_cav_btn: Button = $SidePanel/Margin/VBox/ResearchCavalryBtn
+
+## Faction-flavoured name for the signature cavalry-charge tech.
+const SIGNATURE_NAME: Dictionary = {0: "Jaguar Fury", 1: "Blight Surge", 2: "Lattice Charge"}
 @onready var _barracks_btn: Button = $BottomBar/Margin/HBox/BarracksBtn
 @onready var _tc_btn: Button = $BottomBar/Margin/HBox/TCBtn
 @onready var _tower_btn: Button = $BottomBar/Margin/HBox/TowerBtn
@@ -27,6 +31,7 @@ func _ready() -> void:
 	_train2_btn.pressed.connect(func(): _try_train(1))
 	_train3_btn.pressed.connect(func(): _try_train(2))
 	_research_atk_btn.pressed.connect(func(): _try_research("atk"))
+	_research_cav_btn.pressed.connect(func(): _try_research("cavalry"))
 	_research_armor_btn.pressed.connect(func(): _try_research("armor"))
 	SelectionManager.building_selected.connect(show_building)
 	SelectionManager.building_deselected.connect(hide_building)
@@ -89,11 +94,14 @@ func _refresh_research(b: Node) -> void:
 	_research_label.visible = is_player_tc
 	_research_atk_btn.visible = is_player_tc
 	_research_armor_btn.visible = is_player_tc
+	_research_cav_btn.visible = is_player_tc
 	if not is_player_tc:
 		return
 	_research_label.text = "Upgrades: ATK %d / ARM %d" % [GameStats.atk_level, GameStats.armor_level]
 	_set_research_button(_research_atk_btn, "atk", "ATK", GameStats.atk_level, b)
 	_set_research_button(_research_armor_btn, "armor", "ARM", GameStats.armor_level, b)
+	var sig_name: String = SIGNATURE_NAME.get(GameSettings.player_faction_id, "Cavalry Charge")
+	_set_research_button(_research_cav_btn, "cavalry", sig_name, GameStats.cavalry_level, b)
 
 func _set_research_button(btn: Button, research_id: String, tag: String, level: int, b: Node) -> void:
 	var levels: Array = b.RESEARCH[research_id]["levels"]
