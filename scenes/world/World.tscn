@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://d8w3r5y6q1n2v"]
+[gd_scene load_steps=29 format=3 uid="uid://d8w3r5y6q1n2v"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/Ground.tscn" id="1_ground"]
 [ext_resource type="PackedScene" path="res://scenes/camera/RTSCamera.tscn" id="2_camscn"]
@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/AbilityPanel.tscn" id="25_abilp"]
 [ext_resource type="Script" path="res://scripts/world/fog_of_war.gd" id="26_fog"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemyVillager.tscn" id="24_evil"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TutorialController.tscn" id="27_tut"]
 
 [sub_resource type="NavigationPolygon" id="NavPoly_1"]
 vertices = PackedVector2Array(0, 0, 2048, 0, 2048, 2048, 0, 2048)
@@ -109,6 +110,8 @@ script = ExtResource("26_fog")
 [node name="CommandPanel" parent="." instance=ExtResource("15_cmdp")]
 
 [node name="AbilityPanel" parent="." instance=ExtResource("25_abilp")]
+
+[node name="TutorialController" parent="." instance=ExtResource("27_tut")]
 
 [node name="ProductionQueue" parent="." instance=ExtResource("16_prodq")]
 

@@ -54,6 +54,9 @@ func _build_list() -> void:
 	v.add_theme_constant_override("separation", 10)
 	panel.add_child(v)
 
+	# Always-available tutorial entry at the top.
+	v.add_child(_tutorial_row())
+
 	var prev_cleared: bool = true  # first mission is always available
 	for m in MissionConfig.MISSIONS:
 		var mid: String = String(m.get("id", ""))
@@ -84,6 +87,23 @@ func _mission_row(m: Dictionary, unlocked: bool, cleared: bool) -> Button:
 	if unlocked:
 		var mid: String = String(m.get("id", ""))
 		btn.pressed.connect(func() -> void: MissionLoader.start(mid))
+	return btn
+
+func _tutorial_row() -> Button:
+	var btn := Button.new()
+	btn.text = "▶  Tutorial — learn the basics"
+	btn.custom_minimum_size = Vector2(0, 44)
+	btn.add_theme_color_override("font_color", ACCENT)
+	btn.add_theme_color_override("font_hover_color", WHITE)
+	var nb := StyleBoxFlat.new()
+	nb.bg_color = Color(0.10, 0.13, 0.17, 0.9)
+	nb.set_corner_radius_all(3)
+	nb.set_border_width_all(1)
+	nb.border_color = PANEL_BORDER
+	nb.set_content_margin_all(8)
+	btn.add_theme_stylebox_override("normal", nb)
+	btn.add_theme_stylebox_override("hover", nb)
+	btn.pressed.connect(func() -> void: MissionLoader.start_tutorial())
 	return btn
 
 func _short(map_name: String) -> String:

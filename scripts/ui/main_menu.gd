@@ -21,6 +21,21 @@ func _ready() -> void:
 	_build_continue_button()
 	_build_campaign_button()
 	SoundManager.start_menu_music()
+	_maybe_offer_tutorial()
+
+## On a brand-new profile, offer the guided tutorial once.
+func _maybe_offer_tutorial() -> void:
+	if not ProfileManager.get_first_run():
+		return
+	var dialog := ConfirmationDialog.new()
+	dialog.title = "Welcome to Itzal Rising"
+	dialog.dialog_text = "New here? Play the guided tutorial to learn the basics."
+	dialog.ok_button_text = "Play Tutorial"
+	dialog.cancel_button_text = "Skip"
+	add_child(dialog)
+	dialog.confirmed.connect(func() -> void: MissionLoader.start_tutorial())
+	dialog.canceled.connect(func() -> void: ProfileManager.clear_first_run())
+	dialog.popup_centered()
 
 ## CAMPAIGN is code-built bottom-right, clear of the painted center-stack
 ## buttons (anchors .398-.601 x .381-.735) and the bottom-left CONTINUE.

@@ -17,6 +17,19 @@ func start(mission_id: String) -> void:
 	GameSettings.difficulty = String(m.get("difficulty", "normal"))
 	GameSettings.player_faction_id = int(m.get("faction_id", 0))
 	ActiveMission.set_mission(mission_id)
+	_reset_and_load()
+
+## Launches the guided tutorial on a fixed, gentle config. ActiveMission id
+## "tutorial" is not in MISSIONS (so no map modifier), and the TutorialController
+## node in World activates only for this id.
+func start_tutorial() -> void:
+	GameSettings.selected_map = "Jungle Basin"
+	GameSettings.difficulty = "easy"
+	GameSettings.player_faction_id = 0
+	ActiveMission.set_mission("tutorial")
+	_reset_and_load()
+
+func _reset_and_load() -> void:
 	ResourceManager.reset()
 	SelectionManager.clear()
 	SelectionManager.deselect_building()
