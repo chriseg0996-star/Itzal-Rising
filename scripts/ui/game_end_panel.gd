@@ -8,6 +8,8 @@ const MONUMENT_DURATION: float = 180.0
 
 var game_over: bool = false
 var player_had_tc: bool = false
+var _recorded: bool = false
+var _match_deltas: Dictionary = {}
 var monument_countdown_active: bool = false
 var monument_time_left: float = 0.0
 var _alert_60_sent: bool = false
@@ -109,6 +111,15 @@ func _find_player_tc() -> Node:
 func _show(text: String) -> void:
 	get_tree().paused = true
 	title.text = text
+	var won: bool = text.begins_with("VICTORY") or text.begins_with("MONUMENT")
+	if not _recorded:
+		_recorded = true
+		_match_deltas = ProfileManager.record_match(won, GameSettings.player_faction_id,
+			GameSettings.selected_map, GameStats.game_time, {
+				"enemies_killed": GameStats.enemies_killed,
+				"units_lost": GameStats.units_lost,
+				"buildings_destroyed": GameStats.buildings_destroyed,
+			})
 	stats_label.text = "Time: %s\nUnits trained: %d\nResources gathered: %d" % [
 		GameStats.format_time(),
 		GameStats.units_trained,
@@ -127,6 +138,8 @@ func _on_restart() -> void:
 	GameStats.reset()
 	game_over = false
 	player_had_tc = false
+	_recorded = false
+	_match_deltas = {}
 	monument_countdown_active = false
 	monument_time_left = 0.0
 	_monument_label.visible = false
