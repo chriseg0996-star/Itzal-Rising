@@ -13,7 +13,6 @@ const POLL: float = 0.25
 const UNIT_RADIUS: float = 280.0
 const BUILDING_RADIUS: float = 320.0
 const COL_UNEXPLORED: Color = Color(0.04, 0.05, 0.08, 1.0)
-const COL_EXPLORED: Color = Color(0.04, 0.05, 0.08, 0.55)
 ## Flip to true to neutralize fog entirely (debug).
 const DEBUG_DISABLE: bool = false
 
@@ -98,13 +97,13 @@ func _stamp(world_pos: Vector2, radius: float) -> void:
 func _draw() -> void:
 	if DEBUG_DISABLE:
 		return
+	# Only the never-seen darkness is drawn; once a cell is explored it stays
+	# fully clear (enemy units there still require live vision to show).
 	for cy in GRID:
 		for cx in GRID:
-			var state: int = _cells[cy * GRID + cx]
-			if state == VISIBLE_STATE:
+			if _cells[cy * GRID + cx] != UNEXPLORED:
 				continue
-			var col: Color = COL_UNEXPLORED if state == UNEXPLORED else COL_EXPLORED
-			draw_rect(Rect2(float(cx) * CELL, float(cy) * CELL, CELL, CELL), col)
+			draw_rect(Rect2(float(cx) * CELL, float(cy) * CELL, CELL, CELL), COL_UNEXPLORED)
 
 func get_cell_state(world_pos: Vector2) -> int:
 	if DEBUG_DISABLE:
