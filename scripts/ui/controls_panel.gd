@@ -16,9 +16,11 @@ const BINDINGS: Array[Array] = [
 	["B / T / Y", "Build Barracks / Town Center / Tower"],
 	["M", "Build Monument (hold 3:00 to win)"],
 	["E", "Faction ability"],
+	["Barracks", "Trains Soldier / Archer / Cavalry (counters: cavalry > ranged > infantry)"],
 	["Right click while placing", "Cancel placement"],
 	["Esc", "Pause"],
 	["F1", "Toggle this panel"],
+	["New here?", "Try the Tutorial from the Campaign menu"],
 ]
 
 func _ready() -> void:
