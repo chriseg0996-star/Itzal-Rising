@@ -6,6 +6,7 @@ const ACTION_BARRACKS: StringName = &"build_barracks"
 const ACTION_TC: StringName = &"build_town_center"
 const ACTION_TOWER: StringName = &"build_tower"
 const ACTION_MONUMENT: StringName = &"build_monument"
+const ACTION_FARM: StringName = &"build_farm"
 
 const BUILDING_DATA: Dictionary = {
 	"tc": {
@@ -24,6 +25,10 @@ const BUILDING_DATA: Dictionary = {
 		"size": Vector2(64, 64),
 		"cost": {"madera": 400, "oro": 300},
 	},
+	"farm": {
+		"size": Vector2(72, 64),
+		"cost": {"madera": 60},
+	},
 }
 
 ## Faction-routed building scenes. The one acceptable hardcoded-path location:
@@ -35,18 +40,21 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"barracks": "res://scenes/buildings/Barracks.tscn",
 		&"tower": "res://scenes/buildings/Tower.tscn",
 		&"monument": "res://scenes/buildings/Monument.tscn",
+		&"farm": "res://scenes/buildings/Farm.tscn",
 	},
 	1: {
 		&"tc": "res://scenes/buildings/EnemyTownCenter.tscn",
 		&"barracks": "res://scenes/buildings/EnemyBarracks.tscn",
 		&"tower": "res://scenes/buildings/EnemyTower.tscn",
 		&"monument": "res://scenes/buildings/Monument.tscn",
+		&"farm": "res://scenes/buildings/Farm.tscn",
 	},
 	2: {
 		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
 		&"barracks": "res://scenes/buildings/IxBarracks.tscn",
 		&"tower": "res://scenes/buildings/IxTower.tscn",
 		&"monument": "res://scenes/buildings/Monument.tscn",
+		&"farm": "res://scenes/buildings/Farm.tscn",
 	},
 }
 
@@ -120,6 +128,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(ACTION_MONUMENT):
 		start_placement("monument")
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed(ACTION_FARM):
+		start_placement("farm")
 		get_viewport().set_input_as_handled()
 		return
 	if not is_placing():

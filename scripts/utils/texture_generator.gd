@@ -44,6 +44,8 @@ func _create_image(asset: String) -> Image:
 			return _make_tower()
 		"monument":
 			return _make_monument()
+		"farm":
+			return _make_farm()
 		"menu_bg":
 			return _make_gradient(Color(0.039, 0.051, 0.078, 1), Color(0.106, 0.129, 0.188, 1), 128, 256)
 	return _make_blank()
@@ -220,6 +222,24 @@ func _make_barracks(wall: Color, accent: Color, door: Color, window: Color) -> I
 	img.fill_rect(Rect2i(56, 28, 10, 10), window)
 	img.fill_rect(Rect2i(6, 68, 6, 4), accent)
 	img.fill_rect(Rect2i(68, 68, 6, 4), accent)
+	return img
+
+func _make_farm() -> Image:
+	var img: Image = Image.create(64, 64, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var soil: Color = Color(0.40, 0.28, 0.16)
+	var soil_dark: Color = Color(0.30, 0.20, 0.11)
+	var crop: Color = Color(0.55, 0.72, 0.25)
+	# Tilled field with a wooden border
+	img.fill_rect(Rect2i(4, 8, 56, 50), soil)
+	for row in range(12, 56, 8):
+		img.fill_rect(Rect2i(8, row, 48, 3), soil_dark)
+		img.fill_rect(Rect2i(8, row - 2, 48, 2), crop)
+	# Border posts
+	img.fill_rect(Rect2i(2, 6, 60, 3), soil_dark)
+	img.fill_rect(Rect2i(2, 56, 60, 3), soil_dark)
+	img.fill_rect(Rect2i(2, 6, 3, 53), soil_dark)
+	img.fill_rect(Rect2i(59, 6, 3, 53), soil_dark)
 	return img
 
 func _make_monument() -> Image:

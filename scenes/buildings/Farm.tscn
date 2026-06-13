@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_FARM"]
+size = Vector2(72, 64)
+
+[node name="Farm" type="Node2D"]
+script = ExtResource("1_bldg_script")
+building_name = "Farm"
+max_hp = 200
+sprite_asset = "farm"
+faction_id = 0
+food_per_sec = 2.0
+
+[node name="Sprite" type="ColorRect" parent="."]
+visible = false
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+color = Color(0.4, 0.28, 0.16, 1)
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_FARM")

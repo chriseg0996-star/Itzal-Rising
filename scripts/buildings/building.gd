@@ -37,6 +37,8 @@ const RESEARCH: Dictionary = {
 @export var max_hp: int = 100
 @export var faction_id: int = 0
 @export var sprite_asset: String = ""
+## Passive food income per second (Farms). 0 = no income.
+@export var food_per_sec: float = 0.0
 
 @export var train_unit_scene: PackedScene
 @export var train_unit_label: String = "Unit"
@@ -67,6 +69,7 @@ var queue: Array = []
 var production_timer: float = 0.0
 var attack_timer: float = 0.0
 var dying: bool = false
+var _food_accum: float = 0.0
 var rally_point: Vector2 = Vector2.ZERO
 var has_rally_point: bool = false
 var _rally_marker: Node2D = null
@@ -274,6 +277,12 @@ func _die() -> void:
 func _process(delta: float) -> void:
 	if dying:
 		return
+	if food_per_sec > 0.0:
+		_food_accum += delta * food_per_sec
+		if _food_accum >= 1.0:
+			var whole: int = int(_food_accum)
+			_food_accum -= float(whole)
+			ResourceManager.add_resource("comida", whole, faction_id)
 	if attack_damage > 0 and attack_interval > 0.0:
 		_attack_step(delta)
 	if queue.is_empty():
