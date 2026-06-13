@@ -7,6 +7,7 @@ extends CanvasLayer
 @onready var _timer_label: Label = $SidePanel/Margin/VBox/TimerLabel
 @onready var _train_btn: Button = $SidePanel/Margin/VBox/TrainBtn
 @onready var _train2_btn: Button = $SidePanel/Margin/VBox/Train2Btn
+@onready var _train3_btn: Button = $SidePanel/Margin/VBox/Train3Btn
 @onready var _research_label: Label = $SidePanel/Margin/VBox/ResearchLabel
 @onready var _research_atk_btn: Button = $SidePanel/Margin/VBox/ResearchAtkBtn
 @onready var _research_armor_btn: Button = $SidePanel/Margin/VBox/ResearchArmorBtn
@@ -24,6 +25,7 @@ func _ready() -> void:
 	_monument_btn.pressed.connect(func(): BuildingPlacer.start_placement("monument"))
 	_train_btn.pressed.connect(func(): _try_train(0))
 	_train2_btn.pressed.connect(func(): _try_train(1))
+	_train3_btn.pressed.connect(func(): _try_train(2))
 	_research_atk_btn.pressed.connect(func(): _try_research("atk"))
 	_research_armor_btn.pressed.connect(func(): _try_research("armor"))
 	SelectionManager.building_selected.connect(show_building)
@@ -69,10 +71,13 @@ func _refresh() -> void:
 	_timer_label.text = "Idle" if q.is_empty() else "%.1fs" % timer
 	_train_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(0)
 	_train2_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(1)
+	_train3_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(2)
 	if _train_btn.visible:
 		_train_btn.text = "%s (%s)" % [b.get_train_label(0), b.get_train_cost_label(0)]
 	if _train2_btn.visible:
 		_train2_btn.text = "%s (%s)" % [b.get_train_label(1), b.get_train_cost_label(1)]
+	if _train3_btn.visible:
+		_train3_btn.text = "%s (%s)" % [b.get_train_label(2), b.get_train_cost_label(2)]
 	_refresh_research(b)
 
 ## Research is offered on the player's Town Center only. Buttons are static

@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemySoldier.tscn" id="2_esol"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemyArcher.tscn" id="3_earc"]
+[ext_resource type="PackedScene" path="res://scenes/units/EnemyRaider.tscn" id="4_erdr"]
 [ext_resource type="Texture2D" path="res://assets/sprites/enemy_barracks_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_EBR"]
@@ -21,6 +22,10 @@ train_unit_2_scene = ExtResource("3_earc")
 train_unit_2_label = "Archer"
 train_2_costs = {"madera": 40, "oro": 40}
 train_2_duration = 9.0
+train_unit_3_scene = ExtResource("4_erdr")
+train_unit_3_label = "Raider"
+train_3_costs = {"madera": 40, "oro": 50}
+train_3_duration = 12.0
 faction_id = 1
 
 [node name="Sprite" type="ColorRect" parent="."]

@@ -40,6 +40,11 @@ const RESEARCH: Dictionary = {
 @export var train_2_costs: Dictionary = {}
 @export var train_2_duration: float = 5.0
 
+@export var train_unit_3_scene: PackedScene
+@export var train_unit_3_label: String = ""
+@export var train_3_costs: Dictionary = {}
+@export var train_3_duration: float = 5.0
+
 @export var attack_damage: int = 0
 @export var attack_range: float = 0.0
 @export var attack_interval: float = 0.0
@@ -110,10 +115,16 @@ func has_train_slot(slot: int) -> bool:
 		return train_unit_scene != null
 	if slot == 1:
 		return train_unit_2_scene != null
+	if slot == 2:
+		return train_unit_3_scene != null
 	return false
 
 func get_train_cost_label(slot: int = 0) -> String:
-	var costs: Dictionary = train_costs if slot == 0 else train_2_costs
+	var costs: Dictionary = train_costs
+	if slot == 1:
+		costs = train_2_costs
+	elif slot == 2:
+		costs = train_3_costs
 	var parts: PackedStringArray = PackedStringArray()
 	for type in costs:
 		var letter: String = "?"
@@ -127,6 +138,8 @@ func get_train_cost_label(slot: int = 0) -> String:
 func get_train_label(slot: int = 0) -> String:
 	if slot == 1:
 		return train_unit_2_label
+	if slot == 2:
+		return train_unit_3_label
 	return train_unit_label
 
 func try_queue_training(slot: int = 0) -> bool:
@@ -145,6 +158,10 @@ func try_queue_training(slot: int = 0) -> bool:
 		scene = train_unit_2_scene
 		costs = train_2_costs
 		duration = train_2_duration
+	elif slot == 2:
+		scene = train_unit_3_scene
+		costs = train_3_costs
+		duration = train_3_duration
 	else:
 		return false
 	if scene == null:
