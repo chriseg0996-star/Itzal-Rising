@@ -43,6 +43,8 @@ var _next_all_in: float = ESCALATION_TIME + ALL_IN_PERIOD
 ## The faction this AI drives. Decay by default; when the human plays Decay,
 ## the AI takes over Itzal instead.
 var ai_faction_id: int = FactionManager.ENEMY
+## Campaign "fast_aggro" mission modifier scales the wave interval (1.0 = none).
+var mission_wave_mult: float = 1.0
 
 func _ready() -> void:
 	call_deferred("_bootstrap")
@@ -52,6 +54,11 @@ func reset() -> void:
 	tick_timer = 0.0
 	game_time = 0.0
 	initialized = false
+	# Resolve campaign modifiers here so a later skirmish (ActiveMission inactive)
+	# always falls back to 1.0.
+	mission_wave_mult = 1.0
+	if ActiveMission.is_active() and String(ActiveMission.get_data().get("modifier", "")) == "fast_aggro":
+		mission_wave_mult = 0.6
 	_apply_difficulty()
 	_next_all_in = ESCALATION_TIME + all_in_period
 	call_deferred("_bootstrap")
@@ -76,6 +83,7 @@ func _apply_difficulty() -> void:
 			max_soldiers = 8
 			max_towers = 3
 			all_in_period = 120.0
+	wave_interval *= mission_wave_mult
 
 func _bootstrap() -> void:
 	await get_tree().process_frame

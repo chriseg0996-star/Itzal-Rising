@@ -51,6 +51,8 @@ func request_load() -> void:
 	if not (parsed is Dictionary):
 		return
 	var data: Dictionary = parsed
+	# A loaded quicksave is a plain skirmish — drop any campaign context.
+	ActiveMission.clear()
 	var settings: Dictionary = data.get("settings", {})
 	GameSettings.player_faction_id = int(settings.get("player_faction_id", 0))
 	GameSettings.selected_map = String(settings.get("selected_map", "Jungle Basin"))

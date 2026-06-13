@@ -45,6 +45,29 @@ func _ready() -> void:
 			(cam as Node2D).position = cfg.get("enemy_tc", MapConfig.DEFAULT_ENEMY_TC) as Vector2
 		else:
 			(cam as Node2D).position = player_start
+	_apply_mission_modifier(world, player_start)
+
+## Campaign handicaps that need the live world. fast_aggro is handled in
+## EnemyAI.reset(); the rest are applied here.
+func _apply_mission_modifier(world: Node, player_start: Vector2) -> void:
+	if not ActiveMission.is_active():
+		return
+	match String(ActiveMission.get_data().get("modifier", "")):
+		"enemy_eco_boost":
+			# Campaign AI is always Decay (faction 1) — top up its pool.
+			ResourceManager.add_resource("madera", 300, FactionManager.ENEMY)
+			ResourceManager.add_resource("oro", 200, FactionManager.ENEMY)
+		"player_handicap":
+			# Offset a harder scenario with one extra starting worker.
+			var scene_path: String = "res://scenes/units/Villager.tscn"
+			if GameSettings.player_faction_id == FactionManager.IX:
+				scene_path = "res://scenes/units/IxWeaver.tscn"
+			var packed: PackedScene = load(scene_path)
+			if packed != null:
+				var v: Node = packed.instantiate()
+				world.add_child(v)
+				if v is Node2D:
+					(v as Node2D).global_position = player_start + Vector2(0, 90)
 
 func _move(world: Node, node_name: String, pos: Vector2) -> void:
 	var n: Node = world.get_node_or_null(NodePath(node_name))
