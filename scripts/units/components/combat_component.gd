@@ -6,6 +6,10 @@ signal attack_landed(target: Node2D, damage: float)
 
 enum State { IDLE, CHASING, ATTACKING }
 
+## Attack ranges above this fire a Projectile (deferred damage) instead of
+## instant hitscan — archers/ranged read as ranged; melee stays instant.
+const RANGED_THRESHOLD: float = 120.0
+
 @export var aggro_range: float = 250.0
 @export var attack_damage: float = 10.0
 @export var attack_range: float = 80.0
@@ -120,6 +124,18 @@ func _attack() -> void:
 	var dmg: float = attack_damage
 	if _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id"))):
 		dmg += GameStats.player_atk_bonus()
+	# Ranged: launch a projectile that applies the damage on impact. We must NOT
+	# also apply damage or spawn an impact here — the projectile owns both.
+	if attack_range > RANGED_THRESHOLD:
+		_cooldown_timer = attack_cooldown
+		attack_started.emit(_target)
+		var color: Color = Color(1.0, 0.85, 0.3, 1.0)
+		var fac: FactionData = FactionManager.get_faction(int(_owner_unit.get("faction_id")))
+		if fac != null:
+			color = fac.primary_color
+		Projectile.fire(get_tree().current_scene, _owner_unit.global_position, _target, dmg, color)
+		attack_landed.emit(_target, dmg)
+		return
 	var stat: Node = _target.get_node_or_null("StatComponent")
 	if stat != null and stat.has_method("take_damage"):
 		_cooldown_timer = attack_cooldown

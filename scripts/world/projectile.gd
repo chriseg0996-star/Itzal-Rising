@@ -1,3 +1,4 @@
+class_name Projectile
 extends Node2D
 
 ## A simple homing tracer for ranged attacks (archers, towers). Flies from the
