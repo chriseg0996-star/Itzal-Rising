@@ -33,6 +33,14 @@ func take_damage(amount: float) -> void:
 	_current_health = max(_current_health - dealt, 0.0)
 	health_changed.emit(_current_health, max_health)
 	if _current_health <= 0.0:
+		# Tally exactly at the death edge (is_dead() guards re-entry). Never in
+		# die()/_exit_tree — SaveManager.load frees units directly and must not
+		# inflate the counts.
+		if _owner_unit != null:
+			if FactionManager.is_player_faction(int(_owner_unit.get("faction_id"))):
+				GameStats.units_lost += 1
+			else:
+				GameStats.enemies_killed += 1
 		died.emit(_owner_unit)
 
 ## SaveManager hook: set absolute health after _ready ran (load path).

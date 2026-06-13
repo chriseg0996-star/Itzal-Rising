@@ -262,6 +262,10 @@ func _draw() -> void:
 
 func _die() -> void:
 	dying = true
+	# Count enemy buildings the player razed (player-side losses aren't tallied
+	# here — only destruction of hostiles matters for the summary).
+	if not FactionManager.is_player_faction(faction_id):
+		GameStats.buildings_destroyed += 1
 	var cam: Node = get_tree().get_first_node_in_group("rts_camera")
 	if cam != null and cam.has_method("shake"):
 		cam.shake(6.0, 0.25)
