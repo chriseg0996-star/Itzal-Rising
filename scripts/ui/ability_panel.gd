@@ -94,6 +94,9 @@ func try_cast() -> void:
 	_execute_ability()
 	_cooldown_remaining = _cooldown_max
 	_button.disabled = true
+	var cam: Node = get_tree().get_first_node_in_group("rts_camera")
+	if cam != null and cam.has_method("shake"):
+		cam.shake(4.0, 0.2)
 
 func get_cooldown() -> float:
 	return _cooldown_remaining

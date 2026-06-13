@@ -215,6 +215,9 @@ func _phase_all_in() -> void:
 		return
 	if force_attack((target as Node2D).global_position):
 		AlertManager.push("Enemy all-in incoming!", "warning")
+		var cam: Node = get_tree().get_first_node_in_group("rts_camera")
+		if cam != null and cam.has_method("shake"):
+			cam.shake(8.0, 0.4)
 
 ## Sends every AI soldier at a position immediately, ignoring force thresholds.
 ## Used by the monument countdown so a fresh monument is contested right away

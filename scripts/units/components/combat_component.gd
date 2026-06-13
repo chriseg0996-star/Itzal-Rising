@@ -143,6 +143,7 @@ func _attack() -> void:
 		stat.take_damage(dmg)
 		attack_landed.emit(_target, dmg)
 		_spawn_impact(_target.global_position)
+		DamageNumbers.spawn(get_tree().current_scene, dmg, _target.global_position, Color(0.95, 0.95, 0.95))
 	elif _target.has_method("take_damage"):
 		# Buildings carry hp on the node itself (building.gd), no StatComponent.
 		_cooldown_timer = attack_cooldown

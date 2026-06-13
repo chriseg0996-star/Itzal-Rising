@@ -210,6 +210,7 @@ func take_damage(amount: int) -> void:
 	SoundManager.play("building_hit", -8.0)
 	_flash_hit()
 	queue_redraw()
+	DamageNumbers.spawn(get_tree().current_scene, float(amount), global_position + Vector2(0, HP_BAR_Y), Color(0.95, 0.95, 0.95))
 	if FactionManager.is_player_faction(faction_id):
 		building_damaged.emit(self)
 	if hp <= 0:
@@ -236,6 +237,9 @@ func _draw() -> void:
 
 func _die() -> void:
 	dying = true
+	var cam: Node = get_tree().get_first_node_in_group("rts_camera")
+	if cam != null and cam.has_method("shake"):
+		cam.shake(6.0, 0.25)
 	queue_free()
 
 func _process(delta: float) -> void:

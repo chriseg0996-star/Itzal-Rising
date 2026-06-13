@@ -8,9 +8,20 @@ const WORLD_SIZE: Vector2 = Vector2(2048, 2048)
 @export var max_zoom: float = 2.0
 @export var zoom_step: float = 0.1
 
+var _shake_amount: float = 0.0
+var _shake_timer: float = 0.0
+var _shake_duration: float = 0.0
+
 func _ready() -> void:
 	position = Vector2(1024, 512)
 	add_to_group("rts_camera")
+
+## Kick a decaying screen shake. Applied to `offset` (not `position`) so it never
+## fights _clamp_to_world. The strongest active shake wins.
+func shake(amount: float, duration: float) -> void:
+	_shake_amount = maxf(_shake_amount, amount)
+	_shake_duration = maxf(_shake_duration, duration)
+	_shake_timer = maxf(_shake_timer, duration)
 
 func _process(delta: float) -> void:
 	var direction := Vector2.ZERO
@@ -41,6 +52,19 @@ func _process(delta: float) -> void:
 		direction = direction.normalized()
 		position += direction * pan_speed * delta / zoom.x
 	_clamp_to_world()
+	_apply_shake(delta)
+
+func _apply_shake(delta: float) -> void:
+	if _shake_timer <= 0.0:
+		if offset != Vector2.ZERO:
+			offset = Vector2.ZERO
+		return
+	_shake_timer -= delta
+	var mag: float = _shake_amount * (_shake_timer / _shake_duration)
+	offset = Vector2(randf_range(-mag, mag), randf_range(-mag, mag))
+	if _shake_timer <= 0.0:
+		offset = Vector2.ZERO
+		_shake_amount = 0.0
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

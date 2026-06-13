@@ -38,6 +38,7 @@ func _apply() -> void:
 		var stat: Node = _target.get_node_or_null("StatComponent")
 		if stat != null and stat.has_method("take_damage"):
 			stat.take_damage(_damage)
+			DamageNumbers.spawn(get_tree().current_scene, _damage, _target.global_position, Color(0.95, 0.95, 0.95))
 		elif _target.has_method("take_damage"):
 			_target.take_damage(int(_damage))
 		_spawn_impact(_target.global_position)
