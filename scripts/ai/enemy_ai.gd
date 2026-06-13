@@ -6,11 +6,11 @@ const RAMP_PERIOD: float = 60.0
 const RAMP_STEP: float = 5.0
 
 ## Late game: past ESCALATION_TIME the AI attacks with smaller forces, trains
-## past its difficulty cap and launches periodic all-in pushes.
+## past its difficulty cap and launches periodic all-in pushes. The period and
+## training bonus are difficulty-scaled (see _apply_difficulty).
 const ESCALATION_TIME: float = 360.0
-const ALL_IN_PERIOD: float = 150.0
+const ALL_IN_PERIOD: float = 150.0  # normal-difficulty default
 const ATTACK_FORCE_LATE: int = 3
-const LATE_CAP_BONUS: int = 6
 
 const ENEMY_BASE_POS: Vector2 = Vector2(1600, 1600)
 const BARRACKS_OFFSET_RANGE: float = 220.0
@@ -32,6 +32,10 @@ var initialized: bool = false
 var wave_interval: float = TICK_INTERVAL_INITIAL
 var max_soldiers: int = 0  # 0 = uncapped
 var max_towers: int = 2
+## Difficulty-scaled endgame: easy disables all-ins (period 0) and trains a
+## smaller late-game bonus; hard pushes harder.
+var all_in_period: float = ALL_IN_PERIOD
+var late_cap_bonus: int = 6
 ## Resolved from the AI's town center at bootstrap so map layouts can move the
 ## base; falls back to the legacy constant if no TC is found.
 var base_pos: Vector2 = ENEMY_BASE_POS
@@ -48,25 +52,30 @@ func reset() -> void:
 	tick_timer = 0.0
 	game_time = 0.0
 	initialized = false
-	_next_all_in = ESCALATION_TIME + ALL_IN_PERIOD
 	_apply_difficulty()
+	_next_all_in = ESCALATION_TIME + all_in_period
 	call_deferred("_bootstrap")
 
 func _apply_difficulty() -> void:
 	wave_interval = TICK_INTERVAL_INITIAL
 	max_soldiers = 0
 	max_towers = 2
+	all_in_period = ALL_IN_PERIOD
+	late_cap_bonus = 6
 	match GameSettings.difficulty:
 		"easy":
 			wave_interval *= 1.5
 			max_soldiers = 3
 			max_towers = 1
+			all_in_period = 0.0  # no all-in pushes — stays beatable for new players
+			late_cap_bonus = 3
 		"normal":
 			pass  # unchanged
 		"hard":
 			wave_interval *= 0.7
 			max_soldiers = 8
 			max_towers = 3
+			all_in_period = 120.0
 
 func _bootstrap() -> void:
 	await get_tree().process_frame
@@ -111,7 +120,7 @@ func _phase_train_at_barracks() -> void:
 	var army: Array = _get_enemy_soldiers()
 	var cap: int = max_soldiers
 	if cap > 0 and game_time >= ESCALATION_TIME:
-		cap += LATE_CAP_BONUS
+		cap += late_cap_bonus
 	if cap > 0 and army.size() >= cap:
 		return
 	# Keep roughly 1 archer per 2 melee. Classified via sprite_asset (node
@@ -194,10 +203,13 @@ func _phase_atacar() -> void:
 			s.attack_move(target_pos)
 
 ## Periodic late-game all-in: every soldier attacks regardless of force size.
+## Disabled on easy (all_in_period == 0).
 func _phase_all_in() -> void:
+	if all_in_period <= 0.0:
+		return
 	if game_time < _next_all_in:
 		return
-	_next_all_in += ALL_IN_PERIOD
+	_next_all_in += all_in_period
 	var target: Node = _get_attack_target()
 	if target == null:
 		return

@@ -8,7 +8,7 @@ size = Vector2(64, 80)
 [node name="Monument" type="Node2D"]
 script = ExtResource("1_bldg_script")
 building_name = "Monument"
-max_hp = 600
+max_hp = 800
 sprite_asset = "monument"
 faction_id = 0
 

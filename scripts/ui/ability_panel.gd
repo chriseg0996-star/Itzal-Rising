@@ -6,11 +6,10 @@ extends CanvasLayer
 ## exposed for SaveManager via the "ability_panel" group.
 
 const ABILITIES: Dictionary = {
-	0: {"name": "Jaguar's Vigor", "desc": "Heal all your units +30 HP"},
-	1: {"name": "Corruption Burst", "desc": "25 dmg to hostiles near your TC"},
-	2: {"name": "Lattice Overcharge", "desc": "+5 armor to your units, 10 s"},
+	0: {"name": "Jaguar's Vigor", "desc": "Heal all your units +30 HP", "cooldown": 60.0},
+	1: {"name": "Corruption Burst", "desc": "25 dmg to hostiles near your TC", "cooldown": 75.0},
+	2: {"name": "Lattice Overcharge", "desc": "+5 armor to your units, 10 s", "cooldown": 60.0},
 }
-const COOLDOWN: float = 60.0
 const ACCENT: Color = Color(0.0, 0.85, 0.85, 1.0)
 const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
 
@@ -21,6 +20,7 @@ const OVERCHARGE_ARMOR: float = 5.0
 const OVERCHARGE_DURATION: float = 10.0
 
 var _cooldown_remaining: float = 0.0
+var _cooldown_max: float = 60.0
 var _buff_active: bool = false
 var _button: Button = null
 var _sweep: ColorRect = null
@@ -31,6 +31,7 @@ func _ready() -> void:
 
 func _build() -> void:
 	var def: Dictionary = ABILITIES.get(GameSettings.player_faction_id, ABILITIES[0])
+	_cooldown_max = float(def.get("cooldown", 60.0))
 	var accent: Color = ACCENT
 	var fac: FactionData = FactionManager.get_faction(GameSettings.player_faction_id)
 	if fac != null:
@@ -76,7 +77,7 @@ func _process(delta: float) -> void:
 	if _cooldown_remaining > 0.0:
 		_button.text = "%s %.0fs" % [def["name"], ceilf(_cooldown_remaining)]
 		_sweep.visible = true
-		_sweep.offset_right = -_button.size.x * (1.0 - _cooldown_remaining / COOLDOWN)
+		_sweep.offset_right = -_button.size.x * (1.0 - _cooldown_remaining / _cooldown_max)
 	else:
 		_button.text = "%s (E)" % def["name"]
 		_button.disabled = false
@@ -91,14 +92,14 @@ func try_cast() -> void:
 	if get_tree().paused or _cooldown_remaining > 0.0:
 		return
 	_execute_ability()
-	_cooldown_remaining = COOLDOWN
+	_cooldown_remaining = _cooldown_max
 	_button.disabled = true
 
 func get_cooldown() -> float:
 	return _cooldown_remaining
 
 func set_cooldown(value: float) -> void:
-	_cooldown_remaining = clampf(value, 0.0, COOLDOWN)
+	_cooldown_remaining = clampf(value, 0.0, _cooldown_max)
 	if _button != null:
 		_button.disabled = _cooldown_remaining > 0.0
 
