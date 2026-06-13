@@ -120,11 +120,19 @@ func _show(text: String) -> void:
 				"units_lost": GameStats.units_lost,
 				"buildings_destroyed": GameStats.buildings_destroyed,
 			})
-	stats_label.text = "Time: %s\nUnits trained: %d\nResources gathered: %d" % [
+	var summary: String = "Time: %s\nUnits trained: %d   Resources: %d\nEnemies killed: %d   Units lost: %d   Razed: %d\nRecord: %dW / %dL" % [
 		GameStats.format_time(),
 		GameStats.units_trained,
-		GameStats.resources_gathered
+		GameStats.resources_gathered,
+		GameStats.enemies_killed,
+		GameStats.units_lost,
+		GameStats.buildings_destroyed,
+		ProfileManager.wins,
+		ProfileManager.losses,
 	]
+	if won and bool(_match_deltas.get("new_best", false)):
+		summary += "\n★ NEW BEST TIME on %s!" % GameSettings.selected_map
+	stats_label.text = summary
 	visible = true
 	game_over = true
 
