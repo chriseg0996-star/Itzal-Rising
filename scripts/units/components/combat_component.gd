@@ -133,6 +133,8 @@ func _attack() -> void:
 	var is_counter: bool = COUNTERS.get(unit_class, &"") == _target_class(_target)
 	if is_counter:
 		dmg *= COUNTER_MULT
+	var num_color: Color = Color(1.0, 0.5, 0.1) if is_counter else Color(0.95, 0.95, 0.95)
+	var num_prefix: String = "+" if is_counter else ""
 	# Ranged: launch a projectile that applies the damage on impact. We must NOT
 	# also apply damage or spawn an impact here — the projectile owns both.
 	if attack_range > RANGED_THRESHOLD:
@@ -142,7 +144,7 @@ func _attack() -> void:
 		var fac: FactionData = FactionManager.get_faction(int(_owner_unit.get("faction_id")))
 		if fac != null:
 			color = fac.primary_color
-		Projectile.fire(get_tree().current_scene, _owner_unit.global_position, _target, dmg, color)
+		Projectile.fire(get_tree().current_scene, _owner_unit.global_position, _target, dmg, color, is_counter)
 		attack_landed.emit(_target, dmg)
 		return
 	var stat: Node = _target.get_node_or_null("StatComponent")
@@ -152,7 +154,7 @@ func _attack() -> void:
 		stat.take_damage(dmg)
 		attack_landed.emit(_target, dmg)
 		_spawn_impact(_target.global_position)
-		DamageNumbers.spawn(get_tree().current_scene, dmg, _target.global_position, Color(0.95, 0.95, 0.95))
+		DamageNumbers.spawn(get_tree().current_scene, dmg, _target.global_position, num_color, num_prefix)
 	elif _target.has_method("take_damage"):
 		# Buildings carry hp on the node itself (building.gd), no StatComponent.
 		_cooldown_timer = attack_cooldown

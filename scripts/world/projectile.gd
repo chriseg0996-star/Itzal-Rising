@@ -14,11 +14,13 @@ var _target: Node2D = null
 var _damage: float = 0.0
 var _color: Color = Color(1.0, 0.85, 0.3, 1.0)
 var _dir: Vector2 = Vector2.RIGHT
+var _is_counter: bool = false
 
-func setup(target: Node2D, damage: float, color: Color) -> void:
+func setup(target: Node2D, damage: float, color: Color, is_counter: bool = false) -> void:
 	_target = target
 	_damage = damage
 	_color = color
+	_is_counter = is_counter
 
 func _physics_process(delta: float) -> void:
 	if _target == null or not is_instance_valid(_target):
@@ -38,7 +40,9 @@ func _apply() -> void:
 		var stat: Node = _target.get_node_or_null("StatComponent")
 		if stat != null and stat.has_method("take_damage"):
 			stat.take_damage(_damage)
-			DamageNumbers.spawn(get_tree().current_scene, _damage, _target.global_position, Color(0.95, 0.95, 0.95))
+			var col: Color = Color(1.0, 0.5, 0.1) if _is_counter else Color(0.95, 0.95, 0.95)
+			var pre: String = "+" if _is_counter else ""
+			DamageNumbers.spawn(get_tree().current_scene, _damage, _target.global_position, col, pre)
 		elif _target.has_method("take_damage"):
 			_target.take_damage(int(_damage))
 		_spawn_impact(_target.global_position)
@@ -54,7 +58,7 @@ func _spawn_impact(world_pos: Vector2) -> void:
 		Particles.spawn(scene, "attack_impact", world_pos)
 
 ## Instances a projectile into `parent` and launches it at `target`.
-static func fire(parent: Node, from: Vector2, target: Node2D, damage: float, color: Color) -> void:
+static func fire(parent: Node, from: Vector2, target: Node2D, damage: float, color: Color, is_counter: bool = false) -> void:
 	if parent == null or not is_instance_valid(parent) or target == null:
 		return
 	var scene: PackedScene = load("res://scenes/world/Projectile.tscn")
@@ -65,4 +69,4 @@ static func fire(parent: Node, from: Vector2, target: Node2D, damage: float, col
 	if proj is Node2D:
 		(proj as Node2D).global_position = from
 	if proj.has_method("setup"):
-		proj.setup(target, damage, color)
+		proj.setup(target, damage, color, is_counter)
