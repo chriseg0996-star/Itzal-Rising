@@ -44,6 +44,11 @@ const RESEARCH: Dictionary = {
 @export var attack_range: float = 0.0
 @export var attack_interval: float = 0.0
 
+const HP_BAR_WIDTH: float = 56.0
+const HP_BAR_HEIGHT: float = 5.0
+const HP_BAR_Y: float = -110.0
+const HP_BAR_BG: Color = Color(0.08, 0.1, 0.12, 0.9)
+
 var hp: int
 var queue: Array = []
 var production_timer: float = 0.0
@@ -52,6 +57,8 @@ var dying: bool = false
 var rally_point: Vector2 = Vector2.ZERO
 var has_rally_point: bool = false
 var _rally_marker: Node2D = null
+var _base_modulate: Color = Color.WHITE
+var _hp_fill_color: Color = Color(0.27, 0.86, 0.50)
 
 func _ready() -> void:
 	add_to_group("buildings")
@@ -63,6 +70,10 @@ func _ready() -> void:
 	if faction_id == FactionManager.IX:
 		_apply_lattice_network()
 	_apply_sprite(sprite_asset)
+	_base_modulate = modulate
+	var fac: FactionData = FactionManager.get_faction(faction_id)
+	if fac != null:
+		_hp_fill_color = fac.primary_color
 	if FactionManager.is_player_faction(faction_id):
 		AlertManager.register_building(self)
 
@@ -197,10 +208,31 @@ func take_damage(amount: int) -> void:
 		return
 	hp = max(0, hp - amount)
 	SoundManager.play("building_hit", -8.0)
+	_flash_hit()
+	queue_redraw()
 	if FactionManager.is_player_faction(faction_id):
 		building_damaged.emit(self)
 	if hp <= 0:
 		_die()
+
+## Brief white flash on hit (mirrors villager.gd _flash_hit). modulate is an
+## independent channel from the fog's visibility writes, so they don't fight.
+func _flash_hit() -> void:
+	if dying:
+		return
+	modulate = Color(2.0, 2.0, 2.0, _base_modulate.a)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", _base_modulate, 0.1)
+
+## HP bar floats above the building art while it is damaged.
+func _draw() -> void:
+	if dying or hp >= max_hp or max_hp <= 0:
+		return
+	var ratio: float = clampf(float(hp) / float(max_hp), 0.0, 1.0)
+	var origin := Vector2(-HP_BAR_WIDTH * 0.5, HP_BAR_Y)
+	draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH, HP_BAR_HEIGHT)), HP_BAR_BG)
+	var fill: Color = _hp_fill_color.lerp(Color(0.85, 0.2, 0.15), 1.0 - ratio)
+	draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH * ratio, HP_BAR_HEIGHT)), fill)
 
 func _die() -> void:
 	dying = true
