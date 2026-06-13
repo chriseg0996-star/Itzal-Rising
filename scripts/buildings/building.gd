@@ -264,8 +264,9 @@ func _attack_step(delta: float) -> void:
 	if target == null:
 		attack_timer = attack_interval
 		return
-	if target.has_method("take_damage"):
-		target.take_damage(attack_damage)
+	# Towers fire a projectile (damage applied on impact) in the faction colour.
+	if target is Node2D:
+		Projectile.fire(get_tree().current_scene, global_position, target as Node2D, float(attack_damage), _hp_fill_color)
 	attack_timer = 0.0
 
 func _find_enemy_in_range() -> Node:
