@@ -19,10 +19,11 @@ const MAP_CLAMP_MAX: Vector2 = Vector2(2044.0, 2044.0)
 var selected: Array = []
 var selected_building: Node = null
 var inspected: Node = null
+var _inspect_marker: Node2D = null
 var _throttle: Dictionary = {}
 
 ## Read-only inspect of a hostile unit/building: clears any commandable selection
-## and points the info panel at `node`.
+## and points the info panel at `node`, with a neutral targeting ring on the map.
 func inspect(node: Node) -> void:
 	if node == null or not is_instance_valid(node):
 		return
@@ -34,15 +35,32 @@ func inspect(node: Node) -> void:
 	if selected_building != null:
 		selected_building = null
 		building_deselected.emit()
+	_free_inspect_marker()
 	inspected = node
+	if node is Node2D:
+		var marker := InspectMarker.new()
+		marker.z_index = 60
+		var bn: Variant = node.get("building_name")
+		if bn != null and String(bn) != "":
+			marker.radius = 70.0
+		# Deferred: the target may be mid-tree-callback when clicked, which makes
+		# a direct add_child fail ("parent busy setting up children").
+		(node as Node2D).add_child.call_deferred(marker)
+		_inspect_marker = marker
 	inspect_changed.emit(node)
 	SoundManager.play("unit_select")
 
 func _clear_inspect() -> void:
+	_free_inspect_marker()
 	if inspected == null:
 		return
 	inspected = null
 	inspect_changed.emit(null)
+
+func _free_inspect_marker() -> void:
+	if _inspect_marker != null and is_instance_valid(_inspect_marker):
+		_inspect_marker.queue_free()
+	_inspect_marker = null
 
 func select_only(unit: Node) -> void:
 	clear()
