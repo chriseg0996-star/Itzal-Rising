@@ -76,9 +76,24 @@ func _handle_right() -> void:
 	var resource := _resource_at(world_pos)
 	if resource != null:
 		SelectionManager.harvest_with_selected(resource)
-	else:
-		var attack_move: bool = Input.is_action_pressed("attack_move")
-		SelectionManager.move_selected_to(world_pos, attack_move)
+		get_viewport().set_input_as_handled()
+		return
+	# Right-click your own foundation = build it; your own farm = work it. Falls
+	# through to a normal move if no villager is selected.
+	var bld := _building_at(world_pos)
+	if bld != null:
+		if bool(bld.get("under_construction")):
+			if SelectionManager.build_with_selected(bld) > 0:
+				get_viewport().set_input_as_handled()
+				return
+		else:
+			var fps: Variant = bld.get("food_per_sec")
+			if fps != null and float(fps) > 0.0:
+				if SelectionManager.work_farm_with_selected(bld) > 0:
+					get_viewport().set_input_as_handled()
+					return
+	var attack_move: bool = Input.is_action_pressed("attack_move")
+	SelectionManager.move_selected_to(world_pos, attack_move)
 	get_viewport().set_input_as_handled()
 
 func _unit_at(world_pos: Vector2) -> Node:

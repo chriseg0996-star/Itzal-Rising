@@ -77,6 +77,17 @@ var has_rally_point: bool = false
 var _rally_marker: Node2D = null
 var _base_modulate: Color = Color.WHITE
 var _hp_fill_color: Color = Color(0.27, 0.86, 0.50)
+## Construction: player-placed buildings start as a foundation that villagers
+## raise over `_build_time` seconds (more builders = faster). Not functional and
+## vulnerable until complete. AI/default buildings stay instant (never call begin).
+var under_construction: bool = false
+var build_progress: float = 0.0
+var _build_time: float = 0.0
+## Farm income only flows while a villager is working it (TTL refreshed by the
+## worker each tick; expires shortly after it leaves or dies).
+var _worker_ttl: float = 0.0
+
+const CONSTRUCTION_TINT: Color = Color(0.55, 0.75, 1.0, 0.6)
 
 func _ready() -> void:
 	add_to_group("buildings")
@@ -123,6 +134,44 @@ func _apply_sprite(asset: String) -> void:
 	if existing != null:
 		move_child(sprite_2d, existing.get_index() + 1)
 
+## Player placement: start as a foundation. Villagers raise build_progress to 1.
+func begin_construction(build_time: float) -> void:
+	under_construction = true
+	build_progress = 0.0
+	_build_time = maxf(build_time, 0.1)
+	hp = maxi(1, int(round(float(max_hp) * 0.25)))
+	modulate = CONSTRUCTION_TINT
+	queue_redraw()
+
+## Called each physics tick by an adjacent builder. Builders stack (faster) and
+## raise hp with progress; attacks still lower hp and can destroy the site.
+func contribute_build(delta: float) -> void:
+	if not under_construction or dying:
+		return
+	build_progress = clampf(build_progress + delta / _build_time, 0.0, 1.0)
+	var target: int = int(round(float(max_hp) * lerpf(0.25, 1.0, build_progress)))
+	if target > hp:
+		hp = mini(target, max_hp)
+	queue_redraw()
+	if build_progress >= 1.0:
+		_finish_construction()
+
+func _finish_construction() -> void:
+	under_construction = false
+	build_progress = 1.0
+	hp = max_hp
+	modulate = _base_modulate
+	SoundManager.play("building_place")
+	queue_redraw()
+
+func is_complete() -> bool:
+	return not under_construction
+
+## A farm worker refreshes this each tick it stands on the farm; income flows
+## only while it is fresh (see _process).
+func report_worker() -> void:
+	_worker_ttl = 1.0
+
 func has_train_slot(slot: int) -> bool:
 	if slot == 0:
 		return train_unit_scene != null
@@ -156,7 +205,7 @@ func get_train_label(slot: int = 0) -> String:
 	return train_unit_label
 
 func try_queue_training(slot: int = 0) -> bool:
-	if dying:
+	if dying or under_construction:
 		return false
 	if queue.size() >= MAX_QUEUE:
 		return false
@@ -315,7 +364,13 @@ func _die() -> void:
 func _process(delta: float) -> void:
 	if dying:
 		return
-	if food_per_sec > 0.0:
+	# A foundation does nothing until villagers finish it.
+	if under_construction:
+		return
+	if _worker_ttl > 0.0:
+		_worker_ttl = maxf(_worker_ttl - delta, 0.0)
+	# Farm income flows only while a villager is working the farm.
+	if food_per_sec > 0.0 and _worker_ttl > 0.0:
 		_food_accum += delta * food_per_sec
 		if _food_accum >= 1.0:
 			var whole: int = int(_food_accum)

@@ -12,22 +12,27 @@ const BUILDING_DATA: Dictionary = {
 	"tc": {
 		"size": Vector2(96, 96),
 		"cost": {"madera": 100},
+		"build_time": 25.0,
 	},
 	"barracks": {
 		"size": Vector2(80, 80),
 		"cost": {"madera": 100, "oro": 50},
+		"build_time": 18.0,
 	},
 	"tower": {
 		"size": Vector2(48, 48),
 		"cost": {"madera": 150, "oro": 50},
+		"build_time": 12.0,
 	},
 	"monument": {
 		"size": Vector2(64, 64),
 		"cost": {"madera": 400, "oro": 300},
+		"build_time": 35.0,
 	},
 	"farm": {
 		"size": Vector2(72, 64),
 		"cost": {"madera": 60},
+		"build_time": 8.0,
 	},
 }
 
@@ -141,8 +146,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not mb.pressed:
 			return
 		if mb.button_index == MOUSE_BUTTON_LEFT:
-			var pos: Vector2 = preview_root.get_global_mouse_position()
-			print("colocando edificio en ", pos)
 			_try_place()
 			get_viewport().set_input_as_handled()
 		elif mb.button_index == MOUSE_BUTTON_RIGHT:
@@ -151,6 +154,32 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _can_afford(cost: Dictionary) -> bool:
 	return ResourceManager.can_afford(cost, GameSettings.player_faction_id)
+
+## Send a player villager to build the new foundation: nearest idle one, or the
+## nearest of any (pulled off its task) if none are idle.
+func _assign_builder(site: Node, pos: Vector2) -> void:
+	var idle_best: Node = null
+	var idle_d: float = INF
+	var any_best: Node = null
+	var any_d: float = INF
+	for v in get_tree().get_nodes_in_group("villagers"):
+		if not is_instance_valid(v) or not (v is Node2D):
+			continue
+		if int(v.get("faction_id")) != GameSettings.player_faction_id:
+			continue
+		if not v.has_method("build_structure"):
+			continue
+		var d: float = pos.distance_to((v as Node2D).global_position)
+		if d < any_d:
+			any_d = d
+			any_best = v
+		var busy: bool = v.has_method("is_busy") and v.is_busy()
+		if not busy and d < idle_d:
+			idle_d = d
+			idle_best = v
+	var builder: Node = idle_best if idle_best != null else any_best
+	if builder != null:
+		builder.build_structure(site)
 
 func _try_place() -> void:
 	var world_pos: Vector2 = preview_root.get_global_mouse_position()
@@ -174,6 +203,11 @@ func _try_place() -> void:
 	target_parent.add_child(building)
 	if building is Node2D:
 		(building as Node2D).global_position = world_pos
+	# Foundation: a nearby villager auto-walks over and raises it over time.
+	if building.has_method("begin_construction"):
+		var bt: float = float(BUILDING_DATA[current_type].get("build_time", 12.0))
+		building.begin_construction(bt)
+		_assign_builder(building, world_pos)
 	SoundManager.play("building_place")
 	Particles.spawn(get_tree().current_scene, "building_place", world_pos)
 	cancel_placement()

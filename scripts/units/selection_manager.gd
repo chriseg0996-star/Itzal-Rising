@@ -139,6 +139,25 @@ func move_selected_to(target: Vector2, attack_move: bool = false) -> void:
 			u.move_to(dest)
 	SoundManager.play("unit_move", -6.0)
 
+## Send selected villagers to build a construction site. Returns how many were
+## dispatched (0 = none in selection, so the caller can fall back to a move).
+func build_with_selected(site: Node) -> int:
+	var n: int = 0
+	for u in selected:
+		if is_instance_valid(u) and u.has_method("build_structure"):
+			u.build_structure(site)
+			n += 1
+	return n
+
+## Send selected villagers to work a farm. Returns how many were dispatched.
+func work_farm_with_selected(farm: Node) -> int:
+	var n: int = 0
+	for u in selected:
+		if is_instance_valid(u) and u.has_method("work_farm"):
+			u.work_farm(farm)
+			n += 1
+	return n
+
 func harvest_with_selected(resource: Node) -> void:
 	if selected.is_empty():
 		return
