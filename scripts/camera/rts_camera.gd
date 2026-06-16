@@ -45,14 +45,21 @@ func _process(delta: float) -> void:
 	var mouse_pos: Vector2 = viewport.get_mouse_position()
 	var viewport_size: Vector2 = viewport.get_visible_rect().size
 
-	if mouse_pos.x >= 0.0 and mouse_pos.x <= float(edge_margin):
-		direction.x -= 1.0
-	elif mouse_pos.x >= viewport_size.x - float(edge_margin) and mouse_pos.x <= viewport_size.x:
-		direction.x += 1.0
-	if mouse_pos.y >= 0.0 and mouse_pos.y <= float(edge_margin):
-		direction.y -= 1.0
-	elif mouse_pos.y >= viewport_size.y - float(edge_margin) and mouse_pos.y <= viewport_size.y:
-		direction.y += 1.0
+	# Edge pan: trigger when the cursor is near OR past an edge. No hard far-side
+	# bound, so it still fires when the stretch mode letterboxes an axis (the
+	# cursor then sits just outside [0, size] in the black bar) — that was why
+	# vertical edge-scroll silently failed while horizontal worked. Gated on
+	# window focus so an off-window cursor doesn't scroll while we're alt-tabbed.
+	var win: Window = get_window()
+	if win == null or win.has_focus():
+		if mouse_pos.x <= float(edge_margin):
+			direction.x -= 1.0
+		elif mouse_pos.x >= viewport_size.x - float(edge_margin):
+			direction.x += 1.0
+		if mouse_pos.y <= float(edge_margin):
+			direction.y -= 1.0
+		elif mouse_pos.y >= viewport_size.y - float(edge_margin):
+			direction.y += 1.0
 
 	# Ease the pan velocity toward the target so starts/stops glide instead of
 	# snapping. pan_speed is divided by zoom so the on-screen speed stays steady.
