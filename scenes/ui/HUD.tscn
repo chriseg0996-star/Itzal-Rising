@@ -1,7 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://h7d9q3x5n2m8k"]
+[gd_scene load_steps=8 format=3 uid="uid://h7d9q3x5n2m8k"]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/UnitInfoPanel.tscn" id="2_uip"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/wood.png" id="ic_wood"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/food.png" id="ic_food"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/gold.png" id="ic_gold"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/pop.png" id="ic_pop"]
 
 [sub_resource type="StyleBoxFlat" id="TopBarStyle"]
 content_margin_left = 4.0
@@ -37,11 +41,13 @@ theme_override_constants/separation = 24
 tooltip_text = "Wood"
 theme_override_constants/separation = 6
 
-[node name="Icon" type="ColorRect" parent="TopBar/Margin/HBox/Wood"]
-custom_minimum_size = Vector2(20, 20)
+[node name="Icon" type="TextureRect" parent="TopBar/Margin/HBox/Wood"]
+custom_minimum_size = Vector2(26, 26)
 tooltip_text = "Wood"
 mouse_filter = 1
-color = Color(0, 0.85, 0.85, 1)
+texture = ExtResource("ic_wood")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TopBar/Margin/HBox/Wood"]
 text = "200"
@@ -53,11 +59,13 @@ theme_override_font_sizes/font_size = 18
 tooltip_text = "Food"
 theme_override_constants/separation = 6
 
-[node name="Icon" type="ColorRect" parent="TopBar/Margin/HBox/Food"]
-custom_minimum_size = Vector2(20, 20)
+[node name="Icon" type="TextureRect" parent="TopBar/Margin/HBox/Food"]
+custom_minimum_size = Vector2(26, 26)
 tooltip_text = "Food"
 mouse_filter = 1
-color = Color(0, 0.85, 0.85, 1)
+texture = ExtResource("ic_food")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TopBar/Margin/HBox/Food"]
 text = "200"
@@ -69,11 +77,13 @@ theme_override_font_sizes/font_size = 18
 tooltip_text = "Gold"
 theme_override_constants/separation = 6
 
-[node name="Icon" type="ColorRect" parent="TopBar/Margin/HBox/Gold"]
-custom_minimum_size = Vector2(20, 20)
+[node name="Icon" type="TextureRect" parent="TopBar/Margin/HBox/Gold"]
+custom_minimum_size = Vector2(26, 26)
 tooltip_text = "Gold"
 mouse_filter = 1
-color = Color(0, 0.85, 0.85, 1)
+texture = ExtResource("ic_gold")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TopBar/Margin/HBox/Gold"]
 text = "100"
@@ -85,11 +95,13 @@ theme_override_font_sizes/font_size = 18
 tooltip_text = "Population"
 theme_override_constants/separation = 6
 
-[node name="Icon" type="ColorRect" parent="TopBar/Margin/HBox/Pop"]
-custom_minimum_size = Vector2(20, 20)
+[node name="Icon" type="TextureRect" parent="TopBar/Margin/HBox/Pop"]
+custom_minimum_size = Vector2(26, 26)
 tooltip_text = "Population"
 mouse_filter = 1
-color = Color(0, 0.85, 0.85, 1)
+texture = ExtResource("ic_pop")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TopBar/Margin/HBox/Pop"]
 text = "0/80"
