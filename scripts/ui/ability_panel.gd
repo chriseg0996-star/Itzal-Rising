@@ -65,11 +65,11 @@ func _build() -> void:
 		accent = fac.primary_color
 
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.12, 0.15, 0.18, 0.96)
+	sb.bg_color = Color(0.07, 0.09, 0.12, 0.9)
 	sb.set_border_width_all(1)
-	sb.border_color = Color(accent.r, accent.g, accent.b, 0.7)
-	sb.set_corner_radius_all(4)
-	sb.set_content_margin_all(6)
+	sb.border_color = Color(accent.r, accent.g, accent.b, 0.22)
+	sb.set_corner_radius_all(6)
+	sb.set_content_margin_all(8)
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", sb)
 	add_child(panel)

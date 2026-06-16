@@ -41,6 +41,10 @@ window/size/viewport_height=720
 window/size/mode=3
 window/stretch/mode="canvas_items"
 
+[gui]
+
+theme/custom="res://assets/ui/itzal_theme.tres"
+
 [input]
 
 move_up={
