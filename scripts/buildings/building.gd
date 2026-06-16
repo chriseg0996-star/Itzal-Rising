@@ -186,7 +186,7 @@ func try_queue_training(slot: int = 0) -> bool:
 	if not ResourceManager.can_afford(costs, faction_id):
 		return false
 	ResourceManager.spend(costs, faction_id)
-	_enqueue({"scene": scene, "duration": duration})
+	_enqueue({"scene": scene, "duration": duration, "label": get_train_label(slot)})
 	return true
 
 ## Living player units plus units still queued at any player building, so a full
