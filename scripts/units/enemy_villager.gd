@@ -133,6 +133,16 @@ func _physics_process(delta: float) -> void:
 			_process_moving(delta)
 			if not _harvest_component.is_active():
 				_state = State.IDLE
+	_apply_separation(delta)
+
+## Keeps villagers from stacking, in every non-dying state (shared steering).
+func _apply_separation(delta: float) -> void:
+	var push: Vector2 = UnitSeparation.push(self)
+	if push.length() <= 2.0:
+		return
+	global_position += push * delta
+	var b: Rect2 = map_bounds.grow(-4.0)
+	global_position = global_position.clamp(b.position, b.end)
 
 func _process_moving(delta: float) -> void:
 	if _nav_agent.is_navigation_finished():
