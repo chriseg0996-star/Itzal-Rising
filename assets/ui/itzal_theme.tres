@@ -6,4 +6,4 @@ subpixel_positioning = 1
 
 [resource]
 default_font = SubResource("SystemFont_ui")
-default_font_size = 15
+default_font_size = 13

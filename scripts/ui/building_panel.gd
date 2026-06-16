@@ -42,7 +42,7 @@ func _ready() -> void:
 	_set_btn_icon(_monument_btn, "bld_monument")
 	_set_btn_icon(_farm_btn, "bld_farm")
 	for b in [_train_btn, _train2_btn, _train3_btn]:
-		b.add_theme_constant_override("icon_max_width", 22)
+		b.add_theme_constant_override("icon_max_width", 18)
 	SelectionManager.building_selected.connect(show_building)
 	SelectionManager.building_deselected.connect(hide_building)
 	_side_panel.visible = false
@@ -52,7 +52,7 @@ func _set_btn_icon(btn: Button, key: String) -> void:
 	var path: String = "res://assets/ui/icons/%s.png" % key
 	if ResourceLoader.exists(path):
 		btn.icon = load(path)
-		btn.add_theme_constant_override("icon_max_width", 24)
+		btn.add_theme_constant_override("icon_max_width", 20)
 
 ## Maps a unit's train label to its archetype icon key.
 func _unit_icon_key(label: String) -> String:
