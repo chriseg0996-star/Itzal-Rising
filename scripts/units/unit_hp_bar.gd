@@ -26,6 +26,9 @@ static func enhance(unit: Node) -> void:
 	frame.offset_top = bg.offset_top - PAD
 	frame.offset_right = bg.offset_right + PAD
 	frame.offset_bottom = bg.offset_bottom + PAD
-	unit.add_child(frame)
-	# Render the frame behind the red/green bars.
-	unit.move_child(frame, bg.get_index())
+	# Deferred: units present at scene load run _ready while the tree is "busy
+	# setting up children", which makes a direct add_child fail. Render the frame
+	# behind the red/green bars (move to the bg's slot, also deferred so it runs
+	# after the add).
+	unit.add_child.call_deferred(frame)
+	unit.move_child.call_deferred(frame, bg.get_index())
