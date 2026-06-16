@@ -21,6 +21,7 @@ var _faction_id:   int               = 0
 var _timer:        float             = 0.0
 var _carrying:     int               = 0
 var _carry_type:   StringName        = &""
+var _dropoff:      Node2D            = null  ## chosen drop-off for the current trip
 
 func setup(nav_agent: NavigationAgent2D, home: Node2D, faction_id: int = 0) -> void:
 	_nav_agent = nav_agent
@@ -75,13 +76,37 @@ func _tick_harvesting() -> void:
 		_set_state(State.RETURNING)
 
 func _tick_returning(unit_pos: Vector2) -> void:
-	if _home == null:
+	var dest: Node2D = _drop_target(unit_pos)
+	if dest == null:
 		_deposit_and_resume()
 		return
-	if unit_pos.distance_to(_home.global_position) <= 64.0:
+	if unit_pos.distance_to(dest.global_position) <= 64.0:
 		_deposit_and_resume()
 		return
-	_nav_agent.target_position = _safe_target(_home.global_position)
+	_nav_agent.target_position = _safe_target(dest.global_position)
+
+## Drop-off for this trip: the nearest friendly Town Center (so a villager that
+## gathers near a freshly-built TC deposits there instead of trekking home).
+## Cached per trip, recomputed after each deposit.
+func _drop_target(from: Vector2) -> Node2D:
+	if _dropoff != null and is_instance_valid(_dropoff):
+		return _dropoff
+	_dropoff = _nearest_dropoff(from)
+	return _dropoff
+
+func _nearest_dropoff(from: Vector2) -> Node2D:
+	var best: Node2D = null
+	var best_dist: float = INF
+	for tc in get_tree().get_nodes_in_group("town_center"):
+		if not is_instance_valid(tc) or not (tc is Node2D):
+			continue
+		if int(tc.get("faction_id")) != _faction_id:
+			continue
+		var d: float = from.distance_to((tc as Node2D).global_position)
+		if d < best_dist:
+			best_dist = d
+			best = tc as Node2D
+	return best if best != null else _home
 
 func _deposit_and_resume() -> void:
 	if _carrying > 0 and _carry_type != &"":
@@ -91,6 +116,7 @@ func _deposit_and_resume() -> void:
 		deposit_made.emit(_carry_type, _carrying)
 	_carrying   = 0
 	_carry_type = &""
+	_dropoff    = null  # recompute nearest drop-off for the next trip
 	if _target_node != null and not _target_node.is_depleted():
 		_set_state(State.MOVING_TO_NODE)
 	else:
