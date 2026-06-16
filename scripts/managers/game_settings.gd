@@ -8,6 +8,10 @@ extends Node
 
 const SETTINGS_PATH: String = "user://settings.cfg"
 
+## Hard cap on the player's living unit count (villagers + military). Enforced in
+## building.gd training and displayed by the HUD.
+const MAX_POPULATION: int = 120
+
 var difficulty: String = "normal"
 ## Team id the human player controls this match (FactionManager ids).
 ## 0 = default player, 2 = Ix Architects. Set to 2 to field the Ix faction.

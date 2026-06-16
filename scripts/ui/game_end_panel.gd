@@ -4,7 +4,7 @@ extends CanvasLayer
 @onready var stats_label: Label = $Center/Panel/Margin/VBox/StatsLabel
 @onready var restart_btn: Button = $Center/Panel/Margin/VBox/RestartBtn
 
-const MONUMENT_DURATION: float = 180.0
+const MONUMENT_DURATION: float = 120.0
 
 var game_over: bool = false
 var player_had_tc: bool = false

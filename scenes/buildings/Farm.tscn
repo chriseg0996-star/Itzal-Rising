@@ -11,7 +11,7 @@ building_name = "Farm"
 max_hp = 200
 sprite_asset = "farm"
 faction_id = 0
-food_per_sec = 2.0
+food_per_sec = 1.5
 
 [node name="Sprite" type="ColorRect" parent="."]
 visible = false

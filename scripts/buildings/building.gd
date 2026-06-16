@@ -95,7 +95,7 @@ func _ready() -> void:
 		AlertManager.register_building(self)
 
 ## Ix "Lattice Network": if an allied Ix building sits within 300px, this building
-## gains +20% max HP (and is restored to full). Evaluated once, on spawn.
+## gains +15% max HP (and is restored to full). Evaluated once, on spawn.
 func _apply_lattice_network() -> void:
 	var allies: int = 0
 	for b in get_tree().get_nodes_in_group("buildings"):
@@ -106,7 +106,7 @@ func _apply_lattice_network() -> void:
 		if global_position.distance_to((b as Node2D).global_position) <= 300.0:
 			allies += 1
 	if allies >= 1:
-		max_hp = int(round(float(max_hp) * 1.2))
+		max_hp = int(round(float(max_hp) * 1.15))
 		hp = max_hp
 
 func _apply_sprite(asset: String) -> void:
@@ -178,11 +178,29 @@ func try_queue_training(slot: int = 0) -> bool:
 		return false
 	if scene == null:
 		return false
+	# Population cap (player only — the AI is bounded by its own difficulty caps).
+	if FactionManager.is_player_faction(faction_id) and _player_population() >= GameSettings.MAX_POPULATION:
+		AlertManager.push("Population limit reached", "warn")
+		return false
 	if not ResourceManager.can_afford(costs, faction_id):
 		return false
 	ResourceManager.spend(costs, faction_id)
 	_enqueue({"scene": scene, "duration": duration})
 	return true
+
+## Living player units plus units still queued at any player building, so a full
+## training queue can't push the army past the cap.
+func _player_population() -> int:
+	var count: int = get_tree().get_nodes_in_group("player_units").size()
+	for b in get_tree().get_nodes_in_group("player_buildings"):
+		if not is_instance_valid(b):
+			continue
+		var q: Variant = b.get("queue")
+		if q is Array:
+			for entry in q:
+				if not (entry as Dictionary).has("research_id"):
+					count += 1
+	return count
 
 func _enqueue(entry: Dictionary) -> void:
 	queue.append(entry)

@@ -20,7 +20,7 @@ const ABILITIES: Dictionary = {
 	2: [
 		{"id": "overcharge", "name": "Lattice Overcharge", "desc": "+6 armor to your units, 10s",      "cooldown": 65.0},
 		{"id": "aegis",      "name": "Aegis Field",        "desc": "Your buildings take half dmg, 8s", "cooldown": 90.0},
-		{"id": "energize",   "name": "Energize",          "desc": "+250 wood, +200 gold, +150 food",  "cooldown": 100.0},
+		{"id": "energize",   "name": "Energize",          "desc": "+150 wood, +120 gold, +90 food",   "cooldown": 110.0},
 	],
 }
 const ACTIONS: Array[String] = ["use_ability", "use_ability_2", "use_ability_3"]
@@ -300,9 +300,9 @@ func _cast_aegis() -> void:
 
 func _cast_energize() -> void:
 	var pf: int = GameSettings.player_faction_id
-	ResourceManager.add_resource("madera", 250, pf)
-	ResourceManager.add_resource("oro", 200, pf)
-	ResourceManager.add_resource("comida", 150, pf)
+	ResourceManager.add_resource("madera", 150, pf)
+	ResourceManager.add_resource("oro", 120, pf)
+	ResourceManager.add_resource("comida", 90, pf)
 
 func _find_player_tc() -> Node2D:
 	for b in get_tree().get_nodes_in_group("player_buildings"):

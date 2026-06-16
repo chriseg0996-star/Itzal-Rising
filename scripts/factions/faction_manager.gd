@@ -22,10 +22,12 @@ var _factions: Dictionary = {}  # int faction_id -> FactionData
 func _ready() -> void:
 	# 0 = player and 2 = Ix are both player-aligned (never hostile to each other).
 	# 1 = Decay is hostile to BOTH so the AI engages whichever the human controls.
-	# Stat profile: Itzal balanced (+1 armor), Decay glass cannon, Ix elite strikers.
-	_register(PLAYER, "Player", [ENEMY], PLAYER_COLOR, 1.0, 1.0, 1.0)
+	# Stat profile (identity, not strictly-better): Itzal baseline + utility kit;
+	# Decay glass cannon (+10% atk, -10% HP); Ix defensive elite (+1 armor, modest
+	# +5% atk, sturdier buildings/guard).
+	_register(PLAYER, "Player", [ENEMY], PLAYER_COLOR, 1.0, 0.0, 1.0)
 	_register(ENEMY, "Decay", [PLAYER, IX], ENEMY_COLOR, 1.1, 0.0, 0.9)
-	_register(IX, "Ix Architects", [ENEMY], IX_COLOR, 1.15, 1.0, 1.0)
+	_register(IX, "Ix Architects", [ENEMY], IX_COLOR, 1.05, 1.0, 1.0)
 
 func _register(faction_id: int, display_name: String, hostile_to: Array[int], primary_color: Color,
 		atk_mult: float = 1.0, armor_bonus: float = 0.0, hp_mult: float = 1.0) -> void:

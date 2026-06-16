@@ -176,7 +176,7 @@ target_desired_distance = 4.0
 [node name="StatComponent" type="Node" parent="."]
 script = ExtResource("2_stat")
 max_health = 80.0
-armor = 2.0
+armor = 0.0
 
 [node name="CombatComponent" type="Node" parent="."]
 script = ExtResource("3_combat")

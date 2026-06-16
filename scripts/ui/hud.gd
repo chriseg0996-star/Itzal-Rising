@@ -5,8 +5,6 @@ const ALERT_SLOTS: int = 5
 const PULSE_COOLDOWN: float = 2.0
 const PULSE_COLOR: Color = Color(0.85, 0.2, 0.15, 1.0)
 
-@export var max_population: int = 120
-
 @onready var wood_label: Label = $TopBar/Margin/HBox/Wood/Label
 @onready var food_label: Label = $TopBar/Margin/HBox/Food/Label
 @onready var gold_label: Label = $TopBar/Margin/HBox/Gold/Label
@@ -72,9 +70,9 @@ func _refresh() -> void:
 
 func _update_population() -> void:
 	var count: int = get_tree().get_nodes_in_group("player_units").size()
-	pop_label.text = "%d/%d" % [count, max_population]
+	pop_label.text = "%d/%d" % [count, GameSettings.MAX_POPULATION]
 	var col: Color = Color(1, 1, 1, 1)
-	if count >= max_population:
+	if count >= GameSettings.MAX_POPULATION:
 		col = Color(1.0, 0.33, 0.22, 1)
 	pop_label.add_theme_color_override("font_color", col)
 
