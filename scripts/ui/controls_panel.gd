@@ -16,7 +16,7 @@ const BINDINGS: Array[Array] = [
 	["B / T / Y", "Build Barracks / Town Center / Tower"],
 	["M", "Build Monument (hold 3:00 to win)"],
 	["F", "Build Farm (passive food income)"],
-	["E", "Faction ability"],
+	["E / R / Q", "Faction abilities (3 per civ)"],
 	["Barracks", "Trains Soldier / Archer / Cavalry (counters: cavalry > ranged > infantry)"],
 	["Right click while placing", "Cancel placement"],
 	["Esc", "Pause"],

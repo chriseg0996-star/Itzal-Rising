@@ -133,7 +133,11 @@ func _apply(data: Dictionary) -> void:
 
 	var ability: Node = tree.get_first_node_in_group("ability_panel")
 	if ability != null and data.has("ability"):
-		ability.set_cooldown(float((data["ability"] as Dictionary).get("cooldown_remaining", 0.0)))
+		var adata: Dictionary = data["ability"]
+		if adata.has("cooldowns") and ability.has_method("set_cooldowns"):
+			ability.set_cooldowns(adata["cooldowns"] as Array)
+		elif adata.has("cooldown_remaining") and ability.has_method("set_cooldown"):
+			ability.set_cooldown(float(adata["cooldown_remaining"]))  # legacy saves
 	var end_panel: Node = world.get_node_or_null("GameEndPanel")
 	if end_panel != null and data.has("monument"):
 		var mon: Dictionary = data["monument"]
@@ -239,8 +243,8 @@ func _snapshot() -> Dictionary:
 		"resource_nodes": [],
 	}
 	var ability: Node = tree.get_first_node_in_group("ability_panel")
-	if ability != null:
-		data["ability"] = {"cooldown_remaining": ability.get_cooldown()}
+	if ability != null and ability.has_method("get_cooldowns"):
+		data["ability"] = {"cooldowns": ability.get_cooldowns()}
 	var end_panel: Node = tree.current_scene.get_node_or_null("GameEndPanel") if tree.current_scene != null else null
 	if end_panel != null and end_panel.has_method("get_monument_state"):
 		data["monument"] = end_panel.get_monument_state()
