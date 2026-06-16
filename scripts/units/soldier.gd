@@ -118,8 +118,10 @@ func set_selected(value: bool) -> void:
 func move_to(target: Vector2) -> void:
 	if state == State.DYING:
 		return
-	if state == State.HOLDING:
-		_set_combat_enabled(true)
+	# Plain move = disengage: suspend auto-combat so the order is obeyed and the
+	# unit can retreat instead of being dragged back by target re-acquisition.
+	# Combat resumes on arrival (_move_step) or via Stop/attack-move.
+	_set_combat_enabled(false)
 	state = State.MOVING
 	if _movement_component != null:
 		_movement_component.move_to(target)
@@ -127,8 +129,8 @@ func move_to(target: Vector2) -> void:
 func attack_move(target: Vector2) -> void:
 	if state == State.DYING:
 		return
-	if state == State.HOLDING:
-		_set_combat_enabled(true)
+	# Attack-move keeps auto-combat on so the unit engages anything en route.
+	_set_combat_enabled(true)
 	state = State.MOVING
 	if _movement_component != null:
 		_movement_component.move_to(target)
@@ -152,7 +154,7 @@ func hold() -> void:
 func patrol(target: Vector2) -> void:
 	if state == State.DYING:
 		return
-	move_to(target)
+	attack_move(target)
 
 func _set_combat_enabled(enabled: bool) -> void:
 	var combat := get_node_or_null("CombatComponent")
@@ -185,6 +187,8 @@ func _physics_process(delta: float) -> void:
 func _move_step(_delta: float) -> void:
 	if _movement_component == null or not _movement_component.is_moving():
 		state = State.IDLE
+		# Arrived: resume auto-defense (a plain move had suspended it).
+		_set_combat_enabled(true)
 
 func _update_hp_bar() -> void:
 	if hp_bar_fg == null or _stat == null:
