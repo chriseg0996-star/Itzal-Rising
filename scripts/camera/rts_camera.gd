@@ -2,18 +2,24 @@ extends Camera2D
 
 const WORLD_SIZE: Vector2 = Vector2(2048, 2048)
 
-@export var pan_speed: float = 400.0
+@export var pan_speed: float = 520.0
 @export var edge_margin: int = 20
 @export var min_zoom: float = 0.5
 @export var max_zoom: float = 2.0
-@export var zoom_step: float = 0.1
+@export var zoom_step: float = 0.12
+## Higher = snappier; lower = floatier. Frame-rate independent (scaled by delta).
+@export var pan_smoothing: float = 12.0
+@export var zoom_smoothing: float = 14.0
 
 var _shake_amount: float = 0.0
 var _shake_timer: float = 0.0
 var _shake_duration: float = 0.0
+var _pan_velocity: Vector2 = Vector2.ZERO
+var _target_zoom: float = 1.0
 
 func _ready() -> void:
 	position = Vector2(1024, 512)
+	_target_zoom = zoom.x
 	add_to_group("rts_camera")
 
 ## Kick a decaying screen shake. Applied to `offset` (not `position`) so it never
@@ -48,9 +54,19 @@ func _process(delta: float) -> void:
 	elif mouse_pos.y >= viewport_size.y - float(edge_margin) and mouse_pos.y <= viewport_size.y:
 		direction.y += 1.0
 
+	# Ease the pan velocity toward the target so starts/stops glide instead of
+	# snapping. pan_speed is divided by zoom so the on-screen speed stays steady.
+	var target_velocity: Vector2 = Vector2.ZERO
 	if direction != Vector2.ZERO:
-		direction = direction.normalized()
-		position += direction * pan_speed * delta / zoom.x
+		target_velocity = direction.normalized() * pan_speed / zoom.x
+	_pan_velocity = _pan_velocity.lerp(target_velocity, clampf(pan_smoothing * delta, 0.0, 1.0))
+	position += _pan_velocity * delta
+
+	# Smoothly approach the target zoom set by the wheel.
+	if not is_equal_approx(zoom.x, _target_zoom):
+		var z: float = lerpf(zoom.x, _target_zoom, clampf(zoom_smoothing * delta, 0.0, 1.0))
+		zoom = Vector2(z, z)
+
 	_clamp_to_world()
 	_apply_shake(delta)
 
@@ -77,9 +93,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_apply_zoom(-zoom_step)
 
 func _apply_zoom(amount: float) -> void:
-	var new_zoom: float = clampf(zoom.x + amount, min_zoom, max_zoom)
-	zoom = Vector2(new_zoom, new_zoom)
-	_clamp_to_world()
+	# Set a target; _process eases the actual zoom toward it.
+	_target_zoom = clampf(_target_zoom + amount, min_zoom, max_zoom)
 
 ## Keep the view inside the world; if the view is wider than the world on an
 ## axis (possible at min zoom), center that axis instead — clampf would get
