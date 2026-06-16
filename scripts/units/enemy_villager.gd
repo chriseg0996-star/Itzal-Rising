@@ -51,6 +51,7 @@ func _ready() -> void:
 		_stat.health_changed.connect(_on_health_changed)
 	if _hp_bar_fg != null:
 		_hp_bar_width = _hp_bar_fg.offset_right - _hp_bar_fg.offset_left
+	UnitHpBar.enhance(self)
 	_update_hp_bar()
 	_home = _find_home()
 	var old_sprite := get_node_or_null("Sprite")

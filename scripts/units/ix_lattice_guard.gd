@@ -49,6 +49,7 @@ func _ready() -> void:
 		add_to_group("player_units")
 	if hp_bar_fg != null:
 		hp_bar_width = hp_bar_fg.offset_right - hp_bar_fg.offset_left
+	UnitHpBar.enhance(self)
 	var old_sprite := get_node_or_null("Sprite")
 	if old_sprite != null and old_sprite is CanvasItem:
 		(old_sprite as CanvasItem).visible = false
