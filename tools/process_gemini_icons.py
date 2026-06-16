@@ -27,11 +27,23 @@ LO = 60.0   # luminance below this -> transparent
 HI = 145.0  # luminance above this -> fully opaque
 
 # name -> (source file, keep-x range, keep-y range, optional bottom-right remove)
+# The resource cards have a baked number bottom-right; the building/unit icons
+# are clean single glyphs (just a Gemini sparkle watermark in the corner to drop).
 CARDS: dict = {
 	"pop":  ("pop.png.png",  (0.13, 0.40), (0.17, 0.82), None),
 	"wood": ("wood.png.png", (0.06, 0.94), (0.07, 0.93), (0.60, 0.64)),
 	"gold": ("gold.png.png", (0.06, 0.94), (0.07, 0.93), (0.60, 0.62)),
 	"food": ("food.png.png", (0.06, 0.94), (0.07, 0.90), (0.60, 0.62)),
+	"bld_tc":       ("bld_tc.png.png",       (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"bld_barracks": ("bld_barracks.png.png", (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"bld_tower":    ("bld_tower.png.png",    (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"bld_monument": ("bld_monument.png.png", (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"bld_farm":     ("bld_farm.png.png",     (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"unit_villager": ("unit_villager.png.png", (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"unit_soldier":  ("unit_soldier.png.png",  (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"unit_archer":   ("unit_archer.png.png",   (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"unit_raider":   ("unit_raider.png.png",   (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"unit_guard":    ("unit_guard.png.png",    (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
 }
 
 

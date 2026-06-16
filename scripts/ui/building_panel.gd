@@ -35,9 +35,45 @@ func _ready() -> void:
 	_research_atk_btn.pressed.connect(func(): _try_research("atk"))
 	_research_cav_btn.pressed.connect(func(): _try_research("cavalry"))
 	_research_armor_btn.pressed.connect(func(): _try_research("armor"))
+	# Build-button icons (graceful: skip any that aren't present yet).
+	_set_btn_icon(_barracks_btn, "bld_barracks")
+	_set_btn_icon(_tc_btn, "bld_tc")
+	_set_btn_icon(_tower_btn, "bld_tower")
+	_set_btn_icon(_monument_btn, "bld_monument")
+	_set_btn_icon(_farm_btn, "bld_farm")
+	for b in [_train_btn, _train2_btn, _train3_btn]:
+		b.add_theme_constant_override("icon_max_width", 22)
 	SelectionManager.building_selected.connect(show_building)
 	SelectionManager.building_deselected.connect(hide_building)
 	_side_panel.visible = false
+
+## Sets a button's left icon from assets/ui/icons/<key>.png if it exists.
+func _set_btn_icon(btn: Button, key: String) -> void:
+	var path: String = "res://assets/ui/icons/%s.png" % key
+	if ResourceLoader.exists(path):
+		btn.icon = load(path)
+		btn.add_theme_constant_override("icon_max_width", 24)
+
+## Maps a unit's train label to its archetype icon key.
+func _unit_icon_key(label: String) -> String:
+	var l: String = label.to_lower()
+	if l.contains("archer"):
+		return "unit_archer"
+	if l.contains("raider") or l.contains("lancer") or l.contains("rider"):
+		return "unit_raider"
+	if l.contains("guard"):
+		return "unit_guard"
+	if l.contains("villager") or l.contains("weaver"):
+		return "unit_villager"
+	return "unit_soldier"
+
+func _apply_train_icon(btn: Button, label: String) -> void:
+	var path: String = "res://assets/ui/icons/%s.png" % _unit_icon_key(label)
+	if not ResourceLoader.exists(path):
+		return
+	var tex: Texture2D = load(path)
+	if btn.icon != tex:
+		btn.icon = tex
 
 func show_building(building: Node) -> void:
 	_selected_building = building
@@ -81,10 +117,13 @@ func _refresh() -> void:
 	_train3_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(2)
 	if _train_btn.visible:
 		_train_btn.text = "%s (%s)" % [b.get_train_label(0), b.get_train_cost_label(0)]
+		_apply_train_icon(_train_btn, b.get_train_label(0))
 	if _train2_btn.visible:
 		_train2_btn.text = "%s (%s)" % [b.get_train_label(1), b.get_train_cost_label(1)]
+		_apply_train_icon(_train2_btn, b.get_train_label(1))
 	if _train3_btn.visible:
 		_train3_btn.text = "%s (%s)" % [b.get_train_label(2), b.get_train_cost_label(2)]
+		_apply_train_icon(_train3_btn, b.get_train_label(2))
 	_refresh_research(b)
 
 ## Research is offered on the player's Town Center only. Buttons are static
