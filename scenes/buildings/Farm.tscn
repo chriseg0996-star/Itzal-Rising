@@ -1,6 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+[ext_resource type="Texture2D" uid="uid://cduf460pdobd8" path="res://assets/buildings/farm.png" id="2_farm_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_FARM"]
 size = Vector2(72, 64)
@@ -9,9 +10,13 @@ size = Vector2(72, 64)
 script = ExtResource("1_bldg_script")
 building_name = "Farm"
 max_hp = 200
-sprite_asset = "farm"
+sprite_asset = ""
 faction_id = 0
 food_per_sec = 1.5
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_farm_tex")
 
 [node name="Sprite" type="ColorRect" parent="."]
 visible = false
