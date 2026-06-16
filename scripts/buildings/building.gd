@@ -59,10 +59,11 @@ const RESEARCH: Dictionary = {
 @export var attack_range: float = 0.0
 @export var attack_interval: float = 0.0
 
-const HP_BAR_WIDTH: float = 56.0
-const HP_BAR_HEIGHT: float = 5.0
-const HP_BAR_Y: float = -110.0
-const HP_BAR_BG: Color = Color(0.08, 0.1, 0.12, 0.9)
+const HP_BAR_WIDTH: float = 64.0
+const HP_BAR_HEIGHT: float = 8.0
+const HP_BAR_Y: float = -112.0
+const HP_BAR_BG: Color = Color(0.08, 0.1, 0.12, 0.95)
+const HP_BAR_OUTLINE: Color = Color(0.0, 0.0, 0.0, 0.85)
 
 var hp: int
 var queue: Array = []
@@ -294,6 +295,8 @@ func _draw() -> void:
 		return
 	var ratio: float = clampf(float(hp) / float(max_hp), 0.0, 1.0)
 	var origin := Vector2(-HP_BAR_WIDTH * 0.5, HP_BAR_Y)
+	# Dark outline so the bar reads against any terrain, then track, then fill.
+	draw_rect(Rect2(origin - Vector2(1.5, 1.5), Vector2(HP_BAR_WIDTH + 3.0, HP_BAR_HEIGHT + 3.0)), HP_BAR_OUTLINE)
 	draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH, HP_BAR_HEIGHT)), HP_BAR_BG)
 	var fill: Color = _hp_fill_color.lerp(Color(0.85, 0.2, 0.15), 1.0 - ratio)
 	draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH * ratio, HP_BAR_HEIGHT)), fill)
