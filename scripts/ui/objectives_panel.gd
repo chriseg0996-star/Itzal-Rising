@@ -14,7 +14,7 @@ const LABEL_DONE: Color = Color(0.92, 0.95, 0.98, 1)
 const LABEL_TODO: Color = Color(0.92, 0.95, 0.98, 1)
 
 var _rows: Array[VBoxContainer] = []
-var _dots: Array[ColorRect] = []
+var _icons: Array[TextureRect] = []
 var _name_labels: Array[Label] = []
 var _status_labels: Array[Label] = []
 var _bars: Array[ProgressBar] = []
@@ -41,10 +41,11 @@ func _build_rows() -> void:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 6)
 
-		var dot := ColorRect.new()
-		dot.custom_minimum_size = Vector2(6, 6)
-		dot.color = DOT_TODO
-		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var icon := TextureRect.new()
+		icon.custom_minimum_size = Vector2(20, 20)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 		var name_label := Label.new()
 		name_label.text = ""
@@ -59,7 +60,7 @@ func _build_rows() -> void:
 		status_label.add_theme_color_override("font_color", LABEL_TODO)
 		status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
-		line.add_child(dot)
+		line.add_child(icon)
 		line.add_child(name_label)
 		line.add_child(status_label)
 
@@ -76,7 +77,7 @@ func _build_rows() -> void:
 		_content.add_child(row)
 
 		_rows.append(row)
-		_dots.append(dot)
+		_icons.append(icon)
 		_name_labels.append(name_label)
 		_status_labels.append(status_label)
 		_bars.append(bar)
@@ -96,7 +97,9 @@ func _refresh() -> void:
 		_rows[i].visible = true
 		_name_labels[i].text = ObjectiveManager.get_label(obj)
 		_status_labels[i].text = "✓" if done else "%d/%d" % [current, target]
-		_dots[i].color = DOT_DONE if done else DOT_TODO
+		var icon_path: String = ObjectiveManager.get_icon_path(obj)
+		_icons[i].texture = load(icon_path) if icon_path != "" else null
+		_icons[i].modulate = DOT_DONE if done else Color(1, 1, 1, 1)
 		_name_labels[i].add_theme_color_override("font_color", LABEL_DONE if done else LABEL_TODO)
 		_status_labels[i].add_theme_color_override("font_color", LABEL_DONE if done else LABEL_TODO)
 		_bars[i].value = 100.0 if done else progress * 100.0

@@ -45,8 +45,26 @@ const OBJECTIVES: Array[Dictionary] = [
 	},
 ]
 
+## Objective id -> HUD icon key (assets/ui/icons/<key>.png). Barracks reuses the
+## build-button icon.
+const ICON_BY_ID: Dictionary = {
+	"train_first_soldier": "obj_soldier",
+	"gather_500_resources": "obj_resources",
+	"build_barracks": "bld_barracks",
+	"train_5_soldiers": "obj_squad",
+	"survive_5_minutes": "obj_time",
+}
+
 var _completed: Array[String] = []
 var _accum: float = 0.0
+
+## res:// path to the objective's icon, or "" if none/missing.
+func get_icon_path(obj: Dictionary) -> String:
+	var key: String = String(ICON_BY_ID.get(String(obj.get("id", "")), ""))
+	if key == "":
+		return ""
+	var path: String = "res://assets/ui/icons/%s.png" % key
+	return path if ResourceLoader.exists(path) else ""
 
 func _process(delta: float) -> void:
 	_accum += delta

@@ -44,6 +44,10 @@ CARDS: dict = {
 	"unit_archer":   ("unit_archer.png.png",   (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
 	"unit_raider":   ("unit_raider.png.png",   (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
 	"unit_guard":    ("unit_guard.png.png",    (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"obj_soldier":   ("obj_soldier.png.png",   (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"obj_resources": ("obj_resources.png.png", (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"obj_squad":     ("obj_squad.png.png",     (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
+	"obj_time":      ("obj_time.png.png",      (0.04, 0.96), (0.04, 0.96), (0.90, 0.90)),
 }
 
 
