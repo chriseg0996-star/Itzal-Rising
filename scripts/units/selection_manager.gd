@@ -4,6 +4,9 @@ signal building_selected(building: Node)
 signal building_deselected
 signal move_commanded(target: Vector2, units: Array)
 signal selection_changed(units: Array)
+## Read-only focus on a non-commandable node (enemy unit/building) for the info
+## panel. Emits null when inspection is cleared.
+signal inspect_changed(node: Node)
 
 const FORMATION_SPACING: float = 40.0
 const LINE_SPACING: float = 48.0
@@ -15,7 +18,31 @@ const MAP_CLAMP_MAX: Vector2 = Vector2(2044.0, 2044.0)
 
 var selected: Array = []
 var selected_building: Node = null
+var inspected: Node = null
 var _throttle: Dictionary = {}
+
+## Read-only inspect of a hostile unit/building: clears any commandable selection
+## and points the info panel at `node`.
+func inspect(node: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		return
+	for u in selected:
+		if is_instance_valid(u):
+			u.set_selected(false)
+	selected.clear()
+	selection_changed.emit([])
+	if selected_building != null:
+		selected_building = null
+		building_deselected.emit()
+	inspected = node
+	inspect_changed.emit(node)
+	SoundManager.play("unit_select")
+
+func _clear_inspect() -> void:
+	if inspected == null:
+		return
+	inspected = null
+	inspect_changed.emit(null)
 
 func select_only(unit: Node) -> void:
 	clear()
@@ -50,6 +77,7 @@ func clear() -> void:
 			u.set_selected(false)
 	selected.clear()
 	selection_changed.emit([])
+	_clear_inspect()
 
 func select_building(b: Node) -> void:
 	if b == null or not is_instance_valid(b):
@@ -57,6 +85,7 @@ func select_building(b: Node) -> void:
 	if b == selected_building:
 		return
 	selected_building = b
+	_clear_inspect()
 	building_selected.emit(b)
 
 func deselect_building() -> void:
@@ -86,7 +115,6 @@ func move_selected_to(target: Vector2, attack_move: bool = false) -> void:
 		var x_offset: float = (float(col_in_row) - float(units_in_row - 1) * 0.5) * FORMATION_SPACING
 		var y_offset: float = (float(row) - float(rows - 1) * 0.5) * FORMATION_SPACING
 		var dest: Vector2 = (target + Vector2(x_offset, y_offset)).clamp(MAP_CLAMP_MIN, MAP_CLAMP_MAX)
-		print("move_selected_to clamped to: ", dest)
 		if attack_move and u.has_method("attack_move"):
 			u.attack_move(dest)
 		elif u.has_method("move_to"):
@@ -171,7 +199,6 @@ func _command_move(world_pos: Vector2) -> void:
 			continue
 		var offset_x: float = (float(i) - float(n - 1) * 0.5) * LINE_SPACING
 		var target: Vector2 = (world_pos + Vector2(offset_x, 0.0)).clamp(MAP_CLAMP_MIN, MAP_CLAMP_MAX)
-		print("target clamped to: ", target)
 		u.move_to(target)
 		_stamp_throttle(u)
 		dispatched.append(u)

@@ -38,8 +38,8 @@ anchor_top = 1.0
 anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 8.0
-offset_top = -174.0
-offset_right = 200.0
+offset_top = -196.0
+offset_right = 224.0
 offset_bottom = -64.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("PanelStyle")
@@ -54,8 +54,14 @@ horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_font_sizes/font_size = 18
 
+[node name="OwnerLabel" type="Label" parent="VBox"]
+text = ""
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.55, 0.65, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+
 [node name="HPBar" type="ProgressBar" parent="VBox"]
-custom_minimum_size = Vector2(0, 14)
+custom_minimum_size = Vector2(0, 16)
 min_value = 0.0
 max_value = 100.0
 value = 100.0

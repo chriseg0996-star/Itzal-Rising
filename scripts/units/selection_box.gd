@@ -40,6 +40,14 @@ func _handle_left(mb: InputEventMouseButton) -> void:
 			dragging_box = false
 			get_viewport().set_input_as_handled()
 			return
+		# Nothing of ours here: if a hostile unit/structure is under the cursor,
+		# inspect it (read-only HP/name) instead of starting a drag-box.
+		var foe := _inspectable_at(world_pos)
+		if foe != null:
+			SelectionManager.inspect(foe)
+			dragging_box = false
+			get_viewport().set_input_as_handled()
+			return
 		drag_start_world = world_pos
 		dragging_box = true
 		queue_redraw()
@@ -89,6 +97,14 @@ func _building_at(world_pos: Vector2) -> Node:
 	if fid == null or not FactionManager.is_player_faction(int(fid)):
 		return null
 	return b
+
+## Any hostile unit or building under the cursor — for read-only inspection.
+## Player units/buildings are handled before this is reached.
+func _inspectable_at(world_pos: Vector2) -> Node:
+	var u: Node = _node_at(world_pos, UNIT_LAYER_MASK, "combat_units")
+	if u != null:
+		return u
+	return _node_at(world_pos, BUILDING_LAYER_MASK, "buildings")
 
 func _node_at(world_pos: Vector2, mask: int, group: String) -> Node:
 	var space := get_world_2d().direct_space_state
