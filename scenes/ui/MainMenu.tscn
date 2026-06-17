@@ -5,16 +5,11 @@
 [sub_resource type="StyleBoxEmpty" id="SB_Empty"]
 
 [sub_resource type="StyleBoxFlat" id="SB_Hover"]
-bg_color = Color(0, 0.85, 0.85, 0.16)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.35, 1, 1, 0.7)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0.85, 0.85, 0.13)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="MainMenu" type="Control"]
 anchor_right = 1.0
@@ -35,9 +30,9 @@ expand_mode = 1
 stretch_mode = 0
 
 [node name="PlayBtn" type="Button" parent="."]
-anchor_left = 0.40
+anchor_left = 0.412
 anchor_top = 0.415
-anchor_right = 0.60
+anchor_right = 0.588
 anchor_bottom = 0.475
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
@@ -45,9 +40,9 @@ theme_override_styles/pressed = SubResource("SB_Hover")
 theme_override_styles/focus = SubResource("SB_Empty")
 
 [node name="SkirmishBtn" type="Button" parent="."]
-anchor_left = 0.40
+anchor_left = 0.412
 anchor_top = 0.497
-anchor_right = 0.60
+anchor_right = 0.588
 anchor_bottom = 0.557
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
@@ -55,9 +50,9 @@ theme_override_styles/pressed = SubResource("SB_Hover")
 theme_override_styles/focus = SubResource("SB_Empty")
 
 [node name="MultiplayerBtn" type="Button" parent="."]
-anchor_left = 0.40
+anchor_left = 0.412
 anchor_top = 0.579
-anchor_right = 0.60
+anchor_right = 0.588
 anchor_bottom = 0.639
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
@@ -65,9 +60,9 @@ theme_override_styles/pressed = SubResource("SB_Hover")
 theme_override_styles/focus = SubResource("SB_Empty")
 
 [node name="SettingsBtn" type="Button" parent="."]
-anchor_left = 0.40
+anchor_left = 0.412
 anchor_top = 0.661
-anchor_right = 0.60
+anchor_right = 0.588
 anchor_bottom = 0.721
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
@@ -75,9 +70,9 @@ theme_override_styles/pressed = SubResource("SB_Hover")
 theme_override_styles/focus = SubResource("SB_Empty")
 
 [node name="QuitBtn" type="Button" parent="."]
-anchor_left = 0.40
+anchor_left = 0.412
 anchor_top = 0.740
-anchor_right = 0.60
+anchor_right = 0.588
 anchor_bottom = 0.800
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
