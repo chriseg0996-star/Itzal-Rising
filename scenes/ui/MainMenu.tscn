@@ -35,40 +35,50 @@ expand_mode = 1
 stretch_mode = 0
 
 [node name="PlayBtn" type="Button" parent="."]
-anchor_left = 0.398
-anchor_top = 0.381
-anchor_right = 0.601
-anchor_bottom = 0.453
+anchor_left = 0.40
+anchor_top = 0.415
+anchor_right = 0.60
+anchor_bottom = 0.475
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
 theme_override_styles/pressed = SubResource("SB_Hover")
 theme_override_styles/focus = SubResource("SB_Empty")
 
 [node name="SkirmishBtn" type="Button" parent="."]
-anchor_left = 0.398
-anchor_top = 0.475
-anchor_right = 0.601
-anchor_bottom = 0.548
+anchor_left = 0.40
+anchor_top = 0.497
+anchor_right = 0.60
+anchor_bottom = 0.557
+theme_override_styles/normal = SubResource("SB_Empty")
+theme_override_styles/hover = SubResource("SB_Hover")
+theme_override_styles/pressed = SubResource("SB_Hover")
+theme_override_styles/focus = SubResource("SB_Empty")
+
+[node name="MultiplayerBtn" type="Button" parent="."]
+anchor_left = 0.40
+anchor_top = 0.579
+anchor_right = 0.60
+anchor_bottom = 0.639
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
 theme_override_styles/pressed = SubResource("SB_Hover")
 theme_override_styles/focus = SubResource("SB_Empty")
 
 [node name="SettingsBtn" type="Button" parent="."]
-anchor_left = 0.398
-anchor_top = 0.568
-anchor_right = 0.601
-anchor_bottom = 0.641
+anchor_left = 0.40
+anchor_top = 0.661
+anchor_right = 0.60
+anchor_bottom = 0.721
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
 theme_override_styles/pressed = SubResource("SB_Hover")
 theme_override_styles/focus = SubResource("SB_Empty")
 
 [node name="QuitBtn" type="Button" parent="."]
-anchor_left = 0.398
-anchor_top = 0.662
-anchor_right = 0.601
-anchor_bottom = 0.735
+anchor_left = 0.40
+anchor_top = 0.740
+anchor_right = 0.60
+anchor_bottom = 0.800
 theme_override_styles/normal = SubResource("SB_Empty")
 theme_override_styles/hover = SubResource("SB_Hover")
 theme_override_styles/pressed = SubResource("SB_Hover")
