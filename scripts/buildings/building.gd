@@ -63,6 +63,11 @@ const RESEARCH: Dictionary = {
 @export var train_3_costs: Dictionary = {}
 @export var train_3_duration: float = 5.0
 
+@export var train_unit_4_scene: PackedScene
+@export var train_unit_4_label: String = ""
+@export var train_4_costs: Dictionary = {}
+@export var train_4_duration: float = 5.0
+
 @export var attack_damage: int = 0
 @export var attack_range: float = 0.0
 @export var attack_interval: float = 0.0
@@ -180,8 +185,9 @@ func is_complete() -> bool:
 func report_worker() -> void:
 	_worker_ttl = 1.0
 
-## Era II unlocks the cavalry slot (slot 2) for whoever owns this building.
+## Era gates: cavalry (slot 2) at Era II, siege (slot 3) at Era III.
 const CAVALRY_ERA: int = 2
+const SIEGE_ERA: int = 3
 
 func _owner_era() -> int:
 	return GameStats.era if FactionManager.is_player_faction(faction_id) else GameStats.ai_era
@@ -193,6 +199,8 @@ func has_train_slot(slot: int) -> bool:
 		return train_unit_2_scene != null
 	if slot == 2:
 		return train_unit_3_scene != null and _owner_era() >= CAVALRY_ERA
+	if slot == 3:
+		return train_unit_4_scene != null and _owner_era() >= SIEGE_ERA
 	return false
 
 func get_train_cost_label(slot: int = 0) -> String:
@@ -201,6 +209,8 @@ func get_train_cost_label(slot: int = 0) -> String:
 		costs = train_2_costs
 	elif slot == 2:
 		costs = train_3_costs
+	elif slot == 3:
+		costs = train_4_costs
 	var parts: PackedStringArray = PackedStringArray()
 	for type in costs:
 		var letter: String = "?"
@@ -216,6 +226,8 @@ func get_train_label(slot: int = 0) -> String:
 		return train_unit_2_label
 	if slot == 2:
 		return train_unit_3_label
+	if slot == 3:
+		return train_unit_4_label
 	return train_unit_label
 
 func try_queue_training(slot: int = 0) -> bool:
@@ -240,6 +252,10 @@ func try_queue_training(slot: int = 0) -> bool:
 		scene = train_unit_3_scene
 		costs = train_3_costs
 		duration = train_3_duration
+	elif slot == 3:
+		scene = train_unit_4_scene
+		costs = train_4_costs
+		duration = train_4_duration
 	else:
 		return false
 	if scene == null:

@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://br8q2x5n4k7p3"]
+[gd_scene load_steps=9 format=3 uid="uid://br8q2x5n4k7p3"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/Soldier.tscn" id="2_sol"]
 [ext_resource type="PackedScene" path="res://scenes/units/Archer.tscn" id="3_arc"]
 [ext_resource type="PackedScene" path="res://scenes/units/Raider.tscn" id="4_rdr"]
+[ext_resource type="PackedScene" path="res://scenes/units/Catapult.tscn" id="6_cat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/barracks_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_BRK"]
@@ -26,6 +27,10 @@ train_unit_3_scene = ExtResource("4_rdr")
 train_unit_3_label = "Raider"
 train_3_costs = {"madera": 40, "oro": 50}
 train_3_duration = 12.0
+train_unit_4_scene = ExtResource("6_cat")
+train_unit_4_label = "Catapult"
+train_4_costs = {"madera": 120, "oro": 80}
+train_4_duration = 20.0
 faction_id = 0
 
 [node name="Sprite" type="ColorRect" parent="."]

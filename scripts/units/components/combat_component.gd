@@ -20,6 +20,8 @@ const RANGED_THRESHOLD: float = 120.0
 ## Rock-paper-scissors: each class deals COUNTER_MULT vs the class it counters.
 const COUNTERS: Dictionary = {&"cavalry": &"ranged", &"ranged": &"infantry", &"infantry": &"cavalry"}
 const COUNTER_MULT: float = 1.5
+## Siege engines deal this multiple to buildings (and little to units).
+const SIEGE_BUILDING_MULT: float = 3.0
 
 @export var aggro_range: float = 250.0
 @export var attack_damage: float = 10.0
@@ -168,6 +170,9 @@ func _attack() -> void:
 	var is_counter: bool = COUNTERS.get(unit_class, &"") == _target_class(_target)
 	if is_counter:
 		dmg *= COUNTER_MULT
+	# Siege engines wreck buildings but are weak against units.
+	if unit_class == &"siege" and _target.get("building_name") != null:
+		dmg *= SIEGE_BUILDING_MULT
 	var num_color: Color = Color(1.0, 0.5, 0.1) if is_counter else Color(0.95, 0.95, 0.95)
 	var num_prefix: String = "+" if is_counter else ""
 	# Ranged: launch a projectile that applies the damage on impact. We must NOT

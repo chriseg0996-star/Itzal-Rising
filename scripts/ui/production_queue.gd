@@ -134,4 +134,6 @@ func _icon_key(label: String) -> String:
 		return "unit_guard"
 	if l.contains("villager") or l.contains("weaver"):
 		return "unit_villager"
+	if l.contains("catapult") or l.contains("cannon") or l.contains("engine") or l.contains("siege"):
+		return "unit_siege"  # no icon ships yet → slot falls back to abbreviation
 	return "unit_soldier"

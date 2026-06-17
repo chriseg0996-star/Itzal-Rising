@@ -13,7 +13,7 @@ const SELECTION_SEGMENTS: int = 32
 
 var _selection_color: Color = SELECTION_COLOR
 
-@export var map_bounds:      Rect2  = Rect2(4.0, 4.0, 2040.0, 2040.0)
+@export var map_bounds:      Rect2  = Rect2(4.0, 4.0, MapConfig.WORLD_SIZE - 8.0, MapConfig.WORLD_SIZE - 8.0)
 @export var faction_id:      int    = 1
 @export var sprite_asset:    String = "enemy_soldier"
 @export var max_hp:          int    = 120

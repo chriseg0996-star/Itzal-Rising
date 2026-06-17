@@ -8,6 +8,7 @@ extends CanvasLayer
 @onready var _train_btn: Button = $SidePanel/Margin/VBox/TrainBtn
 @onready var _train2_btn: Button = $SidePanel/Margin/VBox/Train2Btn
 @onready var _train3_btn: Button = $SidePanel/Margin/VBox/Train3Btn
+@onready var _train4_btn: Button = $SidePanel/Margin/VBox/Train4Btn
 @onready var _research_label: Label = $SidePanel/Margin/VBox/ResearchLabel
 @onready var _research_atk_btn: Button = $SidePanel/Margin/VBox/ResearchAtkBtn
 @onready var _research_armor_btn: Button = $SidePanel/Margin/VBox/ResearchArmorBtn
@@ -33,6 +34,7 @@ func _ready() -> void:
 	_train_btn.pressed.connect(func(): _try_train(0))
 	_train2_btn.pressed.connect(func(): _try_train(1))
 	_train3_btn.pressed.connect(func(): _try_train(2))
+	_train4_btn.pressed.connect(func(): _try_train(3))
 	_research_atk_btn.pressed.connect(func(): _try_research("atk"))
 	_research_cav_btn.pressed.connect(func(): _try_research("cavalry"))
 	_research_armor_btn.pressed.connect(func(): _try_research("armor"))
@@ -43,7 +45,7 @@ func _ready() -> void:
 	_set_btn_icon(_tower_btn, "bld_tower")
 	_set_btn_icon(_monument_btn, "bld_monument")
 	_set_btn_icon(_farm_btn, "bld_farm")
-	for b in [_train_btn, _train2_btn, _train3_btn]:
+	for b in [_train_btn, _train2_btn, _train3_btn, _train4_btn]:
 		b.add_theme_constant_override("icon_max_width", 18)
 	SelectionManager.building_selected.connect(show_building)
 	SelectionManager.building_deselected.connect(hide_building)
@@ -67,6 +69,8 @@ func _unit_icon_key(label: String) -> String:
 		return "unit_guard"
 	if l.contains("villager") or l.contains("weaver"):
 		return "unit_villager"
+	if l.contains("catapult") or l.contains("cannon") or l.contains("engine") or l.contains("siege"):
+		return "unit_siege"  # no icon ships yet → button shows text only
 	return "unit_soldier"
 
 func _apply_train_icon(btn: Button, label: String) -> void:
@@ -117,6 +121,7 @@ func _refresh() -> void:
 	_train_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(0)
 	_train2_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(1)
 	_train3_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(2)
+	_train4_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(3)
 	if _train_btn.visible:
 		_train_btn.text = "%s (%s)" % [b.get_train_label(0), b.get_train_cost_label(0)]
 		_apply_train_icon(_train_btn, b.get_train_label(0))
@@ -126,6 +131,9 @@ func _refresh() -> void:
 	if _train3_btn.visible:
 		_train3_btn.text = "%s (%s)" % [b.get_train_label(2), b.get_train_cost_label(2)]
 		_apply_train_icon(_train3_btn, b.get_train_label(2))
+	if _train4_btn.visible:
+		_train4_btn.text = "%s (%s)" % [b.get_train_label(3), b.get_train_cost_label(3)]
+		_apply_train_icon(_train4_btn, b.get_train_label(3))
 	_refresh_research(b)
 
 ## Research is offered on the player's Town Center only. Buttons are static

@@ -21,7 +21,7 @@ const BINDINGS: Array[Array] = [
 	["Place building", "A villager auto-walks over to build it (vulnerable until done)"],
 	["E / R / Q", "Faction abilities (3 per civ)"],
 	["Town Center", "Train villagers, research ATK/ARM, Advance Era"],
-	["Barracks", "Soldier / Archer; Cavalry unlocks at Era II (cav > ranged > infantry)"],
+	["Barracks", "Soldier / Archer; Cavalry @ Era II, Siege @ Era III (siege wrecks buildings)"],
 	["Monument", "Hold 2:00 uncontested to win"],
 	["Esc", "Pause   ·   F1  Toggle this panel"],
 	["New here?", "Try the Tutorial from the Campaign menu"],

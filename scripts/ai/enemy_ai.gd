@@ -145,17 +145,23 @@ func _phase_train_at_barracks() -> void:
 	# (node names get auto-renamed on sibling conflicts, so they're unreliable).
 	var archers: int = 0
 	var cavalry: int = 0
+	var siege: int = 0
 	for s in army:
 		var asset: String = String(s.get("sprite_asset"))
 		if asset.contains("archer"):
 			archers += 1
 		elif asset.contains("raider"):
 			cavalry += 1
-	var melee: int = army.size() - archers - cavalry
+		elif asset.contains("siege"):
+			siege += 1
+	var melee: int = army.size() - archers - cavalry - siege
 	for b in _get_enemy_buildings():
 		if b.building_name == "Barracks" and b.queue.size() < b.MAX_QUEUE:
 			var slot: int = 0
-			if b.has_train_slot(2) and cavalry * 2 < melee:
+			# A couple of siege engines once teched + with an army to escort them.
+			if b.has_train_slot(3) and siege < 2 and army.size() >= 6:
+				slot = 3
+			elif b.has_train_slot(2) and cavalry * 2 < melee:
 				slot = 2
 			elif b.has_train_slot(1) and archers * 2 < melee:
 				slot = 1
