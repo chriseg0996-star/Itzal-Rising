@@ -69,6 +69,7 @@ const COLOR_BLOCKED: Color = Color(1.0, 0.3, 0.3, 0.45)
 var current_type: String = ""
 var preview_root: Node2D
 var preview_rect: ColorRect
+var preview_cost: Label
 
 func _ready() -> void:
 	preview_root = Node2D.new()
@@ -78,7 +79,23 @@ func _ready() -> void:
 	preview_rect = ColorRect.new()
 	preview_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	preview_root.add_child(preview_rect)
+	preview_cost = Label.new()
+	preview_cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview_cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	preview_cost.add_theme_font_size_override("font_size", 15)
+	preview_cost.add_theme_constant_override("outline_size", 6)
+	preview_cost.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	preview_root.add_child(preview_cost)
 	add_child(preview_root)
+
+## "100W 50G" style cost string for a building type.
+func cost_text(type: String) -> String:
+	var cost: Dictionary = BUILDING_DATA.get(type, {}).get("cost", {})
+	var parts: PackedStringArray = PackedStringArray()
+	for k in cost:
+		var letter: String = "W" if k == "madera" else ("G" if k == "oro" else "F")
+		parts.append("%d%s" % [int(cost[k]), letter])
+	return " ".join(parts)
 
 func is_placing() -> bool:
 	return current_type != ""
@@ -101,6 +118,9 @@ func start_placement(type: StringName) -> void:
 	preview_rect.offset_top = -size.y * 0.5
 	preview_rect.offset_right = size.x * 0.5
 	preview_rect.offset_bottom = size.y * 0.5
+	preview_cost.text = "%s   %s" % [String(type).capitalize(), cost_text(type)]
+	preview_cost.size.x = 200.0
+	preview_cost.position = Vector2(-100.0, -size.y * 0.5 - 30.0)
 	preview_root.visible = true
 
 func cancel_placement() -> void:
@@ -115,8 +135,10 @@ func _process(_delta: float) -> void:
 	var cost: Dictionary = BUILDING_DATA[current_type].cost
 	if _can_afford(cost):
 		preview_rect.color = COLOR_AFFORDABLE
+		preview_cost.modulate = Color(0.6, 1.0, 0.6)
 	else:
 		preview_rect.color = COLOR_BLOCKED
+		preview_cost.modulate = Color(1.0, 0.5, 0.45)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(ACTION_BARRACKS):

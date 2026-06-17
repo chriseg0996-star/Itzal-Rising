@@ -45,6 +45,9 @@ func _ready() -> void:
 	_set_btn_icon(_tower_btn, "bld_tower")
 	_set_btn_icon(_monument_btn, "bld_monument")
 	_set_btn_icon(_farm_btn, "bld_farm")
+	# Cost on hover (the placement ghost also shows it while placing).
+	for pair in [[_barracks_btn, "barracks"], [_tc_btn, "tc"], [_tower_btn, "tower"], [_monument_btn, "monument"], [_farm_btn, "farm"]]:
+		(pair[0] as Button).tooltip_text = "%s  (%s)" % [(pair[0] as Button).text, BuildingPlacer.cost_text(pair[1])]
 	for b in [_train_btn, _train2_btn, _train3_btn, _train4_btn]:
 		b.add_theme_constant_override("icon_max_width", 18)
 	SelectionManager.building_selected.connect(show_building)
