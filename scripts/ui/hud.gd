@@ -9,7 +9,10 @@ const PULSE_COLOR: Color = Color(0.85, 0.2, 0.15, 1.0)
 @onready var food_label: Label = $TopBar/Margin/HBox/Food/Label
 @onready var gold_label: Label = $TopBar/Margin/HBox/Gold/Label
 @onready var pop_label: Label = $TopBar/Margin/HBox/Pop/Label
+@onready var era_label: Label = $TopBar/Margin/HBox/Era/Label
 @onready var _alert_box: VBoxContainer = $AlertPanel/VBox
+
+const ERA_ROMAN: Array[String] = ["I", "II", "III"]
 
 var _poll_timer: float = 0.0
 var _alert_labels: Array[Label] = []
@@ -28,6 +31,7 @@ func _ready() -> void:
 			_alert_labels.append(lbl)
 	_refresh()
 	_update_population()
+	_update_era()
 	_refresh_alerts()
 
 func _process(delta: float) -> void:
@@ -35,6 +39,7 @@ func _process(delta: float) -> void:
 	if _poll_timer >= POLL_INTERVAL:
 		_poll_timer = 0.0
 		_update_population()
+		_update_era()
 	if _pulse_cooldown > 0.0:
 		_pulse_cooldown -= delta
 
@@ -67,6 +72,12 @@ func _refresh() -> void:
 	wood_label.text = str(ResourceManager.get_resource(ResourceManager.WOOD, pf))
 	food_label.text = str(ResourceManager.get_resource(ResourceManager.FOOD, pf))
 	gold_label.text = str(ResourceManager.get_resource(ResourceManager.GOLD, pf))
+
+func _update_era() -> void:
+	if era_label == null:
+		return
+	var e: int = clampi(GameStats.era, 1, ERA_ROMAN.size())
+	era_label.text = "Era %s" % ERA_ROMAN[e - 1]
 
 func _update_population() -> void:
 	var count: int = get_tree().get_nodes_in_group("player_units").size()

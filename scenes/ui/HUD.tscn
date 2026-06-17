@@ -109,6 +109,16 @@ tooltip_text = "Population"
 theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_font_sizes/font_size = 16
 
+[node name="Era" type="HBoxContainer" parent="TopBar/Margin/HBox"]
+tooltip_text = "Era"
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="TopBar/Margin/HBox/Era"]
+text = "Era I"
+tooltip_text = "Era"
+theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+
 [node name="UnitInfoPanel" parent="." instance=ExtResource("2_uip")]
 
 [node name="AlertPanel" type="Control" parent="."]

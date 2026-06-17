@@ -180,13 +180,19 @@ func is_complete() -> bool:
 func report_worker() -> void:
 	_worker_ttl = 1.0
 
+## Era II unlocks the cavalry slot (slot 2) for whoever owns this building.
+const CAVALRY_ERA: int = 2
+
+func _owner_era() -> int:
+	return GameStats.era if FactionManager.is_player_faction(faction_id) else GameStats.ai_era
+
 func has_train_slot(slot: int) -> bool:
 	if slot == 0:
 		return train_unit_scene != null
 	if slot == 1:
 		return train_unit_2_scene != null
 	if slot == 2:
-		return train_unit_3_scene != null
+		return train_unit_3_scene != null and _owner_era() >= CAVALRY_ERA
 	return false
 
 func get_train_cost_label(slot: int = 0) -> String:
@@ -214,6 +220,8 @@ func get_train_label(slot: int = 0) -> String:
 
 func try_queue_training(slot: int = 0) -> bool:
 	if dying or under_construction:
+		return false
+	if not has_train_slot(slot):  # enforces the era gate on the cavalry slot
 		return false
 	if queue.size() >= MAX_QUEUE:
 		return false
