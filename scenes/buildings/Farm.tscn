@@ -15,6 +15,7 @@ faction_id = 0
 food_per_sec = 1.5
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]
+position = Vector2(0, -28)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_farm_tex")
 

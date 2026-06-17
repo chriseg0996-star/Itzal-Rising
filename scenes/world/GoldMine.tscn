@@ -13,7 +13,7 @@ amount = 2000
 sprite_asset = ""
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]
-position = Vector2(0, -16)
+position = Vector2(0, -22)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_gold_tex")
 

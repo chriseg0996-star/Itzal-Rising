@@ -77,35 +77,58 @@ def make_tree() -> None:
 
 
 def make_goldmine() -> None:
-	W, H = 152, 116
+	# A timber-framed mine entrance dug into a dark rock face, gold ore glinting
+	# inside and piled at the mouth.
+	W, H = 156, 124
 	img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+	cx = W // 2
+	gy = H - 16  # ground line
+	_ground_shadow(img, cx, gy, 60, 16)
 	draw = ImageDraw.Draw(img)
-	cx, cy = W // 2, H - 34
-	_ground_shadow(img, cx, H - 16, 58, 18)
-	draw = ImageDraw.Draw(img)
-	# Basalt mound: stacked dark ellipses with a top highlight.
-	draw.ellipse([cx - 60, cy - 30, cx + 60, cy + 40], fill=(34, 36, 44))
-	draw.ellipse([cx - 44, cy - 40, cx + 40, cy + 18], fill=(46, 49, 58))
-	draw.ellipse([cx - 30, cy - 44, cx + 18, cy - 6], fill=(58, 62, 72))
-	# Neon-teal rim light along the top of the rock.
-	draw.arc([cx - 60, cy - 34, cx + 60, cy + 36], 195, 345, fill=NEON + (160,), width=2)
-	# Glowing amber crystal shards.
-	shards = [(cx - 24, cy - 6, 16, 34), (cx + 6, cy - 16, 20, 48),
-		(cx + 30, cy + 2, 14, 28), (cx - 4, cy + 6, 12, 24)]
+
+	# Rock cliff: stacked dark slate slabs (chunky, not round).
+	draw.polygon([(cx - 64, gy), (cx - 52, gy - 64), (cx - 10, gy - 80),
+		(cx + 44, gy - 70), (cx + 64, gy - 30), (cx + 60, gy)], fill=(40, 42, 50))
+	draw.polygon([(cx - 40, gy - 30), (cx - 30, gy - 70), (cx + 8, gy - 78),
+		(cx + 38, gy - 60), (cx + 44, gy - 28)], fill=(52, 55, 65))
+	# Neon-teal rim light along the top ridge.
+	draw.line([(cx - 52, gy - 64), (cx - 10, gy - 80), (cx + 44, gy - 70)],
+		fill=NEON + (150,), width=2)
+
+	# Mine shaft: a dark arched opening (rounded-top rectangle).
+	mw, mh = 46, 54
+	ax0, ay0, ax1, ay1 = cx - mw // 2, gy - mh, cx + mw // 2, gy
+	draw.rounded_rectangle([ax0, ay0, ax1, ay1], radius=mw // 2, fill=(10, 9, 13))
+	draw.rectangle([ax0, ay0 + mw // 2, ax1, ay1], fill=(10, 9, 13))
+
+	# Gold glints deep in the shaft (glow).
+	glints = [(cx - 8, gy - 30), (cx + 9, gy - 22), (cx + 1, gy - 14), (cx - 12, gy - 12)]
 	glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
 	gdraw = ImageDraw.Draw(glow)
-	for (sx, sy, sw, sh) in shards:
-		gdraw.polygon([(sx, sy - sh), (sx - sw // 2, sy), (sx + sw // 2, sy)],
-			fill=(255, 190, 60, 200))
-	glow = glow.filter(ImageFilter.GaussianBlur(5))
+	for (px, py) in glints:
+		gdraw.ellipse([px - 6, py - 6, px + 6, py + 6], fill=(255, 195, 70, 200))
+	# Ore pile at the mouth (amber rocks).
+	ore = [(cx - 18, gy - 4, 10), (cx - 2, gy - 1, 12), (cx + 16, gy - 3, 9), (cx + 6, gy - 9, 8)]
+	for (ox, oy, orad) in ore:
+		gdraw.ellipse([ox - orad, oy - orad, ox + orad, oy + orad], fill=(247, 178, 42, 160))
+	glow = glow.filter(ImageFilter.GaussianBlur(4))
 	img.alpha_composite(glow)
 	draw = ImageDraw.Draw(img)
-	for (sx, sy, sw, sh) in shards:
-		draw.polygon([(sx, sy - sh), (sx - sw // 2, sy), (sx + sw // 2, sy)],
-			fill=(247, 178, 42))
-		# Bright facet + tip.
-		draw.polygon([(sx, sy - sh), (sx, sy), (sx + sw // 2, sy)], fill=(255, 214, 92))
-		draw.line([(sx, sy - sh), (sx, sy)], fill=(255, 245, 200), width=1)
+	for (px, py) in glints:
+		draw.ellipse([px - 2, py - 2, px + 2, py + 2], fill=(255, 226, 130))
+	for (ox, oy, orad) in ore:
+		draw.ellipse([ox - orad, oy - orad, ox + orad, oy + orad], fill=(214, 150, 36))
+		draw.ellipse([ox - orad, oy - orad, ox + orad // 2, oy], fill=(255, 206, 90))
+
+	# Timber frame around the shaft: two posts + a lintel, with neon bolts.
+	post = 8
+	beam = (74, 50, 30)
+	draw.rectangle([ax0 - post, ay0, ax0, gy], fill=beam)
+	draw.rectangle([ax1, ay0, ax1 + post, gy], fill=beam)
+	draw.rectangle([ax0 - post - 4, ay0 - post, ax1 + post + 4, ay0], fill=beam)
+	for bx in (ax0 - 2, ax1 + 2):
+		draw.ellipse([bx - 2, ay0 - post + 2, bx + 2, ay0 - 2], fill=NEON + (220,))
+
 	img.save(OUT_DIR / "goldmine.png")
 	print("WROTE assets/world/goldmine.png (%dx%d)" % (W, H))
 
