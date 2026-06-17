@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://co1k71a4ihf6n"]
+[gd_scene load_steps=4 format=3 uid="uid://co1k71a4ihf6n"]
 
 [ext_resource type="Script" path="res://scripts/world/resource_node.gd" id="1_res_script"]
+[ext_resource type="Texture2D" uid="uid://c2mlcht41gcwq" path="res://assets/world/tree.png" id="2_tree_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_Res"]
 size = Vector2(48, 48)
@@ -8,8 +9,15 @@ size = Vector2(48, 48)
 [node name="ResourceNode" type="Node2D"]
 script = ExtResource("1_res_script")
 amount = 800
+sprite_asset = ""
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+position = Vector2(0, -32)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_tree_tex")
 
 [node name="Sprite" type="ColorRect" parent="."]
+visible = false
 offset_left = -24.0
 offset_top = -24.0
 offset_right = 24.0
