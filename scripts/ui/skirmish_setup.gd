@@ -30,14 +30,17 @@ var _factions: Array[Dictionary] = [
 	{"id": 0, "name": "Itzal Resistance", "accent": Color(0.0, 0.90, 0.78, 1.0), "playable": true,
 	 "atk": "ATK ×1.0", "armor": "ARM +1", "hp": "HP ×1.0",
 	 "icon": "res://assets/ui/faction_itzal.png", "units": "res://assets/ui/units_itzal.png",
+	 "frame": "res://assets/ui/frame_itzal.png",
 	 "desc": "Balanced warriors of Itzal. Ability: Jaguar's Vigor (mass heal). Cavalry: Jaguar Rider. Tech: Jaguar Fury."},
 	{"id": 1, "name": "Enemy Decay", "accent": Color(0.65, 0.15, 0.90, 1.0), "playable": true,
 	 "atk": "ATK ×1.1", "armor": "ARM +0", "hp": "HP ×0.9",
 	 "icon": "res://assets/ui/faction_decay.png", "units": "res://assets/ui/units_decay.png",
+	 "frame": "res://assets/ui/frame_decay.png",
 	 "desc": "Glass-cannon corruption. Ability: Corruption Burst (AoE). Cavalry: Decay Stalker. Tech: Blight Surge."},
 	{"id": 2, "name": "Ix Architects", "accent": Color(0.85, 0.60, 0.10, 1.0), "playable": true,
 	 "atk": "ATK ×1.15", "armor": "ARM +1", "hp": "HP ×1.0",
 	 "icon": "res://assets/ui/faction_ix.png", "units": "res://assets/ui/units_ix.png",
+	 "frame": "res://assets/ui/frame_ix.png",
 	 "desc": "Elite obsidian-lattice strikers. Ability: Lattice Overcharge (armor surge). Cavalry: Lattice Lancer. Tech: Lattice Charge. No archers."},
 ]
 
@@ -59,6 +62,7 @@ var _map_preview_tex: TextureRect = null
 var _map_name_label: Label = null
 var _map_button_styles: Dictionary = {}    # name -> StyleBoxFlat
 var _faction_card_styles: Dictionary = {}  # id -> StyleBoxFlat
+var _faction_cards: Dictionary = {}        # id -> PanelContainer (for select dim)
 var _difficulty_styles: Dictionary = {}    # key -> StyleBoxFlat
 
 @onready var _bg: TextureRect = $BGImage
@@ -177,56 +181,60 @@ func _build_faction_column() -> PanelContainer:
 func _make_faction_card(data: Dictionary) -> PanelContainer:
 	var fid: int = data["id"]
 	var accent: Color = data["accent"]
-	var playable: bool = data["playable"]
+	var frame_path: String = String(data.get("frame", ""))
+	var has_frame: bool = frame_path != "" and ResourceLoader.exists(frame_path)
 
-	var sb := _new_style(4)
+	# The card bg tints with the accent on select (shown through the frame's
+	# transparent centre); the ornate frame is overlaid on top.
+	var sb := _new_style(8)
+	sb.set_content_margin_all(0)
 	_faction_card_styles[fid] = sb
 
 	var card := PanelContainer.new()
 	card.add_theme_stylebox_override("panel", sb)
-	card.custom_minimum_size = Vector2(160, 0)
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	card.custom_minimum_size = Vector2(165, 246) if has_frame else Vector2(160, 0)
+	card.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if has_frame else Control.SIZE_EXPAND_FILL
+	card.size_flags_vertical = Control.SIZE_SHRINK_CENTER if has_frame else Control.SIZE_EXPAND_FILL
 	card.gui_input.connect(_on_faction_input.bind(fid))
+	_faction_cards[fid] = card
+
+	# Content sits inside the frame border.
+	var margin := MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if has_frame:
+		margin.add_theme_constant_override("margin_left", 22)
+		margin.add_theme_constant_override("margin_right", 22)
+		margin.add_theme_constant_override("margin_top", 26)
+		margin.add_theme_constant_override("margin_bottom", 32)
+	card.add_child(margin)
 
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 6)
-	card.add_child(v)
+	v.add_theme_constant_override("separation", 4)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin.add_child(v)
 
 	var icon_path: String = String(data.get("icon", ""))
 	if icon_path != "" and ResourceLoader.exists(icon_path):
 		var icon_tex := TextureRect.new()
 		icon_tex.texture = load(icon_path)
-		icon_tex.custom_minimum_size = Vector2(0, 110)
+		icon_tex.custom_minimum_size = Vector2(0, 56 if has_frame else 110)
 		icon_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon_tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		v.add_child(icon_tex)
-	else:
-		var icon := ColorRect.new()
-		icon.color = accent
-		icon.custom_minimum_size = Vector2(72, 72)
-		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		v.add_child(icon)
 
 	var name_lbl := Label.new()
 	name_lbl.text = data["name"]
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.add_theme_color_override("font_color", accent)
-	name_lbl.add_theme_font_size_override("font_size", 14)
+	name_lbl.add_theme_font_size_override("font_size", 13)
+	name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(name_lbl)
-
-	var units_path: String = String(data.get("units", ""))
-	if units_path != "" and ResourceLoader.exists(units_path):
-		var units_tex := TextureRect.new()
-		units_tex.texture = load(units_path)
-		units_tex.custom_minimum_size = Vector2(0, 54)
-		units_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		units_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		v.add_child(units_tex)
 
 	var chips := HBoxContainer.new()
 	chips.alignment = BoxContainer.ALIGNMENT_CENTER
-	chips.add_theme_constant_override("separation", 6)
+	chips.add_theme_constant_override("separation", 4)
+	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	chips.add_child(_chip(String(data["atk"]), Color(0.9, 0.35, 0.2, 1.0)))
 	chips.add_child(_chip(String(data["armor"]), accent))
 	chips.add_child(_chip(String(data["hp"]), Color(0.4, 0.8, 0.4, 1.0)))
@@ -237,24 +245,19 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc.add_theme_color_override("font_color", TEXT_MUTED)
-	desc.add_theme_font_size_override("font_size", 11)
+	desc.add_theme_font_size_override("font_size", 10)
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(desc)
 
-	if not playable:
-		var ov := ColorRect.new()
-		ov.color = Color(0.0, 0.0, 0.0, 0.55)
-		ov.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		card.add_child(ov)
-		var locked := Label.new()
-		locked.text = "Not playable yet"
-		locked.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		locked.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-		locked.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55, 1.0))
-		locked.add_theme_font_size_override("font_size", 11)
-		ov.add_child(locked)
-		locked.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		locked.offset_bottom = -10.0
+	# Ornate per-faction frame on top (transparent centre, clicks pass through).
+	if has_frame:
+		var frame := TextureRect.new()
+		frame.texture = load(frame_path)
+		frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		frame.stretch_mode = TextureRect.STRETCH_SCALE
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(frame)
 
 	return card
 
@@ -413,13 +416,17 @@ func _refresh_faction_styles() -> void:
 		var sb: StyleBoxFlat = _faction_card_styles[fid]
 		var accent: Color = data["accent"]
 		if fid == selected_faction_id:
-			sb.bg_color = Color(accent.r, accent.g, accent.b, 0.10)
+			sb.bg_color = Color(accent.r, accent.g, accent.b, 0.12)
 			sb.set_border_width_all(2)
 			sb.border_color = accent
+			if _faction_cards.has(fid):
+				_faction_cards[fid].modulate = Color(1, 1, 1, 1)
 		else:
 			sb.bg_color = Color(0.04, 0.07, 0.11, 0.7)
 			sb.set_border_width_all(1)
 			sb.border_color = DIM_BORDER
+			if _faction_cards.has(fid):
+				_faction_cards[fid].modulate = Color(0.60, 0.60, 0.64, 1)
 
 func _refresh_difficulty_styles() -> void:
 	for data in _difficulties:
