@@ -1,6 +1,6 @@
 extends Node
 
-const MAP_BOUNDS: Rect2 = Rect2(0, 0, 2048, 2048)
+const MAP_BOUNDS: Rect2 = Rect2(0, 0, MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 
 const ACTION_BARRACKS: StringName = &"build_barracks"
 const ACTION_TC: StringName = &"build_town_center"

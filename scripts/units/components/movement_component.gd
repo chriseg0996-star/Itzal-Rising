@@ -5,7 +5,7 @@ signal arrived(unit: CharacterBody2D)
 
 @export var speed: float = 120.0
 @export var arrival_threshold: float = 8.0
-@export var map_bounds: Rect2 = Rect2(0, 0, 2048, 2048)
+@export var map_bounds: Rect2 = Rect2(0, 0, MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 
 var _target_position: Vector2 = Vector2.ZERO
 var _moving: bool = false

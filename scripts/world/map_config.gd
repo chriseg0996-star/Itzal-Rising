@@ -8,6 +8,15 @@ extends RefCounted
 ## within reach of each base.
 
 const DEFAULT_MAP: String = "Jungle Basin"
+
+## World dimensions. MAPS positions are authored in DESIGN_SIZE space (the
+## original 2048 layout); MapLoader scales them by SCALE so one constant grows
+## the whole playfield (camera, nav, fog, bounds all read WORLD_SIZE). A bigger
+## map means a longer pre-contact "farming" phase, AoE-style.
+const DESIGN_SIZE: float = 2048.0
+const WORLD_SIZE: float = 3072.0
+const SCALE: float = WORLD_SIZE / DESIGN_SIZE
+
 ## EnemyTC's baked offset inside EnemyBase.tscn — moving the EnemyBase root by
 ## (enemy_tc - this) relocates the whole base while children keep relative pos.
 const DEFAULT_ENEMY_TC: Vector2 = Vector2(1600, 1600)

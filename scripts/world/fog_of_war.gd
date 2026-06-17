@@ -7,8 +7,8 @@ extends Node2D
 ## groups directly). All hostile-visibility writes live HERE and nowhere else.
 ## Known v1 limitation: player units can still auto-acquire fogged targets.
 
-const GRID: int = 32
 const CELL: float = 64.0
+const GRID: int = int(MapConfig.WORLD_SIZE / CELL)
 const POLL: float = 0.25
 const UNIT_RADIUS: float = 280.0
 const BUILDING_RADIUS: float = 320.0

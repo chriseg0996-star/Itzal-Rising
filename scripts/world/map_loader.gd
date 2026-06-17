@@ -14,7 +14,7 @@ const FOOD_SCENE: PackedScene = preload("res://scenes/world/BerryBush.tscn")
 func _ready() -> void:
 	# Swap menu music for the match playlist (silent if the match folder is empty).
 	SoundManager.start_match_music()
-	var cfg: Dictionary = MapConfig.get_map(GameSettings.selected_map)
+	var cfg: Dictionary = _scaled(MapConfig.get_map(GameSettings.selected_map))
 	var world: Node = get_parent()
 	if world == null:
 		return
@@ -71,6 +71,27 @@ func _apply_mission_modifier(world: Node, player_start: Vector2) -> void:
 				world.add_child(v)
 				if v is Node2D:
 					(v as Node2D).global_position = player_start + Vector2(0, 90)
+
+## Scale every position (and position list) in a map config from DESIGN_SIZE to
+## WORLD_SIZE space. Non-position values (tints, texture paths) pass through.
+## DEFAULT_ENEMY_TC stays unscaled — it is the EnemyBase's baked local offset, so
+## `scaled_enemy_tc - DEFAULT` lands the TC at the scaled position.
+func _scaled(raw: Dictionary) -> Dictionary:
+	if is_equal_approx(MapConfig.SCALE, 1.0):
+		return raw
+	var out: Dictionary = {}
+	for k in raw:
+		var v: Variant = raw[k]
+		if v is Vector2:
+			out[k] = (v as Vector2) * MapConfig.SCALE
+		elif v is Array:
+			var a: Array = []
+			for p in v:
+				a.append((p as Vector2) * MapConfig.SCALE if p is Vector2 else p)
+			out[k] = a
+		else:
+			out[k] = v
+	return out
 
 func _move(world: Node, node_name: String, pos: Vector2) -> void:
 	var n: Node = world.get_node_or_null(NodePath(node_name))

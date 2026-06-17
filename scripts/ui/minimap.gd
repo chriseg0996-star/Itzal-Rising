@@ -1,6 +1,6 @@
 extends Control
 
-const WORLD_SIZE: Vector2 = Vector2(2048.0, 2048.0)
+const WORLD_SIZE: Vector2 = Vector2(MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 const POLL_INTERVAL: float = 0.1
 
 const BG_COLOR: Color = Color(0.04, 0.07, 0.10, 0.92)

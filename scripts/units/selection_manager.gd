@@ -12,9 +12,9 @@ const FORMATION_SPACING: float = 40.0
 const LINE_SPACING: float = 48.0
 const NAV_THROTTLE: float = 0.2
 
-# Mirrors harvest_component._safe_target: map (0,0)-(2048,2048) inset by 4px.
+# Mirrors harvest_component._safe_target: the world inset by 4px.
 const MAP_CLAMP_MIN: Vector2 = Vector2(4.0, 4.0)
-const MAP_CLAMP_MAX: Vector2 = Vector2(2044.0, 2044.0)
+const MAP_CLAMP_MAX: Vector2 = Vector2(MapConfig.WORLD_SIZE - 4.0, MapConfig.WORLD_SIZE - 4.0)
 
 var selected: Array = []
 var selected_building: Node = null

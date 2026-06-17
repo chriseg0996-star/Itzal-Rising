@@ -24,7 +24,12 @@ const TOWER_OFFSETS: Array[Vector2] = [
 	Vector2(-300.0, 180.0),
 ]
 const MAP_MIN: float = 80.0
-const MAP_MAX: float = 1968.0
+const MAP_MAX: float = MapConfig.WORLD_SIZE - 80.0
+
+## "Farming phase": the AI gathers, builds and trains but does not march out
+## before this, giving both sides an uncontested economy/build-up window
+## (AoE-style pacing). The bigger map also delays first contact on its own.
+const FIRST_ATTACK_TIME: float = 180.0
 
 var tick_timer: float = 0.0
 var game_time: float = 0.0
@@ -206,6 +211,9 @@ func _place_enemy_building(packed: PackedScene, pos: Vector2) -> void:
 		(building as Node2D).global_position = pos
 
 func _phase_atacar() -> void:
+	# Hold during the farming phase (a monument still triggers force_attack).
+	if game_time < FIRST_ATTACK_TIME:
+		return
 	var soldiers: Array = _get_enemy_soldiers()
 	var threshold: int = ATTACK_FORCE_MIN if game_time < ESCALATION_TIME else ATTACK_FORCE_LATE
 	if soldiers.size() < threshold:

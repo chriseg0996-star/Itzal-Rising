@@ -174,7 +174,7 @@ func _apply_separation(delta: float) -> void:
 	if push.length() <= 2.0:
 		return
 	global_position += push * delta
-	global_position = global_position.clamp(Vector2(4.0, 4.0), Vector2(2044.0, 2044.0))
+	global_position = global_position.clamp(Vector2(4.0, 4.0), Vector2(MapConfig.WORLD_SIZE - 4.0, MapConfig.WORLD_SIZE - 4.0))
 
 func _process_moving(delta: float) -> void:
 	if _nav_agent.is_navigation_finished():
@@ -190,7 +190,7 @@ func _process_moving(delta: float) -> void:
 	if step.length() > dist:
 		step = to_next
 	global_position += step
-	var b: Rect2 = Rect2(4.0, 4.0, 2040.0, 2040.0)
+	var b: Rect2 = Rect2(4.0, 4.0, MapConfig.WORLD_SIZE - 8.0, MapConfig.WORLD_SIZE - 8.0)
 	global_position = global_position.clamp(b.position, b.end)
 
 func assign_harvest(node: ResourceNode) -> void:

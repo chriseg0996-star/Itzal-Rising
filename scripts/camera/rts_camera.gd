@@ -1,6 +1,6 @@
 extends Camera2D
 
-const WORLD_SIZE: Vector2 = Vector2(2048, 2048)
+const WORLD_SIZE: Vector2 = Vector2(MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 
 @export var pan_speed: float = 520.0
 @export var edge_margin: int = 20

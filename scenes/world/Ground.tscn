@@ -8,4 +8,4 @@ z_index = -10
 centered = false
 texture = ExtResource("1_grass")
 region_enabled = true
-region_rect = Rect2(0, 0, 2048, 2048)
+region_rect = Rect2(0, 0, 3072, 3072)

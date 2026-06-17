@@ -11,7 +11,7 @@ enum State { IDLE, MOVING_TO_NODE, HARVESTING, RETURNING }
 @export var harvest_range:    float  = 80.0
 @export var carry_capacity:   int    = 20
 ## Set this to match your NavigationRegion2D polygon extents in the Inspector.
-@export var map_bounds:       Rect2  = Rect2(0.0, 0.0, 2048.0, 2048.0)
+@export var map_bounds:       Rect2  = Rect2(0.0, 0.0, MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 
 var _state:        State             = State.IDLE
 var _target_node:  ResourceNode      = null
