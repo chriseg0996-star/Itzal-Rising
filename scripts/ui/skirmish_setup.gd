@@ -161,7 +161,7 @@ func _build_map_column() -> PanelContainer:
 	return panel
 
 func _build_faction_column() -> PanelContainer:
-	var panel := _make_panel(520.0, true)
+	var panel := _make_panel(700.0, true)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 8)
 	panel.add_child(v)
@@ -192,24 +192,24 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 
 	var card := PanelContainer.new()
 	card.add_theme_stylebox_override("panel", sb)
-	card.custom_minimum_size = Vector2(165, 246) if has_frame else Vector2(160, 0)
+	card.custom_minimum_size = Vector2(212, 316) if has_frame else Vector2(160, 0)
 	card.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if has_frame else Control.SIZE_EXPAND_FILL
 	card.size_flags_vertical = Control.SIZE_SHRINK_CENTER if has_frame else Control.SIZE_EXPAND_FILL
 	card.gui_input.connect(_on_faction_input.bind(fid))
 	_faction_cards[fid] = card
 
-	# Content sits inside the frame border.
+	# Content sits inside the frame border (margins ≈ the painted border width).
 	var margin := MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if has_frame:
-		margin.add_theme_constant_override("margin_left", 22)
-		margin.add_theme_constant_override("margin_right", 22)
-		margin.add_theme_constant_override("margin_top", 26)
-		margin.add_theme_constant_override("margin_bottom", 32)
+		margin.add_theme_constant_override("margin_left", 42)
+		margin.add_theme_constant_override("margin_right", 42)
+		margin.add_theme_constant_override("margin_top", 50)
+		margin.add_theme_constant_override("margin_bottom", 58)
 	card.add_child(margin)
 
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 4)
+	v.add_theme_constant_override("separation", 5)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(v)
 
@@ -217,7 +217,7 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 	if icon_path != "" and ResourceLoader.exists(icon_path):
 		var icon_tex := TextureRect.new()
 		icon_tex.texture = load(icon_path)
-		icon_tex.custom_minimum_size = Vector2(0, 56 if has_frame else 110)
+		icon_tex.custom_minimum_size = Vector2(0, 74 if has_frame else 110)
 		icon_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon_tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -227,25 +227,30 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 	name_lbl.text = data["name"]
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.add_theme_color_override("font_color", accent)
-	name_lbl.add_theme_font_size_override("font_size", 13)
+	name_lbl.add_theme_font_size_override("font_size", 14)
 	name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(name_lbl)
 
-	var chips := HBoxContainer.new()
-	chips.alignment = BoxContainer.ALIGNMENT_CENTER
-	chips.add_theme_constant_override("separation", 4)
-	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	chips.add_child(_chip(String(data["atk"]), Color(0.9, 0.35, 0.2, 1.0)))
-	chips.add_child(_chip(String(data["armor"]), accent))
-	chips.add_child(_chip(String(data["hp"]), Color(0.4, 0.8, 0.4, 1.0)))
-	v.add_child(chips)
+	# Compact stat line (plain coloured labels, no chip backgrounds, so it fits).
+	var stats := HBoxContainer.new()
+	stats.alignment = BoxContainer.ALIGNMENT_CENTER
+	stats.add_theme_constant_override("separation", 6)
+	stats.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for pair in [[String(data["atk"]), Color(0.95, 0.45, 0.25)], [String(data["armor"]), accent], [String(data["hp"]), Color(0.45, 0.85, 0.45)]]:
+		var s := Label.new()
+		s.text = pair[0]
+		s.add_theme_font_size_override("font_size", 10)
+		s.add_theme_color_override("font_color", pair[1])
+		s.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stats.add_child(s)
+	v.add_child(stats)
 
 	var desc := Label.new()
 	desc.text = data["desc"]
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc.add_theme_color_override("font_color", TEXT_MUTED)
-	desc.add_theme_font_size_override("font_size", 10)
+	desc.add_theme_font_size_override("font_size", 11)
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(desc)

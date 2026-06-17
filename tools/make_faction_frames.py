@@ -37,9 +37,13 @@ def main() -> None:
 		# Flood-fill the centre (and a few interior seeds) to a sentinel colour;
 		# the border's bright neon glow is far enough in colour to stop the fill.
 		rgb = im.convert("RGB")
+		# Interior seeds clear the centre; corner/edge seeds clear the outer
+		# checkerboard margin between the ornate art and the texture edge.
 		seeds = [(w // 2, h // 2), (w // 2, h // 3), (w // 2, 2 * h // 3),
 			(w // 3, h // 2), (2 * w // 3, h // 2),
-			(w // 2, int(h * 0.42)), (w // 2, int(h * 0.58))]
+			(w // 2, int(h * 0.42)), (w // 2, int(h * 0.58)),
+			(1, 1), (w - 2, 1), (1, h - 2), (w - 2, h - 2),
+			(w // 2, 1), (w // 2, h - 2), (1, h // 2), (w - 2, h // 2)]
 		for s in seeds:
 			ImageDraw.floodfill(rgb, s, SENT, thresh=THRESH)
 		arr = np.array(im)
