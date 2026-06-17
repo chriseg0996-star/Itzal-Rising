@@ -4,9 +4,11 @@ const CLICK_DISTANCE_THRESHOLD: float = 4.0
 const UNIT_LAYER_MASK: int = 1
 const RESOURCE_LAYER_MASK: int = 2
 const BUILDING_LAYER_MASK: int = 4
+const DOUBLE_CLICK_MS: int = 300
 
 var drag_start_world: Vector2 = Vector2.ZERO
 var dragging_box: bool = false
+var _last_click_ms: int = 0
 
 func _unhandled_input(event: InputEvent) -> void:
 	if BuildingPlacer.is_placing():
@@ -25,8 +27,15 @@ func _handle_left(mb: InputEventMouseButton) -> void:
 	if mb.pressed:
 		var unit := _unit_at(world_pos)
 		if unit != null:
+			var now: int = Time.get_ticks_msec()
+			var double_click: bool = (now - _last_click_ms) < DOUBLE_CLICK_MS
+			_last_click_ms = now
 			if Input.is_key_pressed(KEY_SHIFT):
 				SelectionManager.toggle_unit(unit)
+			elif double_click:
+				# Double-click: select every same-type unit on screen.
+				SelectionManager.select_same_type_on_screen(unit, _screen_world_rect())
+				SelectionManager.deselect_building()
 			else:
 				SelectionManager.select_only(unit)
 				SelectionManager.deselect_building()
@@ -122,6 +131,14 @@ func _inspectable_at(world_pos: Vector2) -> Node:
 	if u != null:
 		return u
 	return _node_at(world_pos, BUILDING_LAYER_MASK, "buildings")
+
+## The world-space rectangle currently visible through the camera.
+func _screen_world_rect() -> Rect2:
+	var cam := get_viewport().get_camera_2d()
+	if cam == null:
+		return Rect2(Vector2.ZERO, Vector2(MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE))
+	var half: Vector2 = get_viewport().get_visible_rect().size * 0.5 / cam.zoom
+	return Rect2(cam.global_position - half, half * 2.0)
 
 func _node_at(world_pos: Vector2, mask: int, group: String) -> Node:
 	var space := get_world_2d().direct_space_state

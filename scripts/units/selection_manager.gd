@@ -21,6 +21,12 @@ var selected_building: Node = null
 var inspected: Node = null
 var _inspect_marker: Node2D = null
 var _throttle: Dictionary = {}
+## Control groups: 1..9 -> Array of units. Ctrl+N binds, N recalls, N twice
+## quickly also centres the camera. _idle_idx cycles the idle-villager hotkey.
+var _groups: Dictionary = {}
+var _last_recall: Dictionary = {}
+var _idle_idx: int = 0
+const DOUBLE_TAP_MS: int = 350
 
 ## Read-only inspect of a hostile unit/building: clears any commandable selection
 ## and points the info panel at `node`, with a neutral targeting ring on the map.
@@ -170,6 +176,10 @@ func harvest_with_selected(resource: Node) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if BuildingPlacer.is_placing():
 		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if _handle_hotkey(event as InputEventKey):
+			get_viewport().set_input_as_handled()
+		return
 	if not (event is InputEventMouseButton):
 		return
 	var mb := event as InputEventMouseButton
@@ -189,6 +199,91 @@ func _unhandled_input(event: InputEvent) -> void:
 	else:
 		_command_move(world_pos)
 	get_viewport().set_input_as_handled()
+
+## Control-group + idle-villager hotkeys. Returns true if it consumed the key.
+func _handle_hotkey(event: InputEventKey) -> bool:
+	var kc: int = event.keycode
+	if kc >= KEY_1 and kc <= KEY_9:
+		var n: int = kc - KEY_0
+		if event.ctrl_pressed:
+			_bind_group(n)
+		else:
+			_recall_group(n)
+		return true
+	if kc == KEY_PERIOD:
+		_cycle_idle_villager()
+		return true
+	return false
+
+func _bind_group(n: int) -> void:
+	_groups[n] = selected.duplicate()
+	if not selected.is_empty():
+		AlertManager.push("Control group %d set (%d)" % [n, selected.size()], "info")
+
+func _recall_group(n: int) -> void:
+	var alive: Array = []
+	for u in _groups.get(n, []):
+		if is_instance_valid(u):
+			alive.append(u)
+	_groups[n] = alive
+	if alive.is_empty():
+		return
+	select_multiple(alive)
+	var now: int = Time.get_ticks_msec()
+	if now - int(_last_recall.get(n, -9999)) < DOUBLE_TAP_MS:
+		_center_camera_on(alive)
+	_last_recall[n] = now
+
+## Selects the next idle (not gathering/building/farming) player worker and
+## snaps the camera to it; repeated presses cycle through them.
+func _cycle_idle_villager() -> void:
+	var idle: Array = []
+	for u in get_tree().get_nodes_in_group("villagers"):
+		if not is_instance_valid(u) or not (u is Node2D):
+			continue
+		if int(u.get("faction_id")) != GameSettings.player_faction_id:
+			continue
+		if u.has_method("is_busy") and u.is_busy():
+			continue
+		idle.append(u)
+	if idle.is_empty():
+		AlertManager.push("No idle workers", "info")
+		return
+	_idle_idx = _idle_idx % idle.size()
+	var v: Node = idle[_idle_idx]
+	_idle_idx += 1
+	select_only(v)
+	_center_camera_on([v])
+
+## Double-click select: all player units sharing this one's sprite_asset that are
+## currently on screen.
+func select_same_type_on_screen(proto: Node, screen_rect: Rect2) -> void:
+	if proto == null or not is_instance_valid(proto):
+		return
+	var key: String = String(proto.get("sprite_asset"))
+	var found: Array = []
+	for u in get_tree().get_nodes_in_group("player_units"):
+		if not is_instance_valid(u) or not (u is Node2D):
+			continue
+		if String(u.get("sprite_asset")) != key:
+			continue
+		if screen_rect.has_point((u as Node2D).global_position):
+			found.append(u)
+	if not found.is_empty():
+		select_multiple(found)
+
+func _center_camera_on(units: Array) -> void:
+	var c: Vector2 = Vector2.ZERO
+	var k: int = 0
+	for u in units:
+		if is_instance_valid(u) and u is Node2D:
+			c += (u as Node2D).global_position
+			k += 1
+	if k == 0:
+		return
+	var cam: Node = get_tree().get_first_node_in_group("rts_camera")
+	if cam != null and cam is Node2D:
+		(cam as Node2D).global_position = c / float(k)
 
 func _resource_at(world_pos: Vector2) -> Node:
 	var world := get_viewport().find_world_2d()
