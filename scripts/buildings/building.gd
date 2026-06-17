@@ -47,6 +47,8 @@ const RESEARCH: Dictionary = {
 @export var sprite_asset: String = ""
 ## Passive food income per second (Farms). 0 = no income.
 @export var food_per_sec: float = 0.0
+## Resource drop-off point (Storehouses); Town Centers also qualify by name.
+@export var is_dropoff: bool = false
 
 @export var train_unit_scene: PackedScene
 @export var train_unit_label: String = "Unit"
@@ -108,6 +110,8 @@ func _ready() -> void:
 		add_to_group("player_buildings")
 	else:
 		add_to_group("enemy_buildings")
+	if is_dropoff or building_name == "Town Center":
+		add_to_group("dropoff")
 	hp = max_hp
 	if faction_id == FactionManager.IX:
 		_apply_lattice_network()

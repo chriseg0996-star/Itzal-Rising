@@ -34,6 +34,11 @@ const BUILDING_DATA: Dictionary = {
 		"cost": {"madera": 60},
 		"build_time": 8.0,
 	},
+	"storehouse": {
+		"size": Vector2(64, 50),
+		"cost": {"madera": 80},
+		"build_time": 10.0,
+	},
 }
 
 ## Faction-routed building scenes. The one acceptable hardcoded-path location:
@@ -46,6 +51,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"tower": "res://scenes/buildings/Tower.tscn",
 		&"monument": "res://scenes/buildings/Monument.tscn",
 		&"farm": "res://scenes/buildings/Farm.tscn",
+		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 	},
 	1: {
 		&"tc": "res://scenes/buildings/EnemyTownCenter.tscn",
@@ -53,6 +59,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"tower": "res://scenes/buildings/EnemyTower.tscn",
 		&"monument": "res://scenes/buildings/Monument.tscn",
 		&"farm": "res://scenes/buildings/Farm.tscn",
+		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 	},
 	2: {
 		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
@@ -60,6 +67,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"tower": "res://scenes/buildings/IxTower.tscn",
 		&"monument": "res://scenes/buildings/Monument.tscn",
 		&"farm": "res://scenes/buildings/Farm.tscn",
+		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 	},
 }
 
@@ -141,6 +149,10 @@ func _process(_delta: float) -> void:
 		preview_cost.modulate = Color(1.0, 0.5, 0.45)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).keycode == KEY_H:
+		start_placement("storehouse")
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(ACTION_BARRACKS):
 		start_placement("barracks")
 		get_viewport().set_input_as_handled()

@@ -97,15 +97,19 @@ func _drop_target(from: Vector2) -> Node2D:
 func _nearest_dropoff(from: Vector2) -> Node2D:
 	var best: Node2D = null
 	var best_dist: float = INF
-	for tc in get_tree().get_nodes_in_group("town_center"):
-		if not is_instance_valid(tc) or not (tc is Node2D):
+	# Town Centers AND Storehouses both accept deposits (group "dropoff").
+	for d_node in get_tree().get_nodes_in_group("dropoff"):
+		if not is_instance_valid(d_node) or not (d_node is Node2D):
 			continue
-		if int(tc.get("faction_id")) != _faction_id:
+		if int(d_node.get("faction_id")) != _faction_id:
 			continue
-		var d: float = from.distance_to((tc as Node2D).global_position)
+		# A storehouse under construction isn't a valid drop-off yet.
+		if d_node.get("under_construction") == true:
+			continue
+		var d: float = from.distance_to((d_node as Node2D).global_position)
 		if d < best_dist:
 			best_dist = d
-			best = tc as Node2D
+			best = d_node as Node2D
 	return best if best != null else _home
 
 func _deposit_and_resume() -> void:
