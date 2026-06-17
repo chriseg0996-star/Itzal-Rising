@@ -6,7 +6,10 @@ extends CharacterBody2D
 
 signal unit_died(unit: CharacterBody2D)
 
-enum State { IDLE, MOVING, HARVESTING, DYING }
+enum State { IDLE, MOVING, HARVESTING, BUILDING, WORKING_FARM, DYING }
+
+const BUILD_RANGE: float = 64.0
+const FARM_RANGE: float = 56.0
 
 const DEATH_FADE_TIME: float = 0.5
 const SELECTION_RADIUS: float = 22.0
@@ -37,6 +40,8 @@ var _state: State = State.IDLE:
 		if changed:
 			_update_animation()
 var _home: Node2D = null
+var _build_target: Node = null
+var _farm_target: Node = null
 var selected: bool = false
 var _stat: StatComponent = null
 var _death_timer: float = 0.0
@@ -135,7 +140,7 @@ func _update_animation() -> void:
 			_anim_sprite.play("idle")
 		State.MOVING:
 			_anim_sprite.play("walk")
-		State.HARVESTING:
+		State.HARVESTING, State.BUILDING, State.WORKING_FARM:
 			_anim_sprite.play("harvest")
 		State.DYING:
 			_anim_sprite.play("death")
@@ -154,7 +159,13 @@ func _physics_process(delta: float) -> void:
 			_process_moving(delta)
 			if not _harvest_component.is_active():
 				_state = State.IDLE
-	_apply_separation(delta)
+		State.BUILDING:
+			_tick_building(delta)
+		State.WORKING_FARM:
+			_tick_farm(delta)
+	# Builders/farmers stay parked on their site (separation would stall them).
+	if _state != State.BUILDING and _state != State.WORKING_FARM:
+		_apply_separation(delta)
 
 ## Keeps villagers from stacking, in every non-dying state (shared steering).
 func _apply_separation(delta: float) -> void:
@@ -190,15 +201,75 @@ func harvest(node) -> void:
 	if node is ResourceNode:
 		assign_harvest(node)
 
+## Walk to a construction site and raise it (25% faster — Ix build bonus); if
+## it's a farm, stay to work it once finished.
+func build_structure(site: Node) -> void:
+	if _state == State.DYING or site == null or not is_instance_valid(site):
+		return
+	_harvest_component.stop()
+	_farm_target = null
+	_build_target = site
+	if site is Node2D:
+		_nav_agent.target_position = (site as Node2D).global_position
+	_state = State.BUILDING
+	_play_sound(sound_harvest)
+
+func work_farm(farm: Node) -> void:
+	if _state == State.DYING or farm == null or not is_instance_valid(farm):
+		return
+	_harvest_component.stop()
+	_build_target = null
+	_farm_target = farm
+	if farm is Node2D:
+		_nav_agent.target_position = (farm as Node2D).global_position
+	_state = State.WORKING_FARM
+	_play_sound(sound_harvest)
+
+func is_busy() -> bool:
+	return _harvest_component.is_active() or _build_target != null or _farm_target != null
+
+func _tick_building(delta: float) -> void:
+	if _build_target == null or not is_instance_valid(_build_target):
+		_build_target = null
+		_state = State.IDLE
+		return
+	if _build_target.has_method("is_complete") and _build_target.is_complete():
+		var done: Node = _build_target
+		_build_target = null
+		var fps: Variant = done.get("food_per_sec")
+		if fps != null and float(fps) > 0.0:
+			work_farm(done)
+		else:
+			_state = State.IDLE
+		return
+	if global_position.distance_to((_build_target as Node2D).global_position) <= BUILD_RANGE:
+		_build_target.contribute_build(delta * build_speed_multiplier)
+	else:
+		_process_moving(delta)
+
+func _tick_farm(delta: float) -> void:
+	if _farm_target == null or not is_instance_valid(_farm_target):
+		_farm_target = null
+		_state = State.IDLE
+		return
+	if global_position.distance_to((_farm_target as Node2D).global_position) <= FARM_RANGE:
+		_farm_target.report_worker()
+	else:
+		_process_moving(delta)
+
 func move_to(target: Vector2) -> void:
 	if _state == State.DYING:
 		return
 	_harvest_component.stop()
+	_build_target = null
+	_farm_target = null
 	_nav_agent.target_position = target
 	_state = State.MOVING
 
 func stop() -> void:
 	_harvest_component.stop()
+	_build_target = null
+	_farm_target = null
 	_nav_agent.target_position = global_position
 	_state = State.IDLE
 
