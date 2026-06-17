@@ -25,9 +25,11 @@ func _ready() -> void:
 func take_damage(amount: float) -> void:
 	if is_dead():
 		return
-	# Player-side units carry the match's armor research bonus.
+	# Era bonus applies to both sides; armour research is player-only.
 	var eff_armor: float = armor
-	if _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id"))):
+	var is_player: bool = _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id")))
+	eff_armor += GameStats.era_armor_bonus(is_player)
+	if is_player:
 		eff_armor += GameStats.player_armor_bonus()
 	var dealt: float = max(amount - eff_armor, 1.0)
 	_current_health = max(_current_health - dealt, 0.0)

@@ -31,6 +31,10 @@ const MAP_MAX: float = MapConfig.WORLD_SIZE - 80.0
 ## (AoE-style pacing). The bigger map also delays first contact on its own.
 const FIRST_ATTACK_TIME: float = 180.0
 
+## The AI advances eras on a timer so it keeps stat parity with a teching player.
+const AI_ERA2_TIME: float = 240.0
+const AI_ERA3_TIME: float = 480.0
+
 var tick_timer: float = 0.0
 var game_time: float = 0.0
 var initialized: bool = false
@@ -111,6 +115,7 @@ func _process(delta: float) -> void:
 	if not initialized:
 		return
 	game_time += delta
+	GameStats.set_ai_era(1 + (1 if game_time >= AI_ERA2_TIME else 0) + (1 if game_time >= AI_ERA3_TIME else 0))
 	tick_timer += delta
 	var interval: float = _current_interval()
 	if tick_timer >= interval:

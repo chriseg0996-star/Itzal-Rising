@@ -128,7 +128,9 @@ func _attack() -> void:
 	# Player-side units carry the match's attack research bonus, and player
 	# cavalry the signature charge multiplier.
 	var dmg: float = attack_damage
-	if _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id"))):
+	var is_player: bool = _owner_unit != null and FactionManager.is_player_faction(int(_owner_unit.get("faction_id")))
+	dmg += GameStats.era_atk_bonus(is_player)
+	if is_player:
 		dmg += GameStats.player_atk_bonus()
 		if unit_class == &"cavalry":
 			dmg *= GameStats.player_cavalry_mult()

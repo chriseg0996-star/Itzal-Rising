@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var _research_atk_btn: Button = $SidePanel/Margin/VBox/ResearchAtkBtn
 @onready var _research_armor_btn: Button = $SidePanel/Margin/VBox/ResearchArmorBtn
 @onready var _research_cav_btn: Button = $SidePanel/Margin/VBox/ResearchCavalryBtn
+@onready var _research_era_btn: Button = $SidePanel/Margin/VBox/ResearchEraBtn
 
 ## Faction-flavoured name for the signature cavalry-charge tech.
 const SIGNATURE_NAME: Dictionary = {0: "Jaguar Fury", 1: "Blight Surge", 2: "Lattice Charge"}
@@ -35,6 +36,7 @@ func _ready() -> void:
 	_research_atk_btn.pressed.connect(func(): _try_research("atk"))
 	_research_cav_btn.pressed.connect(func(): _try_research("cavalry"))
 	_research_armor_btn.pressed.connect(func(): _try_research("armor"))
+	_research_era_btn.pressed.connect(func(): _try_research("era"))
 	# Build-button icons (graceful: skip any that aren't present yet).
 	_set_btn_icon(_barracks_btn, "bld_barracks")
 	_set_btn_icon(_tc_btn, "bld_tc")
@@ -136,13 +138,30 @@ func _refresh_research(b: Node) -> void:
 	_research_atk_btn.visible = is_player_tc
 	_research_armor_btn.visible = is_player_tc
 	_research_cav_btn.visible = is_player_tc
+	_research_era_btn.visible = is_player_tc
 	if not is_player_tc:
 		return
-	_research_label.text = "Upgrades: ATK %d / ARM %d" % [GameStats.atk_level, GameStats.armor_level]
+	_research_label.text = "Era %d  ·  ATK %d / ARM %d" % [GameStats.era, GameStats.atk_level, GameStats.armor_level]
+	_set_era_button(_research_era_btn, b)
 	_set_research_button(_research_atk_btn, "atk", "ATK", GameStats.atk_level, b)
 	_set_research_button(_research_armor_btn, "armor", "ARM", GameStats.armor_level, b)
 	var sig_name: String = SIGNATURE_NAME.get(GameSettings.player_faction_id, "Cavalry Charge")
 	_set_research_button(_research_cav_btn, "cavalry", sig_name, GameStats.cavalry_level, b)
+
+## The era button shows the era you'd advance TO (its cost), or maxed.
+func _set_era_button(btn: Button, b: Node) -> void:
+	var levels: Array = b.RESEARCH["era"]["levels"]
+	var lvl: int = GameStats.get_research_level("era")
+	if lvl >= levels.size():
+		btn.text = "Era %d (max)" % GameStats.era
+		btn.disabled = true
+		return
+	btn.disabled = false
+	var tier: Dictionary = levels[lvl]
+	var parts: PackedStringArray = PackedStringArray()
+	for type in tier["cost"]:
+		parts.append("%d%s" % [int(tier["cost"][type]), "W" if type == "madera" else "G"])
+	btn.text = "Advance to Era %d (%s)" % [GameStats.era + 1, ", ".join(parts)]
 
 func _set_research_button(btn: Button, research_id: String, tag: String, level: int, b: Node) -> void:
 	var levels: Array = b.RESEARCH[research_id]["levels"]

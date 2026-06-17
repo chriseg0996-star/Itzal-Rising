@@ -105,6 +105,8 @@ func _apply(data: Dictionary) -> void:
 	GameStats.atk_level = int(stats.get("atk_level", 0))
 	GameStats.armor_level = int(stats.get("armor_level", 0))
 	GameStats.cavalry_level = int(stats.get("cavalry_level", 0))
+	GameStats.era = int(stats.get("era", 1))
+	GameStats.ai_era = int(stats.get("ai_era", 1))
 	var res: Dictionary = data.get("resources", {})
 	ResourceManager.restore(res.get("player", {}), res.get("enemy", {}))
 	var completed: Array[String] = []
@@ -230,6 +232,8 @@ func _snapshot() -> Dictionary:
 			"atk_level": GameStats.atk_level,
 			"armor_level": GameStats.armor_level,
 			"cavalry_level": GameStats.cavalry_level,
+			"era": GameStats.era,
+			"ai_era": GameStats.ai_era,
 		},
 		"resources": ResourceManager.snapshot(),
 		"objectives_completed": ObjectiveManager._completed.duplicate(),

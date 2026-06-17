@@ -31,6 +31,14 @@ const RESEARCH: Dictionary = {
 			{"cost": {"madera": 150, "oro": 150}, "duration": 25.0},
 		],
 	},
+	# Eras: advance the whole army's attack + armour. Two steps (Era II, III).
+	"era": {
+		"label": "Advance Era",
+		"levels": [
+			{"cost": {"madera": 250, "oro": 150}, "duration": 45.0},
+			{"cost": {"madera": 500, "oro": 350}, "duration": 70.0},
+		],
+	},
 }
 
 @export var building_name: String = "Building"
