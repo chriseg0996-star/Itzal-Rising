@@ -41,10 +41,12 @@ func _handle_left(mb: InputEventMouseButton) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		# Nothing of ours here: if a hostile unit/structure is under the cursor,
-		# inspect it (read-only HP/name) instead of starting a drag-box.
+		# inspect it — but ONLY when nothing is selected, so a left-click on an
+		# enemy never wipes a live command group (attack it with right-click).
 		var foe := _inspectable_at(world_pos)
 		if foe != null:
-			SelectionManager.inspect(foe)
+			if SelectionManager.selected.is_empty():
+				SelectionManager.inspect(foe)
 			dragging_box = false
 			get_viewport().set_input_as_handled()
 			return
