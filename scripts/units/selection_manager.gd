@@ -213,7 +213,26 @@ func _handle_hotkey(event: InputEventKey) -> bool:
 	if kc == KEY_PERIOD:
 		_cycle_idle_villager()
 		return true
+	if kc == KEY_Z:
+		_set_stance_selected(CombatComponent.Stance.AGGRESSIVE, "Aggressive")
+		return true
+	if kc == KEY_X:
+		_set_stance_selected(CombatComponent.Stance.DEFENSIVE, "Defensive")
+		return true
+	if kc == KEY_C:
+		_set_stance_selected(CombatComponent.Stance.HOLD, "Hold Ground")
+		return true
 	return false
+
+## Apply a combat stance to every selected unit that fights (Z/X/C hotkeys).
+func _set_stance_selected(stance: int, label: String) -> void:
+	var n: int = 0
+	for u in selected:
+		if is_instance_valid(u) and u.has_method("set_stance"):
+			u.set_stance(stance)
+			n += 1
+	if n > 0:
+		AlertManager.push("%s stance (%d)" % [label, n], "info")
 
 func _bind_group(n: int) -> void:
 	_groups[n] = selected.duplicate()

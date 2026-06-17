@@ -6,6 +6,13 @@ signal attack_landed(target: Node2D, damage: float)
 
 enum State { IDLE, CHASING, ATTACKING }
 
+## Player stance, set per-unit. AGGRESSIVE engages within aggro_range and chases;
+## DEFENSIVE only engages threats that come close (won't roam); HOLD attacks what
+## it can already hit but never moves. A forced (manual) attack ignores the stance.
+enum Stance { AGGRESSIVE, DEFENSIVE, HOLD }
+const DEFENSIVE_RANGE: float = 150.0
+var stance: int = Stance.AGGRESSIVE
+
 ## Attack ranges above this fire a Projectile (deferred damage) instead of
 ## instant hitscan — archers/ranged read as ranged; melee stays instant.
 const RANGED_THRESHOLD: float = 120.0
@@ -48,6 +55,24 @@ func _physics_process(delta: float) -> void:
 	_validate_target()
 	_run_state()
 
+func set_stance(value: int) -> void:
+	stance = value
+	# Drop a target that the new stance would no longer pursue (a held unit holding
+	# a far chase, etc.); it re-acquires next scan if still in effective range.
+	if not _forced_target and _target != null and _owner_unit != null \
+			and _owner_unit.global_position.distance_to(_target.global_position) > _effective_aggro():
+		_target = null
+		_state = State.IDLE
+
+func _effective_aggro() -> float:
+	match stance:
+		Stance.HOLD:
+			return attack_range
+		Stance.DEFENSIVE:
+			return maxf(attack_range, DEFENSIVE_RANGE)
+		_:
+			return aggro_range
+
 func _scan_for_target() -> void:
 	if _owner_unit == null:
 		return
@@ -64,7 +89,7 @@ func _scan_for_target() -> void:
 		if _is_unit_dead(unit):
 			continue
 		var d: float = _owner_unit.global_position.distance_to(unit.global_position)
-		if d > aggro_range:
+		if d > _effective_aggro():
 			continue
 		if d < nearest_dist:
 			nearest_dist = d
@@ -86,7 +111,7 @@ func _scan_for_target() -> void:
 		if _is_unit_dead(building):
 			continue
 		var d: float = _owner_unit.global_position.distance_to(building.global_position)
-		if d > aggro_range:
+		if d > _effective_aggro():
 			continue
 		if d < nearest_dist:
 			nearest_dist = d
@@ -109,6 +134,11 @@ func _run_state() -> void:
 		return
 	var dist: float = _owner_unit.global_position.distance_to(_target.global_position)
 	if dist > attack_range:
+		# Hold Ground attacks only what it can already reach — never chases.
+		if stance == Stance.HOLD and not _forced_target:
+			_target = null
+			_state = State.IDLE
+			return
 		_state = State.CHASING
 		_chase()
 	else:

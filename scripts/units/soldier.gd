@@ -157,6 +157,11 @@ func patrol(target: Vector2) -> void:
 		return
 	attack_move(target)
 
+func set_stance(s: int) -> void:
+	var combat := get_node_or_null("CombatComponent") as CombatComponent
+	if combat != null:
+		combat.set_stance(s)
+
 func _set_combat_enabled(enabled: bool) -> void:
 	var combat := get_node_or_null("CombatComponent")
 	if combat == null:
