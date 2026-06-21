@@ -9,9 +9,31 @@ signal amount_changed(remaining: int)
 @export var harvest_per_tick: int        = 10
 @export var sprite_asset:     String     = "tree"
 
+## Type-coded ground tint so wood / gold / food read apart at a glance (the
+## sprites share the slate-&-neon palette and otherwise blend together).
+const TINT_WOOD: Color = Color(0.30, 0.78, 0.36, 1.0)
+const TINT_GOLD: Color = Color(0.97, 0.78, 0.16, 1.0)
+const TINT_FOOD: Color = Color(0.90, 0.27, 0.36, 1.0)
+
 func _ready() -> void:
 	add_to_group("resources")
 	_apply_sprite(sprite_asset)
+	queue_redraw()
+
+## A soft color-coded pad on the ground under the node + a brighter ring.
+func _draw() -> void:
+	var c: Color = type_color()
+	draw_circle(Vector2.ZERO, 26.0, Color(c.r, c.g, c.b, 0.18))
+	draw_arc(Vector2.ZERO, 26.0, 0.0, TAU, 40, Color(c.r, c.g, c.b, 0.7), 3.0, true)
+
+## Resource accent colour, by type (handles both en/es type strings).
+func type_color() -> Color:
+	var t: String = String(resource_type)
+	if t == "oro" or t == "gold":
+		return TINT_GOLD
+	if t == "comida" or t == "food":
+		return TINT_FOOD
+	return TINT_WOOD
 
 func is_depleted() -> bool:
 	return amount <= 0

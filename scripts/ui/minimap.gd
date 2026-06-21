@@ -72,7 +72,11 @@ func _rebuild_dots() -> void:
 		if is_instance_valid(r) and r is Node2D:
 			if fog != null and fog.get_cell_state((r as Node2D).global_position) == 0:
 				continue
-			_add_dot((r as Node2D).global_position, RESOURCE_COLOR, RESOURCE_SIZE, ms)
+			# Colour the dot by resource type so wood/gold/food read apart.
+			var rc: Color = RESOURCE_COLOR
+			if r.has_method("type_color"):
+				rc = r.type_color()
+			_add_dot((r as Node2D).global_position, rc, RESOURCE_SIZE, ms)
 	_update_camera_rect(ms)
 
 func _add_dot(world_pos: Vector2, color: Color, dot_size: float, ms: Vector2) -> void:
