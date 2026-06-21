@@ -14,7 +14,7 @@ const DEFAULT_MAP: String = "Jungle Basin"
 ## the whole playfield (camera, nav, fog, bounds all read WORLD_SIZE). A bigger
 ## map means a longer pre-contact "farming" phase, AoE-style.
 const DESIGN_SIZE: float = 2048.0
-const WORLD_SIZE: float = 3072.0
+const WORLD_SIZE: float = 4096.0
 const SCALE: float = WORLD_SIZE / DESIGN_SIZE
 
 ## EnemyTC's baked offset inside EnemyBase.tscn — moving the EnemyBase root by

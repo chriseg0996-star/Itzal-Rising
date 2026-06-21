@@ -28,9 +28,9 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/TutorialController.tscn" id="27_tut"]
 
 [sub_resource type="NavigationPolygon" id="NavPoly_1"]
-vertices = PackedVector2Array(0, 0, 3072, 0, 3072, 3072, 0, 3072)
+vertices = PackedVector2Array(0, 0, 4096, 0, 4096, 4096, 0, 4096)
 polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 3072, 0, 3072, 3072, 0, 3072)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 4096, 0, 4096, 4096, 0, 4096)])
 
 [node name="World" type="Node2D"]
 
