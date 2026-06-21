@@ -1,245 +1,193 @@
 extends Control
 
-## Skirmish Setup — map / faction / difficulty selection over a dimmed background.
-## UI is built in code (project convention); SkirmishSetup.tscn holds the root
-## Control + the BGImage TextureRect. The bg texture is loaded at runtime so a
-## missing file never breaks the scene. Start writes the choices to GameSettings,
-## runs the standard match reset sequence, then loads the World.
+## Skirmish Setup — clean dark UI built in code over the dimmed menu backdrop,
+## matching the Campaign screen's identity (teal-bordered panels, simple rows).
+## Three columns — MAP / FACTION / DIFFICULTY — each a selectable list; Start
+## writes the choices to GameSettings, runs the match reset sequence (incl.
+## ObjectiveManager.reset, P1-001) and loads the World.
 
 const WORLD_SCENE: String = "res://scenes/world/World.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/ui/MainMenu.tscn"
-const BG_IMAGE: String = "res://assets/ui/skirmish_bg.png"
+const BG_IMAGE: String = "res://assets/ui/menu_bg.png"
 
 const ACCENT: Color = Color(0.0, 0.90, 0.78, 1.0)
 const PANEL_BG: Color = Color(0.04, 0.07, 0.11, 0.82)
 const PANEL_BORDER: Color = Color(0.0, 0.90, 0.78, 0.35)
-const TEXT_MUTED: Color = Color(0.7, 0.75, 0.8, 1.0)
 const WHITE: Color = Color(0.95, 0.97, 0.98, 1.0)
-const DIM_BORDER: Color = Color(0.3, 0.35, 0.4, 1.0)
+const MUTED: Color = Color(0.62, 0.68, 0.74, 1.0)
+const ROW_BG: Color = Color(0.10, 0.13, 0.17, 0.9)
+const ROW_SEL_BG: Color = Color(0.0, 0.90, 0.78, 0.14)
+const ROW_HOVER_BORDER: Color = Color(0.0, 0.90, 0.78, 0.65)
 
-var _maps: Array[Dictionary] = [
-	{"name": "Jungle Basin", "color": Color(0.08, 0.22, 0.10, 1.0)},
-	{"name": "Sunken Reef", "color": Color(0.06, 0.14, 0.26, 1.0)},
-	{"name": "Azure Coast", "color": Color(0.08, 0.18, 0.28, 1.0)},
-	{"name": "Volcanic Crags", "color": Color(0.22, 0.08, 0.06, 1.0)},
-]
+var _maps: Array[String] = ["Jungle Basin", "Sunken Reef", "Azure Coast", "Volcanic Crags"]
 
-# atk/armor/hp chips mirror the REAL FactionData modifiers set in
-# faction_manager.gd _ready — keep both in sync when rebalancing.
+# atk/armor/hp mirror the REAL FactionData modifiers in faction_manager.gd.
 var _factions: Array[Dictionary] = [
 	{"id": 0, "name": "Itzal Resistance", "accent": Color(0.0, 0.90, 0.78, 1.0), "playable": true,
-	 "atk": "ATK ×1.0", "armor": "ARM +1", "hp": "HP ×1.0",
-	 "icon": "res://assets/ui/faction_itzal.png", "units": "res://assets/ui/units_itzal.png",
-	 "frame": "res://assets/ui/frame_itzal.png",
-	 "desc": "Balanced warriors of Itzal. Ability: Jaguar's Vigor (mass heal). Cavalry: Jaguar Rider. Tech: Jaguar Fury."},
-	{"id": 1, "name": "Enemy Decay", "accent": Color(0.65, 0.15, 0.90, 1.0), "playable": true,
+	 "atk": "ATK ×1.0", "armor": "ARM +0", "hp": "HP ×1.0",
+	 "desc": "Balanced warriors. Ability: Jaguar's Vigor (mass heal). Tech: Jaguar Fury."},
+	{"id": 1, "name": "Enemy Decay", "accent": Color(0.70, 0.55, 0.85, 1.0), "playable": true,
 	 "atk": "ATK ×1.1", "armor": "ARM +0", "hp": "HP ×0.9",
-	 "icon": "res://assets/ui/faction_decay.png", "units": "res://assets/ui/units_decay.png",
-	 "frame": "res://assets/ui/frame_decay.png",
-	 "desc": "Glass-cannon corruption. Ability: Corruption Burst (AoE). Cavalry: Decay Stalker. Tech: Blight Surge."},
-	{"id": 2, "name": "Ix Architects", "accent": Color(0.85, 0.60, 0.10, 1.0), "playable": true,
-	 "atk": "ATK ×1.15", "armor": "ARM +1", "hp": "HP ×1.0",
-	 "icon": "res://assets/ui/faction_ix.png", "units": "res://assets/ui/units_ix.png",
-	 "frame": "res://assets/ui/frame_ix.png",
-	 "desc": "Elite obsidian-lattice strikers. Ability: Lattice Overcharge (armor surge). Cavalry: Lattice Lancer. Tech: Lattice Charge. No archers."},
+	 "desc": "Glass-cannon corruption. Ability: Corruption Burst (AoE). Tech: Blight Surge."},
+	{"id": 2, "name": "Ix Architects", "accent": Color(0.95, 0.70, 0.20, 1.0), "playable": true,
+	 "atk": "ATK ×1.05", "armor": "ARM +1", "hp": "HP ×1.0",
+	 "desc": "Elite obsidian-lattice strikers. Ability: Lattice Overcharge. No archers."},
 ]
 
 var _difficulties: Array[Dictionary] = [
-	{"key": "easy", "label": "EASY", "color": Color(0.15, 0.72, 0.28, 1.0),
-	 "sub": "Plentiful resources, passive enemy."},
-	{"key": "normal", "label": "NORMAL", "color": Color(0.88, 0.62, 0.08, 1.0),
-	 "sub": "Balanced economy and enemy pressure."},
-	{"key": "hard", "label": "HARD", "color": Color(0.82, 0.15, 0.12, 1.0),
-	 "sub": "Lean economy, aggressive enemy waves."},
+	{"key": "easy", "label": "EASY", "color": Color(0.35, 0.85, 0.40, 1.0),
+	 "desc": "Plentiful resources, passive enemy."},
+	{"key": "normal", "label": "NORMAL", "color": Color(0.95, 0.70, 0.15, 1.0),
+	 "desc": "Balanced economy and enemy pressure."},
+	{"key": "hard", "label": "HARD", "color": Color(0.90, 0.30, 0.25, 1.0),
+	 "desc": "Lean economy, aggressive enemy waves."},
 ]
 
 var selected_map: String = "Jungle Basin"
 var selected_faction_id: int = 0
 var selected_difficulty: String = "normal"
 
-var _map_preview: ColorRect = null
-var _map_preview_tex: TextureRect = null
-var _map_name_label: Label = null
-var _map_button_styles: Dictionary = {}    # name -> StyleBoxFlat
-var _faction_card_styles: Dictionary = {}  # id -> StyleBoxFlat
-var _faction_cards: Dictionary = {}        # id -> PanelContainer (for select dim)
-var _difficulty_styles: Dictionary = {}    # key -> StyleBoxFlat
-
 @onready var _bg: TextureRect = $BGImage
+
+var _map_rows: Array[PanelContainer] = []
+var _faction_rows: Array[PanelContainer] = []
+var _diff_rows: Array[PanelContainer] = []
 
 func _ready() -> void:
 	if _bg != null and ResourceLoader.exists(BG_IMAGE):
 		_bg.texture = load(BG_IMAGE)
 	_build_title()
-	_build_body()
-	_build_bottom_bar()
-	_refresh_map_styles()
-	_refresh_faction_styles()
-	_refresh_difficulty_styles()
-	_update_map_preview()
+	_build_columns()
+	_build_buttons()
+	_refresh_rows(_map_rows, _maps.find(selected_map))
+	_refresh_rows(_faction_rows, selected_faction_id)
+	_refresh_rows(_diff_rows, _diff_index(selected_difficulty))
 	SoundManager.start_menu_music()
 
-# ---------------------------------------------------------------------------
-# Title
-# ---------------------------------------------------------------------------
+# ── Title ──────────────────────────────────────────────────
 func _build_title() -> void:
 	var title := Label.new()
 	title.text = "SKIRMISH SETUP"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_color_override("font_color", ACCENT)
 	title.add_theme_font_size_override("font_size", 52)
-	title.add_theme_font_override("font", _spaced_font(8))
 	add_child(title)
 	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	title.offset_top = 16
-	title.offset_bottom = 84
+	title.offset_top = 24
+	title.offset_bottom = 92
 
-# ---------------------------------------------------------------------------
-# Body (3 columns)
-# ---------------------------------------------------------------------------
-func _build_body() -> void:
-	var margin := MarginContainer.new()
-	add_child(margin)
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 40)
-	margin.add_theme_constant_override("margin_right", 40)
-	margin.add_theme_constant_override("margin_top", 96)
-	margin.add_theme_constant_override("margin_bottom", 96)
+# ── Columns ────────────────────────────────────────────────
+func _build_columns() -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 28)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	add_child(row)
+	row.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	row.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	row.grow_vertical = Control.GROW_DIRECTION_BOTH
 
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 16)
-	margin.add_child(hbox)
+	var map_inner: VBoxContainer = _column(row, "MAP", 300)
+	for i in _maps.size():
+		_add_map_row(map_inner, i)
 
-	hbox.add_child(_build_map_column())
-	hbox.add_child(_build_faction_column())
-	hbox.add_child(_build_difficulty_column())
+	var fac_inner: VBoxContainer = _column(row, "FACTION", 560)
+	for i in _factions.size():
+		_add_faction_row(fac_inner, i)
 
-func _build_map_column() -> PanelContainer:
-	var panel := _make_panel(220.0, false)
+	var diff_inner: VBoxContainer = _column(row, "DIFFICULTY", 320)
+	for i in _difficulties.size():
+		_add_diff_row(diff_inner, i)
+
+## A titled column: header label + bordered panel; returns the inner VBox to
+## which rows are added.
+func _column(parent: HBoxContainer, header: String, min_w: float) -> VBoxContainer:
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	col.custom_minimum_size = Vector2(min_w, 0)
+	col.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	parent.add_child(col)
+
+	var hdr := Label.new()
+	hdr.text = header
+	hdr.add_theme_color_override("font_color", ACCENT)
+	hdr.add_theme_font_size_override("font_size", 18)
+	col.add_child(hdr)
+
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = PANEL_BG
+	sb.set_corner_radius_all(4)
+	sb.set_border_width_all(1)
+	sb.border_color = PANEL_BORDER
+	sb.set_content_margin_all(14)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", sb)
+	col.add_child(panel)
+
+	var inner := VBoxContainer.new()
+	inner.add_theme_constant_override("separation", 8)
+	panel.add_child(inner)
+	return inner
+
+# ── Row construction ───────────────────────────────────────
+func _row_stylebox(selected: bool, hovered: bool) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = ROW_SEL_BG if selected else ROW_BG
+	sb.set_corner_radius_all(3)
+	sb.set_border_width_all(2 if selected else 1)
+	sb.border_color = ACCENT if selected else (ROW_HOVER_BORDER if hovered else PANEL_BORDER)
+	sb.set_content_margin_all(10)
+	return sb
+
+## Wires a PanelContainer as a clickable, hoverable row in `store`.
+func _wire_row(pc: PanelContainer, store: Array, on_pick: Callable) -> void:
+	pc.mouse_filter = Control.MOUSE_FILTER_STOP
+	pc.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	pc.add_theme_stylebox_override("panel", _row_stylebox(false, false))
+	var idx: int = store.size()
+	store.append(pc)
+	pc.gui_input.connect(func(e: InputEvent) -> void:
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			on_pick.call())
+	pc.mouse_entered.connect(func() -> void: _hover_row(store, idx, true))
+	pc.mouse_exited.connect(func() -> void: _hover_row(store, idx, false))
+
+func _add_map_row(inner: VBoxContainer, i: int) -> void:
+	var pc := PanelContainer.new()
+	var mc := _row_margin()
+	pc.add_child(mc)
+	var lbl := Label.new()
+	lbl.text = _maps[i]
+	lbl.add_theme_color_override("font_color", WHITE)
+	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mc.add_child(lbl)
+	inner.add_child(pc)
+	_wire_row(pc, _map_rows, _on_map_picked.bind(i))
+
+func _add_faction_row(inner: VBoxContainer, i: int) -> void:
+	var data: Dictionary = _factions[i]
+	var pc := PanelContainer.new()
+	var mc := _row_margin()
+	pc.add_child(mc)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
-	panel.add_child(v)
-
-	v.add_child(_header("MAP"))
-
-	_map_preview = ColorRect.new()
-	_map_preview.custom_minimum_size = Vector2(200, 120)
-	_map_preview.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	v.add_child(_map_preview)
-
-	_map_preview_tex = TextureRect.new()
-	_map_preview_tex.custom_minimum_size = Vector2(200, 150)
-	_map_preview_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_map_preview_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_map_preview_tex.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_map_preview_tex.visible = false
-	v.add_child(_map_preview_tex)
-
-	_map_name_label = Label.new()
-	_map_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_map_name_label.add_theme_color_override("font_color", WHITE)
-	_map_name_label.add_theme_font_size_override("font_size", 13)
-	v.add_child(_map_name_label)
-
-	for m in _maps:
-		var name_str: String = m["name"]
-		var sb := _new_style(4)
-		_map_button_styles[name_str] = sb
-		var btn := Button.new()
-		btn.text = name_str
-		btn.custom_minimum_size = Vector2(0, 36)
-		btn.add_theme_color_override("font_color", WHITE)
-		btn.add_theme_color_override("font_hover_color", WHITE)
-		btn.add_theme_color_override("font_pressed_color", WHITE)
-		btn.add_theme_color_override("font_focus_color", WHITE)
-		btn.add_theme_font_size_override("font_size", 13)
-		for state in ["normal", "hover", "pressed", "focus"]:
-			btn.add_theme_stylebox_override(state, sb)
-		btn.pressed.connect(_on_map_selected.bind(name_str))
-		v.add_child(btn)
-
-	return panel
-
-func _build_faction_column() -> PanelContainer:
-	var panel := _make_panel(700.0, true)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
-	panel.add_child(v)
-
-	v.add_child(_header("FACTION"))
-
-	var cards := HBoxContainer.new()
-	cards.add_theme_constant_override("separation", 8)
-	cards.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	v.add_child(cards)
-
-	for data in _factions:
-		cards.add_child(_make_faction_card(data))
-
-	return panel
-
-func _make_faction_card(data: Dictionary) -> PanelContainer:
-	var fid: int = data["id"]
-	var accent: Color = data["accent"]
-	var frame_path: String = String(data.get("frame", ""))
-	var has_frame: bool = frame_path != "" and ResourceLoader.exists(frame_path)
-
-	# The card bg tints with the accent on select (shown through the frame's
-	# transparent centre); the ornate frame is overlaid on top.
-	var sb := _new_style(8)
-	sb.set_content_margin_all(0)
-	_faction_card_styles[fid] = sb
-
-	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", sb)
-	card.custom_minimum_size = Vector2(212, 316) if has_frame else Vector2(160, 0)
-	card.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if has_frame else Control.SIZE_EXPAND_FILL
-	card.size_flags_vertical = Control.SIZE_SHRINK_CENTER if has_frame else Control.SIZE_EXPAND_FILL
-	card.gui_input.connect(_on_faction_input.bind(fid))
-	_faction_cards[fid] = card
-
-	# Content sits inside the frame border (margins ≈ the painted border width).
-	var margin := MarginContainer.new()
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if has_frame:
-		margin.add_theme_constant_override("margin_left", 42)
-		margin.add_theme_constant_override("margin_right", 42)
-		margin.add_theme_constant_override("margin_top", 50)
-		margin.add_theme_constant_override("margin_bottom", 58)
-	card.add_child(margin)
-
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 5)
+	v.add_theme_constant_override("separation", 3)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_child(v)
-
-	var icon_path: String = String(data.get("icon", ""))
-	if icon_path != "" and ResourceLoader.exists(icon_path):
-		var icon_tex := TextureRect.new()
-		icon_tex.texture = load(icon_path)
-		icon_tex.custom_minimum_size = Vector2(0, 74 if has_frame else 110)
-		icon_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon_tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		v.add_child(icon_tex)
+	mc.add_child(v)
 
 	var name_lbl := Label.new()
 	name_lbl.text = data["name"]
-	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_lbl.add_theme_color_override("font_color", accent)
-	name_lbl.add_theme_font_size_override("font_size", 14)
+	name_lbl.add_theme_color_override("font_color", data["accent"])
+	name_lbl.add_theme_font_size_override("font_size", 17)
 	name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(name_lbl)
 
-	# Compact stat line (plain coloured labels, no chip backgrounds, so it fits).
 	var stats := HBoxContainer.new()
-	stats.alignment = BoxContainer.ALIGNMENT_CENTER
-	stats.add_theme_constant_override("separation", 6)
+	stats.add_theme_constant_override("separation", 10)
 	stats.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for pair in [[String(data["atk"]), Color(0.95, 0.45, 0.25)], [String(data["armor"]), accent], [String(data["hp"]), Color(0.45, 0.85, 0.45)]]:
+	for pair in [[String(data["atk"]), Color(0.95, 0.55, 0.35)], [String(data["armor"]), ACCENT], [String(data["hp"]), Color(0.50, 0.85, 0.50)]]:
 		var s := Label.new()
 		s.text = pair[0]
-		s.add_theme_font_size_override("font_size", 10)
+		s.add_theme_font_size_override("font_size", 12)
 		s.add_theme_color_override("font_color", pair[1])
 		s.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stats.add_child(s)
@@ -248,230 +196,131 @@ func _make_faction_card(data: Dictionary) -> PanelContainer:
 	var desc := Label.new()
 	desc.text = data["desc"]
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc.add_theme_color_override("font_color", TEXT_MUTED)
-	desc.add_theme_font_size_override("font_size", 11)
-	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	desc.add_theme_color_override("font_color", MUTED)
+	desc.add_theme_font_size_override("font_size", 12)
 	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(desc)
 
-	# Ornate per-faction frame on top (transparent centre, clicks pass through).
-	if has_frame:
-		var frame := TextureRect.new()
-		frame.texture = load(frame_path)
-		frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		frame.stretch_mode = TextureRect.STRETCH_SCALE
-		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		card.add_child(frame)
+	inner.add_child(pc)
+	_wire_row(pc, _faction_rows, _on_faction_picked.bind(int(data["id"])))
 
-	return card
-
-func _build_difficulty_column() -> PanelContainer:
-	var panel := _make_panel(220.0, false)
+func _add_diff_row(inner: VBoxContainer, i: int) -> void:
+	var data: Dictionary = _difficulties[i]
+	var pc := PanelContainer.new()
+	var mc := _row_margin()
+	pc.add_child(mc)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
-	panel.add_child(v)
+	v.add_theme_constant_override("separation", 3)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mc.add_child(v)
 
-	v.add_child(_header("DIFFICULTY"))
+	var name_lbl := Label.new()
+	name_lbl.text = data["label"]
+	name_lbl.add_theme_color_override("font_color", data["color"])
+	name_lbl.add_theme_font_size_override("font_size", 17)
+	name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(name_lbl)
 
-	for data in _difficulties:
-		var key: String = data["key"]
-		var color: Color = data["color"]
-		var sb := _new_style(4)
-		_difficulty_styles[key] = sb
+	var desc := Label.new()
+	desc.text = data["desc"]
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.add_theme_color_override("font_color", MUTED)
+	desc.add_theme_font_size_override("font_size", 12)
+	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(desc)
 
-		var card := PanelContainer.new()
-		card.add_theme_stylebox_override("panel", sb)
-		card.custom_minimum_size = Vector2(0, 90)
-		card.size_flags_horizontal = Control.SIZE_FILL
-		card.gui_input.connect(_on_difficulty_input.bind(key))
+	inner.add_child(pc)
+	_wire_row(pc, _diff_rows, _on_difficulty_picked.bind(String(data["key"])))
 
-		var dv := VBoxContainer.new()
-		dv.add_theme_constant_override("separation", 4)
-		dv.alignment = BoxContainer.ALIGNMENT_CENTER
-		card.add_child(dv)
+func _row_margin() -> MarginContainer:
+	var mc := MarginContainer.new()
+	mc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mc.add_theme_constant_override("margin_left", 4)
+	mc.add_theme_constant_override("margin_right", 4)
+	mc.add_theme_constant_override("margin_top", 2)
+	mc.add_theme_constant_override("margin_bottom", 2)
+	return mc
 
-		var label := Label.new()
-		label.text = data["label"]
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.add_theme_color_override("font_color", color)
-		label.add_theme_font_size_override("font_size", 18)
-		dv.add_child(label)
+# ── Selection ──────────────────────────────────────────────
+func _diff_index(key: String) -> int:
+	for i in _difficulties.size():
+		if String(_difficulties[i]["key"]) == key:
+			return i
+	return 0
 
-		var sub := Label.new()
-		sub.text = data["sub"]
-		sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		sub.add_theme_color_override("font_color", TEXT_MUTED)
-		sub.add_theme_font_size_override("font_size", 11)
-		dv.add_child(sub)
+func _refresh_rows(rows: Array, sel_idx: int) -> void:
+	for i in rows.size():
+		(rows[i] as PanelContainer).add_theme_stylebox_override("panel", _row_stylebox(i == sel_idx, false))
 
-		v.add_child(card)
+func _hover_row(rows: Array, idx: int, hovered: bool) -> void:
+	# Don't override the selected row's emphasis on hover.
+	var sel: int = _selected_index_for(rows)
+	if idx == sel:
+		return
+	(rows[idx] as PanelContainer).add_theme_stylebox_override("panel", _row_stylebox(false, hovered))
 
-	var filler := Control.new()
-	filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	filler.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_child(filler)
+func _selected_index_for(rows: Array) -> int:
+	if rows == _map_rows:
+		return _maps.find(selected_map)
+	if rows == _faction_rows:
+		return selected_faction_id
+	return _diff_index(selected_difficulty)
 
-	return panel
+func _on_map_picked(i: int) -> void:
+	selected_map = _maps[i]
+	_refresh_rows(_map_rows, i)
 
-# ---------------------------------------------------------------------------
-# Bottom bar
-# ---------------------------------------------------------------------------
-func _build_bottom_bar() -> void:
-	var bar := HBoxContainer.new()
-	bar.alignment = BoxContainer.ALIGNMENT_CENTER
-	bar.add_theme_constant_override("separation", 16)
-	add_child(bar)
-	bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	bar.offset_top = -72
-	bar.offset_bottom = -16
-
-	var start_btn := Button.new()
-	start_btn.text = "START"
-	start_btn.custom_minimum_size = Vector2(300, 52)
-	start_btn.add_theme_font_size_override("font_size", 22)
-	start_btn.add_theme_font_override("font", _spaced_font(4))
-	start_btn.add_theme_color_override("font_color", ACCENT)
-	start_btn.add_theme_color_override("font_hover_color", Color(0.6, 1.0, 0.95, 1.0))
-	start_btn.add_theme_color_override("font_pressed_color", WHITE)
-	start_btn.add_theme_color_override("font_focus_color", ACCENT)
-	start_btn.add_theme_stylebox_override("normal", _button_style(Color(0.0, 0.90, 0.78, 0.15), ACCENT, 2))
-	start_btn.add_theme_stylebox_override("hover", _button_style(Color(0.0, 0.90, 0.78, 0.28), ACCENT, 2))
-	start_btn.add_theme_stylebox_override("pressed", _button_style(Color(0.0, 0.90, 0.78, 0.28), ACCENT, 2))
-	start_btn.add_theme_stylebox_override("focus", _button_style(Color(0.0, 0.90, 0.78, 0.15), ACCENT, 2))
-	start_btn.pressed.connect(_on_start_pressed)
-	bar.add_child(start_btn)
-
-	var back_btn := Button.new()
-	back_btn.text = "BACK"
-	back_btn.custom_minimum_size = Vector2(180, 52)
-	back_btn.add_theme_font_size_override("font_size", 16)
-	back_btn.add_theme_font_override("font", _spaced_font(2))
-	back_btn.add_theme_color_override("font_color", Color(0.6, 0.68, 0.72, 1.0))
-	back_btn.add_theme_color_override("font_hover_color", WHITE)
-	back_btn.add_theme_color_override("font_focus_color", Color(0.6, 0.68, 0.72, 1.0))
-	back_btn.add_theme_stylebox_override("normal", _button_style(Color(0, 0, 0, 0), Color(0.4, 0.5, 0.55, 0.6), 1))
-	back_btn.add_theme_stylebox_override("hover", _button_style(Color(0, 0, 0, 0), Color(0.7, 0.75, 0.8, 0.8), 1))
-	back_btn.add_theme_stylebox_override("pressed", _button_style(Color(0, 0, 0, 0), Color(0.7, 0.75, 0.8, 0.8), 1))
-	back_btn.add_theme_stylebox_override("focus", _button_style(Color(0, 0, 0, 0), Color(0.4, 0.5, 0.55, 0.6), 1))
-	back_btn.pressed.connect(_on_back_pressed)
-	bar.add_child(back_btn)
-
-	var ver := Label.new()
-	ver.text = "v1.0.1"
-	ver.add_theme_font_size_override("font_size", 11)
-	ver.add_theme_color_override("font_color", Color(0.3, 0.35, 0.4, 0.8))
-	ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	add_child(ver)
-	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	ver.offset_left = -90.0
-	ver.offset_top = -26.0
-	ver.offset_right = -12.0
-	ver.offset_bottom = -8.0
-
-# ---------------------------------------------------------------------------
-# Selection handlers
-# ---------------------------------------------------------------------------
-func _on_map_selected(map_name: String) -> void:
-	selected_map = map_name
-	_refresh_map_styles()
-	_update_map_preview()
-
-func _on_faction_input(event: InputEvent, faction_id: int) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_on_faction_selected(faction_id)
-
-func _on_faction_selected(faction_id: int) -> void:
+func _on_faction_picked(faction_id: int) -> void:
 	for data in _factions:
-		if int(data["id"]) == faction_id:
-			if not bool(data["playable"]):
-				return
-			break
-	selected_faction_id = faction_id
-	_refresh_faction_styles()
-
-func _on_difficulty_input(event: InputEvent, key: String) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_on_difficulty_selected(key)
-
-func _on_difficulty_selected(difficulty: String) -> void:
-	selected_difficulty = difficulty
-	_refresh_difficulty_styles()
-
-# ---------------------------------------------------------------------------
-# Style refresh
-# ---------------------------------------------------------------------------
-func _refresh_map_styles() -> void:
-	for name_str in _map_button_styles:
-		var sb: StyleBoxFlat = _map_button_styles[name_str]
-		var selected: bool = (name_str == selected_map)
-		if selected:
-			sb.bg_color = Color(0.0, 0.90, 0.78, 0.12)
-			sb.set_border_width_all(2)
-			sb.border_color = ACCENT
-		else:
-			sb.bg_color = Color(0, 0, 0, 0)
-			sb.set_border_width_all(1)
-			sb.border_color = Color(0.0, 0.90, 0.78, 0.18)
-
-func _refresh_faction_styles() -> void:
-	for data in _factions:
-		var fid: int = data["id"]
-		var sb: StyleBoxFlat = _faction_card_styles[fid]
-		var accent: Color = data["accent"]
-		if fid == selected_faction_id:
-			sb.bg_color = Color(accent.r, accent.g, accent.b, 0.12)
-			sb.set_border_width_all(2)
-			sb.border_color = accent
-			if _faction_cards.has(fid):
-				_faction_cards[fid].modulate = Color(1, 1, 1, 1)
-		else:
-			sb.bg_color = Color(0.04, 0.07, 0.11, 0.7)
-			sb.set_border_width_all(1)
-			sb.border_color = DIM_BORDER
-			if _faction_cards.has(fid):
-				_faction_cards[fid].modulate = Color(0.60, 0.60, 0.64, 1)
-
-func _refresh_difficulty_styles() -> void:
-	for data in _difficulties:
-		var key: String = data["key"]
-		var sb: StyleBoxFlat = _difficulty_styles[key]
-		var color: Color = data["color"]
-		if key == selected_difficulty:
-			sb.bg_color = Color(color.r, color.g, color.b, 0.18)
-			sb.set_border_width_all(2)
-			sb.border_color = color
-		else:
-			sb.bg_color = Color(0, 0, 0, 0)
-			sb.set_border_width_all(1)
-			sb.border_color = DIM_BORDER
-
-func _update_map_preview() -> void:
-	var tex_path: String = "res://assets/ui/map_%s.png" % selected_map.to_lower().replace(" ", "_")
-	var has_tex: bool = ResourceLoader.exists(tex_path)
-	if _map_preview_tex != null:
-		_map_preview_tex.visible = has_tex
-		if has_tex:
-			_map_preview_tex.texture = load(tex_path)
-	if _map_preview != null:
-		_map_preview.visible = not has_tex
-	for m in _maps:
-		if m["name"] == selected_map:
-			if _map_preview != null:
-				_map_preview.color = m["color"]
-			if _map_name_label != null:
-				_map_name_label.text = selected_map
+		if int(data["id"]) == faction_id and not bool(data["playable"]):
 			return
+	selected_faction_id = faction_id
+	_refresh_rows(_faction_rows, faction_id)
 
-# ---------------------------------------------------------------------------
-# Navigation
-# ---------------------------------------------------------------------------
+func _on_difficulty_picked(key: String) -> void:
+	selected_difficulty = key
+	_refresh_rows(_diff_rows, _diff_index(key))
+
+# ── Bottom buttons ─────────────────────────────────────────
+func _build_buttons() -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 24)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	add_child(row)
+	row.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	row.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	row.offset_top = -86.0
+	row.offset_bottom = -34.0
+	row.offset_left = -220.0
+	row.offset_right = 220.0
+	row.add_child(_action_button("START", ACCENT, _on_start_pressed))
+	row.add_child(_action_button("BACK", MUTED, _on_back_pressed))
+
+func _action_button(text: String, color: Color, on_press: Callable) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.custom_minimum_size = Vector2(180, 48)
+	btn.add_theme_color_override("font_color", color)
+	btn.add_theme_color_override("font_hover_color", WHITE)
+	btn.add_theme_font_size_override("font_size", 20)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = PANEL_BG
+	sb.set_corner_radius_all(4)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(color.r, color.g, color.b, 0.55)
+	var hb := sb.duplicate() as StyleBoxFlat
+	hb.bg_color = Color(color.r, color.g, color.b, 0.14)
+	hb.border_color = color
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("hover", hb)
+	btn.add_theme_stylebox_override("pressed", hb)
+	btn.pressed.connect(on_press)
+	return btn
+
+# ── Navigation ─────────────────────────────────────────────
 func _on_start_pressed() -> void:
 	GameSettings.selected_map = selected_map
 	GameSettings.difficulty = selected_difficulty
-	# The match systems read player_faction_id (ix_spawner) — keep it in sync so
-	# the chosen faction actually fields.
 	GameSettings.player_faction_id = selected_faction_id
 	ResourceManager.reset()
 	SelectionManager.clear()
@@ -479,59 +328,8 @@ func _on_start_pressed() -> void:
 	BuildingPlacer.cancel_placement()
 	EnemyAI.reset()
 	GameStats.reset()
+	ObjectiveManager.reset()  # P1-001: skirmish must reset objectives too
 	get_tree().change_scene_to_file(WORLD_SCENE)
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-func _make_panel(min_width: float, expand: bool) -> PanelContainer:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = PANEL_BG
-	sb.set_corner_radius_all(4)
-	sb.set_border_width_all(1)
-	sb.border_color = PANEL_BORDER
-	sb.set_content_margin_all(12)
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", sb)
-	panel.custom_minimum_size = Vector2(min_width, 0)
-	panel.size_flags_vertical = Control.SIZE_FILL
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL if expand else Control.SIZE_FILL
-	return panel
-
-func _new_style(radius: int) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.set_corner_radius_all(radius)
-	sb.set_content_margin_all(8)
-	return sb
-
-func _button_style(bg: Color, border: Color, width: int) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = bg
-	sb.set_corner_radius_all(4)
-	sb.set_border_width_all(width)
-	sb.border_color = border
-	sb.set_content_margin_all(8)
-	return sb
-
-func _header(text: String) -> Label:
-	var l := Label.new()
-	l.text = text
-	l.add_theme_color_override("font_color", ACCENT)
-	l.add_theme_font_size_override("font_size", 11)
-	l.add_theme_font_override("font", _spaced_font(3))
-	return l
-
-func _chip(text: String, color: Color) -> Label:
-	var l := Label.new()
-	l.text = text
-	l.add_theme_color_override("font_color", color)
-	l.add_theme_font_size_override("font_size", 11)
-	return l
-
-func _spaced_font(spacing: int) -> FontVariation:
-	var fv := FontVariation.new()
-	fv.spacing_glyph = spacing
-	return fv
