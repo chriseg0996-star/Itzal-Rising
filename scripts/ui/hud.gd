@@ -81,10 +81,11 @@ func _update_era() -> void:
 
 func _update_population() -> void:
 	var count: int = get_tree().get_nodes_in_group("player_units").size()
-	pop_label.text = "%d/%d" % [count, GameSettings.MAX_POPULATION]
+	var cap: int = GameSettings.player_pop_cap()
+	pop_label.text = "%d/%d" % [count, cap]
 	var col: Color = Color(1, 1, 1, 1)
-	if count >= GameSettings.MAX_POPULATION:
-		col = Color(1.0, 0.33, 0.22, 1)
+	if count >= cap:
+		col = Color(1.0, 0.33, 0.22, 1)  # at cap — build a House
 	pop_label.add_theme_color_override("font_color", col)
 
 func _on_alert_pushed(_text: String, level: String) -> void:

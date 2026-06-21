@@ -1,0 +1,36 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+[ext_resource type="Texture2D" path="res://assets/buildings/house.png" id="2_house_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_HOUSE"]
+size = Vector2(56, 48)
+
+[node name="House" type="Node2D"]
+script = ExtResource("1_bldg_script")
+building_name = "House"
+max_hp = 200
+sprite_asset = ""
+faction_id = 0
+population_supply = 10
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+position = Vector2(0, -12)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_house_tex")
+
+[node name="Sprite" type="ColorRect" parent="."]
+visible = false
+offset_left = -28.0
+offset_top = -28.0
+offset_right = 28.0
+offset_bottom = 28.0
+mouse_filter = 2
+color = Color(0.32, 0.30, 0.26, 1)
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_HOUSE")

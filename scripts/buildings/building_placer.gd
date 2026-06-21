@@ -39,6 +39,11 @@ const BUILDING_DATA: Dictionary = {
 		"cost": {"madera": 80},
 		"build_time": 10.0,
 	},
+	"house": {
+		"size": Vector2(56, 56),
+		"cost": {"madera": 50},
+		"build_time": 8.0,
+	},
 }
 
 ## Faction-routed building scenes. The one acceptable hardcoded-path location:
@@ -52,6 +57,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"monument": "res://scenes/buildings/Monument.tscn",
 		&"farm": "res://scenes/buildings/Farm.tscn",
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
+		&"house": "res://scenes/buildings/House.tscn",
 	},
 	1: {
 		&"tc": "res://scenes/buildings/EnemyTownCenter.tscn",
@@ -60,6 +66,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"monument": "res://scenes/buildings/Monument.tscn",
 		&"farm": "res://scenes/buildings/Farm.tscn",
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
+		&"house": "res://scenes/buildings/House.tscn",
 	},
 	2: {
 		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
@@ -68,6 +75,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"monument": "res://scenes/buildings/Monument.tscn",
 		&"farm": "res://scenes/buildings/Farm.tscn",
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
+		&"house": "res://scenes/buildings/House.tscn",
 	},
 }
 
@@ -151,6 +159,10 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).keycode == KEY_H:
 		start_placement("storehouse")
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).keycode == KEY_U:
+		start_placement("house")
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed(ACTION_BARRACKS):

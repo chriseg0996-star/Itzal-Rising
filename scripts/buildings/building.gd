@@ -49,6 +49,9 @@ const RESEARCH: Dictionary = {
 @export var food_per_sec: float = 0.0
 ## Resource drop-off point (Storehouses); Town Centers also qualify by name.
 @export var is_dropoff: bool = false
+## Population headroom this building grants the player (Houses, Town Centers).
+## The player's unit cap is the sum of this over their completed buildings.
+@export var population_supply: int = 0
 
 @export var train_unit_scene: PackedScene
 @export var train_unit_label: String = "Unit"
@@ -265,8 +268,9 @@ func try_queue_training(slot: int = 0) -> bool:
 	if scene == null:
 		return false
 	# Population cap (player only — the AI is bounded by its own difficulty caps).
-	if FactionManager.is_player_faction(faction_id) and _player_population() >= GameSettings.MAX_POPULATION:
-		AlertManager.push("Population limit reached", "warn")
+	# Cap is dynamic: build Houses (and Town Centers) to raise it, AoE-style.
+	if FactionManager.is_player_faction(faction_id) and _player_population() >= GameSettings.player_pop_cap():
+		AlertManager.push("Need more Houses (population limit)", "warn")
 		return false
 	if not ResourceManager.can_afford(costs, faction_id):
 		return false

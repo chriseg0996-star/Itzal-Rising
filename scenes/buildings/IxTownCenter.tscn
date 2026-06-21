@@ -12,6 +12,7 @@ script = ExtResource("1_bldg_script")
 building_name = "Town Center"
 max_hp = 1500
 sprite_asset = ""
+population_supply = 15
 train_unit_scene = ExtResource("2_ixw")
 train_unit_label = "Weaver"
 train_costs = {"comida": 50}
