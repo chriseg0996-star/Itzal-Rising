@@ -1,0 +1,68 @@
+name: CI
+
+# Headless QA gates: boot the world (×3 factions), round-trip save/load, and
+# verify audio assets — on every push and pull request. A gate "passes" only if
+# it prints its OK token (the gates quit(0) on success; a script error aborts
+# before the token, so a missing token == failure even if the process exits 0).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  GODOT_VERSION: "4.6.3"
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Godot ${{ env.GODOT_VERSION }} (headless)
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/godotengine/godot-builds/releases/download"
+          ZIP="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fL "${BASE}/${GODOT_VERSION}-stable/${ZIP}" -o godot.zip
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot
+          chmod +x godot
+          ./godot --version
+
+      - name: Import project
+        run: |
+          set -euo pipefail
+          # First headless run imports assets; it may exit non-zero on the
+          # initial import, so don't fail the job here.
+          ./godot --headless --path . --import || true
+
+      - name: Run QA gates
+        run: |
+          set -uo pipefail
+          GODOT="$PWD/godot"
+          fail=0
+          run_gate() {
+            local name="$1"; local token="$2"; local script="$3"; local faction="${4:-}"
+            echo "::group::${name}"
+            local log
+            if [ -n "$faction" ]; then
+              log="$(GATE_FACTION="$faction" "$GODOT" --headless --path . --script "$script" 2>&1)"
+            else
+              log="$("$GODOT" --headless --path . --script "$script" 2>&1)"
+            fi
+            echo "$log"
+            if echo "$log" | grep -q "$token"; then
+              echo "✅ ${name} PASS"
+            else
+              echo "❌ ${name} FAIL (missing ${token})"
+              fail=1
+            fi
+            echo "::endgroup::"
+          }
+          run_gate "boot (Itzal)" GATE_BOOT_OK tools/gate_boot.gd
+          run_gate "boot (Decay)" GATE_BOOT_OK tools/gate_boot.gd 1
+          run_gate "boot (Ix)"    GATE_BOOT_OK tools/gate_boot.gd 2
+          run_gate "saveload"     GATE_SAVELOAD_OK tools/gate_saveload.gd
+          run_gate "audio"        GATE_AUDIO_OK tools/gate_audio.gd
+          exit $fail
