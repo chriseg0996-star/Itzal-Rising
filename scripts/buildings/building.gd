@@ -275,7 +275,7 @@ func try_queue_training(slot: int = 0) -> bool:
 	if not ResourceManager.can_afford(costs, faction_id):
 		return false
 	ResourceManager.spend(costs, faction_id)
-	_enqueue({"scene": scene, "duration": duration, "label": get_train_label(slot)})
+	_enqueue({"scene": scene, "duration": duration, "label": get_train_label(slot), "cost": costs})
 	return true
 
 ## Living player units plus units still queued at any player building, so a full
@@ -315,7 +315,23 @@ func try_queue_research(research_id: String) -> bool:
 	if not ResourceManager.can_afford(costs, faction_id):
 		return false
 	ResourceManager.spend(costs, faction_id)
-	_enqueue({"scene": null, "duration": float(tier["duration"]), "research_id": research_id})
+	_enqueue({"scene": null, "duration": float(tier["duration"]), "research_id": research_id, "cost": costs})
+	return true
+
+## Cancels the most-recently queued item (training or research) and refunds its
+## full cost. Cancelling the only item stops production; the active front item is
+## otherwise left running. Called from the building panel's Cancel button.
+func cancel_last() -> bool:
+	if dying or queue.is_empty():
+		return false
+	var idx: int = queue.size() - 1
+	var entry: Dictionary = queue[idx]
+	var cost: Dictionary = entry.get("cost", {})
+	for type in cost:
+		ResourceManager.add_resource(String(type), int(cost[type]), faction_id)
+	queue.remove_at(idx)
+	if queue.is_empty():
+		production_timer = 0.0
 	return true
 
 ## Persistent rally point: units finishing training walk here. The marker is a

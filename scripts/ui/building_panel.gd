@@ -5,6 +5,7 @@ extends CanvasLayer
 @onready var _hp_label: Label = $SidePanel/Margin/VBox/HPLabel
 @onready var _queue_label: Label = $SidePanel/Margin/VBox/QueueLabel
 @onready var _timer_label: Label = $SidePanel/Margin/VBox/TimerLabel
+@onready var _cancel_btn: Button = $SidePanel/Margin/VBox/CancelBtn
 @onready var _train_btn: Button = $SidePanel/Margin/VBox/TrainBtn
 @onready var _train2_btn: Button = $SidePanel/Margin/VBox/Train2Btn
 @onready var _train3_btn: Button = $SidePanel/Margin/VBox/Train3Btn
@@ -35,6 +36,7 @@ func _ready() -> void:
 	_farm_btn.pressed.connect(func(): BuildingPlacer.start_placement("farm"))
 	_storehouse_btn.pressed.connect(func(): BuildingPlacer.start_placement("storehouse"))
 	_house_btn.pressed.connect(func(): BuildingPlacer.start_placement("house"))
+	_cancel_btn.pressed.connect(_on_cancel)
 	_train_btn.pressed.connect(func(): _try_train(0))
 	_train2_btn.pressed.connect(func(): _try_train(1))
 	_train3_btn.pressed.connect(func(): _try_train(2))
@@ -109,6 +111,10 @@ func _try_research(research_id: String) -> void:
 	if _selected_building.has_method("try_queue_research"):
 		_selected_building.try_queue_research(research_id)
 
+func _on_cancel() -> void:
+	if _selected_building != null and _selected_building.has_method("cancel_last"):
+		_selected_building.cancel_last()
+
 func _process(_delta: float) -> void:
 	if _selected_building == null or not is_instance_valid(_selected_building):
 		hide_building()
@@ -125,6 +131,7 @@ func _refresh() -> void:
 	_queue_label.text = "Queue: %d/5" % q.size()
 	var timer: float = b.get("production_timer") if b.get("production_timer") != null else 0.0
 	_timer_label.text = "Idle" if q.is_empty() else "%.1fs" % timer
+	_cancel_btn.visible = not q.is_empty()
 	_train_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(0)
 	_train2_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(1)
 	_train3_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(2)
