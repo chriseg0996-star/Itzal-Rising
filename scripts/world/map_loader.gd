@@ -41,6 +41,7 @@ func _ready() -> void:
 		_spawn(GOLD_SCENE, world, p as Vector2)
 	for p in cfg.get("food_nodes", []) as Array:
 		_spawn(FOOD_SCENE, world, p as Vector2)
+	_grow_clusters(world, cfg)
 	var cam: Node = world.get_node_or_null("RTSCamera")
 	if cam != null and cam is Node2D:
 		# A Decay player starts at the enemy base — open the camera there.
@@ -119,3 +120,34 @@ func _spawn(scene: PackedScene, parent: Node, pos: Vector2) -> void:
 	parent.add_child.call_deferred(node)
 	if node is Node2D:
 		(node as Node2D).call_deferred("set_global_position", pos)
+
+## AoE-style abundance: every resource seed becomes the centre of a cluster —
+## dense tree groves, gold veins, berry patches — instead of a lone node. Seeds
+## already exist (baked or _spawned); this only adds the surrounding ring(s).
+## Counts/radii are deterministic so a map always lays out the same.
+const _CLUSTER_TREE: int = 6
+const _CLUSTER_GOLD: int = 2
+const _CLUSTER_FOOD: int = 4
+
+func _grow_clusters(world: Node, cfg: Dictionary) -> void:
+	var trees: Array = (cfg.get("trees", []) as Array) + (cfg.get("extra_trees", []) as Array)
+	for p in trees:
+		_spawn_ring(TREE_SCENE, world, p as Vector2, _CLUSTER_TREE, 54.0)
+	var golds: Array = (cfg.get("gold_mines", []) as Array) + (cfg.get("extra_gold_mines", []) as Array)
+	for p in golds:
+		_spawn_ring(GOLD_SCENE, world, p as Vector2, _CLUSTER_GOLD, 46.0)
+	for p in cfg.get("food_nodes", []) as Array:
+		_spawn_ring(FOOD_SCENE, world, p as Vector2, _CLUSTER_FOOD, 40.0)
+
+## Spawns `count` nodes in an organic ring around `center` (alternating radius
+## for a blobby, non-circular look), clamped inside the playfield.
+func _spawn_ring(scene: PackedScene, parent: Node, center: Vector2, count: int, radius: float) -> void:
+	var lo: float = 80.0
+	var hi: float = MapConfig.WORLD_SIZE - 80.0
+	for i in count:
+		var ang: float = (float(i) / float(count)) * TAU + radius * 0.013
+		var rr: float = radius * (0.78 if i % 2 == 0 else 1.18)
+		var pos: Vector2 = center + Vector2(cos(ang), sin(ang)) * rr
+		pos.x = clampf(pos.x, lo, hi)
+		pos.y = clampf(pos.y, lo, hi)
+		_spawn(scene, parent, pos)
