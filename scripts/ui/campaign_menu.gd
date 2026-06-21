@@ -5,7 +5,7 @@ extends Control
 ## skirmish backdrop. Picking a mission hands off to MissionLoader.
 
 const MAIN_MENU_SCENE: String = "res://scenes/ui/MainMenu.tscn"
-const BG_IMAGE: String = "res://assets/ui/skirmish_bg.png"
+const BG_IMAGE: String = "res://assets/ui/menu_bg.png"
 
 const ACCENT: Color = Color(0.0, 0.90, 0.78, 1.0)
 const PANEL_BG: Color = Color(0.04, 0.07, 0.11, 0.82)
