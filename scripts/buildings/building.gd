@@ -79,7 +79,10 @@ const RESEARCH: Dictionary = {
 
 const HP_BAR_WIDTH: float = 64.0
 const HP_BAR_HEIGHT: float = 8.0
-const HP_BAR_Y: float = -112.0
+const HP_BAR_Y: float = -112.0  # fallback only; per-building value is computed
+## Computed in _ready to sit just above each building's actual sprite top, so
+## the bar hugs small Houses/Towers and tall Town Centers alike.
+var _hp_bar_y: float = HP_BAR_Y
 const HP_BAR_BG: Color = Color(0.08, 0.1, 0.12, 0.95)
 const HP_BAR_OUTLINE: Color = Color(0.0, 0.0, 0.0, 0.85)
 
@@ -119,6 +122,7 @@ func _ready() -> void:
 	if faction_id == FactionManager.IX:
 		_apply_lattice_network()
 	_apply_sprite(sprite_asset)
+	_hp_bar_y = _compute_hp_bar_y()
 	_base_modulate = modulate
 	var fac: FactionData = FactionManager.get_faction(faction_id)
 	if fac != null:
@@ -394,17 +398,61 @@ func _flash_hit() -> void:
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", _base_modulate, 0.1)
 
-## HP bar floats above the building art while it is damaged.
+## Sits the HP bar just above the building's rendered sprite (centered Sprite2D),
+## so it hugs each building instead of floating at a fixed height.
+func _compute_hp_bar_y() -> float:
+	var spr: Node = get_node_or_null("BuildingSprite")
+	if spr is Sprite2D and (spr as Sprite2D).texture != null:
+		var s := spr as Sprite2D
+		var frame_h: float = float(s.texture.get_height()) / float(maxi(1, s.vframes))
+		var center_y: float = s.position.y + s.offset.y * s.scale.y
+		return center_y - frame_h * s.scale.y * 0.5 - 8.0
+	return HP_BAR_Y
+
+const RING_COLOR: Color = Color(0.0, 0.88, 0.78, 1.0)
+const RING_TRACK: Color = Color(0.06, 0.09, 0.12, 0.92)
+
+## HP bar (only while damaged) + a production countdown ring (only while the
+## player building is training/researching).
 func _draw() -> void:
-	if dying or hp >= max_hp or max_hp <= 0:
+	if dying:
 		return
-	var ratio: float = clampf(float(hp) / float(max_hp), 0.0, 1.0)
-	var origin := Vector2(-HP_BAR_WIDTH * 0.5, HP_BAR_Y)
-	# Dark outline so the bar reads against any terrain, then track, then fill.
-	draw_rect(Rect2(origin - Vector2(1.5, 1.5), Vector2(HP_BAR_WIDTH + 3.0, HP_BAR_HEIGHT + 3.0)), HP_BAR_OUTLINE)
-	draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH, HP_BAR_HEIGHT)), HP_BAR_BG)
-	var fill: Color = _hp_fill_color.lerp(Color(0.85, 0.2, 0.15), 1.0 - ratio)
-	draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH * ratio, HP_BAR_HEIGHT)), fill)
+	if max_hp > 0 and hp < max_hp:
+		var ratio: float = clampf(float(hp) / float(max_hp), 0.0, 1.0)
+		var origin := Vector2(-HP_BAR_WIDTH * 0.5, _hp_bar_y)
+		# Dark outline so the bar reads against any terrain, then track, then fill.
+		draw_rect(Rect2(origin - Vector2(1.5, 1.5), Vector2(HP_BAR_WIDTH + 3.0, HP_BAR_HEIGHT + 3.0)), HP_BAR_OUTLINE)
+		draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH, HP_BAR_HEIGHT)), HP_BAR_BG)
+		var fill: Color = _hp_fill_color.lerp(Color(0.85, 0.2, 0.15), 1.0 - ratio)
+		draw_rect(Rect2(origin, Vector2(HP_BAR_WIDTH * ratio, HP_BAR_HEIGHT)), fill)
+	_draw_production_ring()
+
+## A reverse-sweeping countdown clock above the building: a teal arc that drains
+## counter-clockwise from full as the unit builds, with the whole seconds left
+## shown in the centre. Player buildings only (avoids leaking enemy timings).
+func _draw_production_ring() -> void:
+	if queue.is_empty() or production_timer <= 0.0:
+		return
+	if not FactionManager.is_player_faction(faction_id):
+		return
+	var dur: float = float(queue[0].get("duration", train_duration))
+	if dur <= 0.0:
+		return
+	var frac: float = clampf(production_timer / dur, 0.0, 1.0)  # time remaining
+	var center := Vector2(0.0, _hp_bar_y - 22.0)
+	var radius := 16.0
+	# Backing disc + full track ring.
+	draw_circle(center, radius - 1.0, RING_TRACK)
+	draw_arc(center, radius, 0.0, TAU, 48, Color(0.20, 0.26, 0.30, 0.9), 3.0, true)
+	# Remaining-time arc, sweeping counter-clockwise from the top (12 o'clock).
+	var start := -PI / 2.0
+	draw_arc(center, radius, start, start - frac * TAU, 48, RING_COLOR, 3.5, true)
+	# Whole seconds remaining, centred.
+	var secs := str(int(ceil(production_timer)))
+	var font := ThemeDB.fallback_font
+	var fsize := 15
+	var ts: Vector2 = font.get_string_size(secs, HORIZONTAL_ALIGNMENT_CENTER, -1, fsize)
+	draw_string(font, center + Vector2(-ts.x * 0.5, ts.y * 0.32), secs, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize, Color(0.95, 0.97, 0.98))
 
 func _die() -> void:
 	dying = true
@@ -446,6 +494,7 @@ func _process(delta: float) -> void:
 		queue.pop_front()
 		if not queue.is_empty():
 			production_timer = float(queue[0].get("duration", train_duration))
+	queue_redraw()  # animate the countdown ring (and clear it when the queue empties)
 
 func _attack_step(delta: float) -> void:
 	attack_timer += delta
