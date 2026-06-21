@@ -41,6 +41,7 @@ Critical issues only: crash, softlock, broken win/lose, corrupt save, impossible
 | `gate_audio.gd` | **PASS** | `GATE_AUDIO_OK` (7/7 SFX presentes) |
 | `gate_boot` + `GATE_FACTION=1/2` | **PASS** | Decay / Ix boot |
 | boot matriz (4 mapas × 3 facciones) | **PASS** | 12/12 combos `GATE_BOOT_OK` (local + CI) |
+| `gate_campaign.gd` (m1–m5 + tutorial) | **PASS** | 6/6 `GATE_CAMPAIGN_OK`; modificadores eco_boost / fast_aggro OK (local + CI) |
 | Export Windows | **PASS** | `builds/windows/itzal_rising.exe` (~99.7 MB) |
 
 > Los gates corren además en CI (`.github/workflows/ci.yml`) en cada push/PR.

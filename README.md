@@ -123,6 +123,12 @@ $env:GATE_FACTION='2'; godot --headless --path . --script res://tools/gate_boot.
 $env:GATE_MAP='Sunken Reef'; godot --headless --path . --script res://tools/gate_boot.gd
 ```
 
+Campaign mission boot (each mission's map/faction/difficulty + modifier; CI runs m1–m5 + tutorial):
+
+```powershell
+$env:GATE_MISSION='m3'; godot --headless --path . --script res://tools/gate_campaign.gd
+```
+
 Strict audio asset check (requires all SFX WAV files on disk):
 
 ```powershell

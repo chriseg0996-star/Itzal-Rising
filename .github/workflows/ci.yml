@@ -59,6 +59,14 @@ jobs:
             done
           done
           echo "::endgroup::"
+          # Campaign: each mission boots with its map/faction/difficulty and
+          # modifier (enemy_eco_boost / fast_aggro) applied to the live world.
+          echo "::group::campaign missions"
+          for mid in m1 m2 m3 m4 m5 tutorial; do
+            log="$(GATE_MISSION="$mid" "$GODOT" --headless --path . --script tools/gate_campaign.gd 2>&1)"
+            check "campaign ${mid}" GATE_CAMPAIGN_OK "$log"
+          done
+          echo "::endgroup::"
           echo "::group::saveload + audio"
           check "saveload" GATE_SAVELOAD_OK "$("$GODOT" --headless --path . --script tools/gate_saveload.gd 2>&1)"
           check "audio"    GATE_AUDIO_OK    "$("$GODOT" --headless --path . --script tools/gate_audio.gd 2>&1)"
