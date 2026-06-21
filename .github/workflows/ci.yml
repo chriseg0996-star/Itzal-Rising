@@ -42,27 +42,25 @@ jobs:
           set -uo pipefail
           GODOT="$PWD/godot"
           fail=0
-          run_gate() {
-            local name="$1"; local token="$2"; local script="$3"; local faction="${4:-}"
-            echo "::group::${name}"
-            local log
-            if [ -n "$faction" ]; then
-              log="$(GATE_FACTION="$faction" "$GODOT" --headless --path . --script "$script" 2>&1)"
+          check() {  # name, token, log
+            if echo "$3" | grep -q "$2"; then
+              echo "✅ $1 PASS"
             else
-              log="$("$GODOT" --headless --path . --script "$script" 2>&1)"
+              echo "❌ $1 FAIL (missing $2)"; echo "$3"; fail=1
             fi
-            echo "$log"
-            if echo "$log" | grep -q "$token"; then
-              echo "✅ ${name} PASS"
-            else
-              echo "❌ ${name} FAIL (missing ${token})"
-              fail=1
-            fi
-            echo "::endgroup::"
           }
-          run_gate "boot (Itzal)" GATE_BOOT_OK tools/gate_boot.gd
-          run_gate "boot (Decay)" GATE_BOOT_OK tools/gate_boot.gd 1
-          run_gate "boot (Ix)"    GATE_BOOT_OK tools/gate_boot.gd 2
-          run_gate "saveload"     GATE_SAVELOAD_OK tools/gate_saveload.gd
-          run_gate "audio"        GATE_AUDIO_OK tools/gate_audio.gd
+          # Boot matrix: every map × every faction (catches map/faction-specific
+          # boot regressions the single-map gate would miss).
+          echo "::group::boot matrix (map × faction)"
+          for map in "Jungle Basin" "Sunken Reef" "Azure Coast" "Volcanic Crags"; do
+            for f in 0 1 2; do
+              log="$(GATE_FACTION="$f" GATE_MAP="$map" "$GODOT" --headless --path . --script tools/gate_boot.gd 2>&1)"
+              check "boot f${f} — ${map}" GATE_BOOT_OK "$log"
+            done
+          done
+          echo "::endgroup::"
+          echo "::group::saveload + audio"
+          check "saveload" GATE_SAVELOAD_OK "$("$GODOT" --headless --path . --script tools/gate_saveload.gd 2>&1)"
+          check "audio"    GATE_AUDIO_OK    "$("$GODOT" --headless --path . --script tools/gate_audio.gd 2>&1)"
+          echo "::endgroup::"
           exit $fail

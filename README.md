@@ -115,11 +115,12 @@ godot --headless --path . --script res://tools/gate_boot.gd
 godot --headless --path . --script res://tools/gate_saveload.gd
 ```
 
-Optional faction boot variants:
+Optional faction / map boot variants (CI runs the full map × faction matrix):
 
 ```powershell
 $env:GATE_FACTION='1'; godot --headless --path . --script res://tools/gate_boot.gd
 $env:GATE_FACTION='2'; godot --headless --path . --script res://tools/gate_boot.gd
+$env:GATE_MAP='Sunken Reef'; godot --headless --path . --script res://tools/gate_boot.gd
 ```
 
 Strict audio asset check (requires all SFX WAV files on disk):
