@@ -23,8 +23,26 @@ func _ready() -> void:
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
 	_build_continue_button()
+	_build_version_label()
 	SoundManager.start_menu_music()
 	_maybe_offer_tutorial()
+
+## Version string sourced from project.godot (config/version) so it never drifts
+## from the actual build. Bottom-right, unobtrusive.
+func _build_version_label() -> void:
+	var ver: String = String(ProjectSettings.get_setting("application/config/version", "1.0.0"))
+	var lbl := Label.new()
+	lbl.text = "v%s" % ver
+	lbl.add_theme_color_override("font_color", Color(0.55, 0.62, 0.68, 0.8))
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(lbl)
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	lbl.offset_left = -140.0
+	lbl.offset_top = -34.0
+	lbl.offset_right = -16.0
+	lbl.offset_bottom = -12.0
 
 ## On a brand-new profile, offer the guided tutorial once.
 func _maybe_offer_tutorial() -> void:
