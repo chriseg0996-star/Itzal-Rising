@@ -68,9 +68,9 @@ func _apply_mission_modifier(world: Node, player_start: Vector2) -> void:
 			var packed: PackedScene = load(scene_path)
 			if packed != null:
 				var v: Node = packed.instantiate()
-				world.add_child(v)
 				if v is Node2D:
-					(v as Node2D).global_position = player_start + Vector2(0, 90)
+					(v as Node2D).call_deferred("set_global_position", player_start + Vector2(0, 90))
+				world.add_child.call_deferred(v)
 
 ## Scale every position (and position list) in a map config from DESIGN_SIZE to
 ## WORLD_SIZE space. Non-position values (tints, texture paths) pass through.
@@ -116,6 +116,6 @@ func _spawn(scene: PackedScene, parent: Node, pos: Vector2) -> void:
 	if scene == null:
 		return
 	var node: Node = scene.instantiate()
-	parent.add_child(node)
+	parent.add_child.call_deferred(node)
 	if node is Node2D:
-		(node as Node2D).global_position = pos
+		(node as Node2D).call_deferred("set_global_position", pos)

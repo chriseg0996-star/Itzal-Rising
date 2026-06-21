@@ -1,8 +1,9 @@
 # Godot .gitignore
 .godot/
 *.import
-export_presets.cfg
 builds/
+*.tpz
+godot_export_templates.*
 *.tmp
 
 # Local backups of original (un-stripped) sprite sheets
