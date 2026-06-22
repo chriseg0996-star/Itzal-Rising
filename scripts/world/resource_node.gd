@@ -25,9 +25,15 @@ const BERRY_VARIANTS: Array[String] = [
 	"res://assets/world/berry_a.png", "res://assets/world/berry_b.png",
 	"res://assets/world/berry_c.png", "res://assets/world/berry_d.png",
 ]
+const MINE_VARIANTS: Array[String] = [
+	"res://assets/world/mine_a.png", "res://assets/world/mine_b.png",
+	"res://assets/world/mine_c.png", "res://assets/world/mine_d.png",
+]
 const FOREST_WIDTH: float = 120.0   # ~1.5x the Town Hall's visible core
 const BERRY_WIDTH: float = 42.0     # ~35% of a forest — a compact food node
+const MINE_WIDTH: float = 140.0     # between a berry patch and a forest cluster
 const FOREST_AMOUNT: int = 2200
+const MINE_AMOUNT: int = 3500     # fewer, larger formations carry more ore
 
 var variant: int = -1
 var selected: bool = false
@@ -41,6 +47,9 @@ func _ready() -> void:
 		_setup_painted(FOREST_VARIANTS, FOREST_WIDTH, "forests", -2)
 	elif is_food():
 		_setup_painted(BERRY_VARIANTS, BERRY_WIDTH, "berries", -1)
+	elif is_gold():
+		amount = maxi(amount, MINE_AMOUNT)
+		_setup_painted(MINE_VARIANTS, MINE_WIDTH, "mines", -1)
 	else:
 		_apply_sprite(sprite_asset)
 		TextureGenerator.attach_shadow(self, 32.0, 13.0, 2.0, 0.30)
@@ -53,6 +62,13 @@ func is_forest() -> bool:
 func is_food() -> bool:
 	var t: String = String(resource_type)
 	return t == "comida" or t == "food"
+
+func is_gold() -> bool:
+	var t: String = String(resource_type)
+	return t == "oro" or t == "gold"
+
+func is_painted() -> bool:
+	return is_forest() or is_food() or is_gold()
 
 ## Shared setup for painted resource art (forests, berry bushes): random variant,
 ## grove/bush sprite scaled to `width`, ground shadow, drawn below units (so a
@@ -118,7 +134,7 @@ func set_selected(value: bool) -> void:
 ## persistent type-coded pad so it reads apart.
 func _draw() -> void:
 	var c: Color = type_color()
-	if is_forest() or is_food():
+	if is_painted():
 		if selected:
 			draw_arc(Vector2.ZERO, _width * 0.5, 0.0, TAU, 48, Color(c.r, c.g, c.b, 0.9), 3.0, true)
 		return

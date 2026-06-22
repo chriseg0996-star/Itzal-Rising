@@ -59,6 +59,7 @@ func _ready() -> void:
 func _dedup_painted(world: Node) -> void:
 	_dedup_group(world, "forests", 300.0)
 	_dedup_group(world, "berries", 120.0)
+	_dedup_group(world, "mines", 320.0)
 
 func _dedup_group(world: Node, group: String, radius: float) -> void:
 	var nodes: Array = world.get_tree().get_nodes_in_group(group)
@@ -160,7 +161,7 @@ func _spawn(scene: PackedScene, parent: Node, pos: Vector2) -> void:
 ## painted grove sprites (each is already a clump), so a seed only needs 1 extra
 ## grove spread wide — not a dense ring of small trees.
 const _CLUSTER_TREE: int = 1
-const _CLUSTER_GOLD: int = 2
+const _CLUSTER_GOLD: int = 0   # each mine is a full formation — one per seed
 const _CLUSTER_FOOD: int = 3
 
 func _grow_clusters(world: Node, cfg: Dictionary) -> void:
