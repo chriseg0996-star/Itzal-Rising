@@ -18,9 +18,17 @@ var _rng := RandomNumberGenerator.new()
 var _world: float = MapConfig.WORLD_SIZE
 var _scale: float = MapConfig.SCALE
 
+## Large, intentional terrain features (placed once per map, deterministic).
+var _rocky: Array[Vector2] = []
+var _fertile: Array[Vector2] = []
+
 func _ready() -> void:
 	z_index = -9
 	_rng.seed = hash(GameSettings.selected_map)
+	for i in 4:
+		_rocky.append(_rand_pt(340.0))
+	for i in 3:
+		_fertile.append(_rand_pt(340.0))
 	_setup_ground_shader()
 	queue_redraw()
 
@@ -68,6 +76,17 @@ func _build_control() -> ImageTexture:
 	var etc: Vector2 = (MapConfig.get_map(GameSettings.selected_map).get("enemy_tc", MapConfig.DEFAULT_ENEMY_TC) as Vector2)
 	_stamp(img, tc * _scale * k, 17.0, 0)
 	_stamp(img, etc * _scale * k, 17.0, 0)
+	# Intentional features: rocky patches (dirt+gravel), fertile areas, and a
+	# worn travel route between the two bases.
+	for c in _rocky:
+		_stamp(img, c * k, 22.0, 0)
+	for c in _fertile:
+		_stamp(img, c * k, 24.0, 2)
+	var a: Vector2 = tc * _scale * k
+	var b: Vector2 = etc * _scale * k
+	var steps: int = maxi(1, int(a.distance_to(b) / 3.0))
+	for i in range(steps + 1):
+		_stamp(img, a.lerp(b, float(i) / float(steps)), 3.5, 0)
 	return ImageTexture.create_from_image(img)
 
 func _stamp(img: Image, center: Vector2, radius: float, channel: int) -> void:
@@ -104,10 +123,15 @@ func _rand_pt(margin: float) -> Vector2:
 func _draw() -> void:
 	_draw_void()
 	var area := _world * _world
-	for i in int(area / 70000.0):
+	# Sparse scatter (~60% fewer than before); stones live mostly in the rocky
+	# patches so they read as an intentional feature, not random litter.
+	for i in int(area / 175000.0):
 		_grass_tuft(_rand_pt(40.0))
-	for i in int(area / 95000.0):
+	for i in int(area / 300000.0):
 		_small_stone(_rand_pt(50.0))
+	for c in _rocky:
+		for k in 12:
+			_small_stone(c + Vector2(_rng.randf_range(-95.0, 95.0), _rng.randf_range(-80.0, 80.0)))
 	for c in _seeds("trees") + _seeds("extra_trees"):
 		_leaf_litter(c)
 
@@ -140,6 +164,6 @@ func _small_stone(c: Vector2) -> void:
 
 func _leaf_litter(c: Vector2) -> void:
 	var cols := [Color(0.42, 0.30, 0.15), Color(0.52, 0.38, 0.17), Color(0.34, 0.40, 0.18)]
-	for k in 12:
+	for k in 6:
 		var p := c + Vector2(_rng.randf_range(-95.0, 95.0), _rng.randf_range(-80.0, 80.0))
 		draw_circle(p, _rng.randf_range(1.2, 2.6), cols[_rng.randi() % cols.size()])

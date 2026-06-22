@@ -22,25 +22,21 @@ void fragment() {
 	vec3 dg = texture(drygrass, t * 1.17 + vec2(0.31, 0.62)).rgb;
 	vec3 d  = texture(dirt,     t * 1.09 + vec2(0.73, 0.19)).rgb;
 
-	// Natural macro patches (large + medium octave).
-	float macro = n(world / 1500.0) * 0.65 + n(world / 520.0 + vec2(0.5)) * 0.35;
-
-	// Grass dominates; dry-grass on high macro, occasional worn dirt on low macro
-	// — tight smoothstep keeps transitions crisp rather than foggy.
-	float dryw  = smoothstep(0.58, 0.72, macro);
-	float dirtw = smoothstep(0.29, 0.20, macro) * 0.9;
-
+	// Broad grass clearings: one large-scale octave only, so variation reads as
+	// gentle intentional clearings rather than busy random patches.
+	float clearing = n(world / 1700.0);
+	float dryw = smoothstep(0.54, 0.74, clearing) * 0.8;
 	vec3 col = mix(g, dg, dryw);
-	col = mix(col, d, dirtw);
 
-	// Resource splat: r = excavated dirt/gravel, g = leaf litter, b = fertile soil.
+	// Dirt is INTENTIONAL only — from the control splat (buildings, resources,
+	// worn routes, rocky patches). No random brown stains on open grass.
 	vec4 c = texture(control, UV);
 	col = mix(col, d, clamp(c.r, 0.0, 1.0));
-	col = mix(col, col * vec3(0.64, 0.68, 0.52), c.g * 0.75);   // litter: darker, browner
-	col = mix(col, col * vec3(0.74, 1.02, 0.66), c.b * 0.55);   // fertile: richer green
+	col = mix(col, col * vec3(0.64, 0.68, 0.52), c.g * 0.75);   // leaf litter
+	col = mix(col, col * vec3(0.74, 1.02, 0.66), c.b * 0.55);   // fertile soil
 
-	// Fine per-pixel grain so flat areas still breathe.
-	col *= 0.92 + n(world / 64.0) * 0.14;
+	// Subtle fine grain only (no excessive noise).
+	col *= 0.96 + n(world / 70.0) * 0.07;
 
 	COLOR = vec4(col, 1.0);
 }
