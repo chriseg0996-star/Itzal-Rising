@@ -13,6 +13,11 @@ const POLL: float = 0.25
 const UNIT_RADIUS: float = 280.0
 const BUILDING_RADIUS: float = 320.0
 const COL_UNEXPLORED: Color = Color(0.04, 0.05, 0.08, 1.0)
+## Faint veil left over explored-but-unseen ground (classic RTS dim memory).
+const COL_EXPLORED_DIM: Color = Color(0.04, 0.05, 0.08, 0.32)
+## Feathered alpha for unexplored cells by Chebyshev distance to seen ground
+## (index 0 = touching seen) — turns the hard black border into a soft gradient.
+const EDGE_ALPHA: Array = [0.38, 0.62, 0.82, 0.94]
 ## Flip to true to neutralize fog entirely (debug).
 const DEBUG_DISABLE: bool = false
 
@@ -97,13 +102,35 @@ func _stamp(world_pos: Vector2, radius: float) -> void:
 func _draw() -> void:
 	if DEBUG_DISABLE:
 		return
-	# Only the never-seen darkness is drawn; once a cell is explored it stays
-	# fully clear (enemy units there still require live vision to show).
+	# Explored-but-unseen keeps a faint veil; unexplored darkens, but feathered
+	# near seen ground so the border reads as a soft fog gradient, not a hard
+	# black edge.
 	for cy in GRID:
 		for cx in GRID:
-			if _cells[cy * GRID + cx] != UNEXPLORED:
+			var st: int = _cells[cy * GRID + cx]
+			if st == VISIBLE_STATE:
 				continue
-			draw_rect(Rect2(float(cx) * CELL, float(cy) * CELL, CELL, CELL), COL_UNEXPLORED)
+			var rect := Rect2(float(cx) * CELL, float(cy) * CELL, CELL, CELL)
+			if st == EXPLORED:
+				draw_rect(rect, COL_EXPLORED_DIM)
+				continue
+			var a: float = _edge_alpha(cx, cy)
+			draw_rect(rect, Color(COL_UNEXPLORED.r, COL_UNEXPLORED.g, COL_UNEXPLORED.b, a))
+
+## Soft-edge alpha: the nearest seen cell within a few rings fades this cell.
+func _edge_alpha(cx: int, cy: int) -> float:
+	for ring in range(1, EDGE_ALPHA.size() + 1):
+		for dy in range(-ring, ring + 1):
+			for dx in range(-ring, ring + 1):
+				if maxi(absi(dx), absi(dy)) != ring:
+					continue
+				var nx: int = cx + dx
+				var ny: int = cy + dy
+				if nx < 0 or ny < 0 or nx >= GRID or ny >= GRID:
+					continue
+				if _cells[ny * GRID + nx] != UNEXPLORED:
+					return EDGE_ALPHA[ring - 1]
+	return 1.0
 
 func get_cell_state(world_pos: Vector2) -> int:
 	if DEBUG_DISABLE:
