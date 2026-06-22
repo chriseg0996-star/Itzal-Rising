@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""Generate seamless tileable biome ground textures for the RTS world.
+"""Generate seamless, DETAILED terrain tiles + a noise map for the splat shader.
 
-Each map's ground is one Sprite2D with texture_repeat, so the tiles must be
-SEAMLESS (wrap on both axes). Seamlessness comes from summing sine waves with
-INTEGER wavevectors (kx, ky) — each term is exactly periodic over the tile.
-Using many random integer wavevectors (rather than a few fixed orientations)
-makes the noise isotropic, which kills the diagonal moiré "fabric" banding the
-old 4-grating version produced.
+The map ground is rendered by a shader that blends several of these tiles by
+noise (see assets/shaders/terrain.gdshader), so each tile must be SEAMLESS and
+carry baked fine detail (grass flecks, gravel) — that detail is what makes the
+ground read as handcrafted up close instead of a flat fill. Seamlessness comes
+from sine gratings with INTEGER wavevectors (each wraps the tile exactly).
 
-Keep luma in ~0.4-0.6 so per-map MapConfig tints (Jungle = white = identity,
-Volcanic = warm 1.15x) don't blow out to white.
+Outputs (assets/terrain/): grass, grass_dry, dirt, noise, + biome bases
+(sand_reef, azure_coast, volcanic).
 
 Usage:  python tools/make_terrain.py
 """
@@ -26,11 +25,8 @@ OUT_DIR = ROOT / "assets" / "terrain"
 SIZE = 512
 
 
-def _seamless_noise(size: int, n_waves: int, fmin: float, fmax: float, seed: int) -> np.ndarray:
-    """Isotropic seamless value noise: sum of sine gratings with random INTEGER
-    wavevectors of magnitude in [fmin, fmax], 1/|k| (pink) weighting. Integer
-    wavevectors => each grating wraps the tile exactly => seamless. Returns a
-    field in [-1, 1]."""
+def _noise(size: int, n_waves: int, fmin: float, fmax: float, seed: int) -> np.ndarray:
+    """Isotropic seamless value noise in [0,1] (integer wavevectors => seamless)."""
     rng = np.random.default_rng(seed)
     xs = np.linspace(0.0, 2.0 * np.pi, size, endpoint=False)
     gx, gy = np.meshgrid(xs, xs)
@@ -42,46 +38,65 @@ def _seamless_noise(size: int, n_waves: int, fmin: float, fmax: float, seed: int
         m = float(np.hypot(kx, ky))
         if m < fmin or m > fmax:
             continue
-        ph = rng.uniform(0.0, 2.0 * np.pi)
-        field += np.sin(kx * gx + ky * gy + ph) / m
+        field += np.sin(kx * gx + ky * gy + rng.uniform(0, 2 * np.pi)) / m
         made += 1
     field -= field.min()
     field /= max(field.max(), 1e-6)
-    return field * 2.0 - 1.0
+    return field
 
 
-def make_tile(name: str, base_rgb, accent_rgb, accent_amount: float, seed: int,
-              dark_rgb=None) -> None:
-    """Blend base->accent by a low-frequency seamless mask (broad tonal patches),
-    darken with a second mask (mottled shade), and add fine grain so it reads as
-    organic ground, not a flat fill."""
-    base = np.array(base_rgb, dtype=np.float64) / 255.0
-    accent = np.array(accent_rgb, dtype=np.float64) / 255.0
-    dark = np.array(dark_rgb if dark_rgb else accent_rgb, dtype=np.float64) / 255.0
-
-    patches = _seamless_noise(SIZE, 40, 2.0, 9.0, seed) * 0.5 + 0.5          # broad tone
-    mottle = _seamless_noise(SIZE, 48, 9.0, 22.0, seed + 7) * 0.5 + 0.5      # mid shade
-    grain = _seamless_noise(SIZE, 80, 24.0, 80.0, seed + 99) * 0.045         # fine grain
-
-    img = np.empty((SIZE, SIZE, 3), dtype=np.float64)
+def _tile(base, accent, accent_amt, dark, seed,
+          fleck_light=None, fleck_dark=None, pebble=None, pebble_amt=0.0) -> np.ndarray:
+    base = np.array(base, float) / 255.0
+    accent = np.array(accent, float) / 255.0
+    dark = np.array(dark, float) / 255.0
+    patches = _noise(SIZE, 40, 2, 9, seed)
+    mottle = _noise(SIZE, 48, 9, 22, seed + 7)
+    grain = _noise(SIZE, 80, 24, 80, seed + 99) - 0.5
+    img = np.empty((SIZE, SIZE, 3))
     for c in range(3):
-        chan = base[c] + (accent[c] - base[c]) * (patches * accent_amount)
-        chan += (dark[c] - chan) * (mottle * 0.28)
-        chan += grain
-        img[:, :, c] = np.clip(chan, 0.0, 1.0)
+        ch = base[c] + (accent[c] - base[c]) * (patches * accent_amt)
+        ch += (dark[c] - ch) * (mottle * 0.30)
+        ch += grain * 0.05
+        img[:, :, c] = ch
+    # baked fine detail: flecks (grass blades) and pebbles (gravel)
+    fl = _noise(SIZE, 70, 60, 150, seed + 11)
+    if fleck_light is not None:
+        m = np.clip((fl - 0.74) * 6.0, 0, 1)[:, :, None]
+        img = img * (1 - m) + np.array(fleck_light, float) / 255.0 * m
+    if fleck_dark is not None:
+        m = np.clip((0.26 - fl) * 6.0, 0, 1)[:, :, None]
+        img = img * (1 - m) + np.array(fleck_dark, float) / 255.0 * m
+    if pebble is not None and pebble_amt > 0.0:
+        pb = _noise(SIZE, 60, 70, 170, seed + 23)
+        m = np.clip((pb - (1.0 - pebble_amt)) * 8.0, 0, 1)[:, :, None]
+        img = img * (1 - m) + np.array(pebble, float) / 255.0 * m
+    return np.clip(img, 0, 1)
 
-    out = OUT_DIR / ("%s.png" % name)
+
+def _save(name: str, arr: np.ndarray) -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    Image.fromarray((img * 255).astype(np.uint8), "RGB").save(out)
+    out = OUT_DIR / ("%s.png" % name)
+    Image.fromarray((arr * 255).astype(np.uint8), "RGB").save(out)
     print("WROTE %s (%dx%d)" % (out.relative_to(ROOT), SIZE, SIZE))
 
 
 def main() -> None:
-    # base, accent, accent_amount, seed, dark
-    make_tile("grass", (74, 102, 64), (96, 120, 70), 0.7, 1, dark_rgb=(40, 58, 36))
-    make_tile("sand_reef", (188, 168, 120), (150, 158, 120), 0.55, 2, dark_rgb=(120, 110, 78))
-    make_tile("azure_coast", (150, 178, 196), (120, 156, 176), 0.6, 3, dark_rgb=(92, 120, 140))
-    make_tile("volcanic", (74, 58, 52), (110, 64, 42), 0.5, 4, dark_rgb=(40, 30, 28))
+    _save("grass", _tile((72, 100, 60), (96, 120, 70), 0.7, (40, 58, 36), 1,
+                         fleck_light=(120, 150, 86), fleck_dark=(44, 64, 38)))
+    _save("grass_dry", _tile((118, 124, 74), (150, 150, 96), 0.6, (86, 92, 52), 5,
+                            fleck_light=(170, 168, 108), fleck_dark=(92, 96, 54)))
+    _save("dirt", _tile((104, 80, 52), (126, 100, 66), 0.6, (70, 52, 32), 6,
+                       pebble=(150, 146, 138), pebble_amt=0.10,
+                       fleck_dark=(60, 44, 28)))
+    _save("sand_reef", _tile((188, 168, 120), (150, 158, 120), 0.55, (120, 110, 78), 2,
+                            pebble=(170, 165, 150), pebble_amt=0.05))
+    _save("azure_coast", _tile((150, 178, 196), (120, 156, 176), 0.6, (92, 120, 140), 3))
+    _save("volcanic", _tile((74, 58, 52), (110, 64, 42), 0.5, (40, 30, 28), 4,
+                           pebble=(120, 110, 105), pebble_amt=0.08))
+    # grayscale macro/fine noise for the shader (sampled at several scales)
+    nz = _noise(SIZE, 60, 3, 26, 1234)
+    _save("noise", np.dstack([nz, nz, nz]))
 
 
 if __name__ == "__main__":
