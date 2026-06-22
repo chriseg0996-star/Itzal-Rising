@@ -19,9 +19,10 @@ uniform float tile_px = 512.0;
 
 float n(vec2 p) { return texture(noise_tex, p).r; }
 
-// Two-scale sample of a tiling texture — hides the repeat.
+// Two-scale sample of a tiling texture — the large second scale gives broad,
+// natural variation and hides the repeat.
 vec3 detile(sampler2D tex, vec2 t) {
-	return mix(texture(tex, t).rgb, texture(tex, t * 0.43 + vec2(0.5)).rgb, 0.4);
+	return mix(texture(tex, t).rgb, texture(tex, t * 0.34 + vec2(0.5)).rgb, 0.5);
 }
 
 void fragment() {
@@ -35,20 +36,26 @@ void fragment() {
 	vec3 dg = detile(drygrass, t * 1.1 + vec2(0.2));
 	vec3 d  = detile(dirt, t * 0.9 + vec2(0.7));
 
-	// Half-strength broad clearings only.
-	float clearing = n(world / 1900.0);
-	float dryw = smoothstep(0.56, 0.78, clearing) * 0.4;
+	// Large, gentle grass clearings (low frequency, weak).
+	float clearing = n(world / 2700.0);
+	float dryw = smoothstep(0.55, 0.80, clearing) * 0.28;
 	vec3 col = mix(g, dg, dryw);
 
-	// Intentional ground from the control splat.
+	// Biome-scale rocky / fertile zones — broad and subtle, so whole regions of
+	// the map read as stonier or richer ground without any clutter.
+	float biome = n(world / 2800.0 + vec2(11.3));
+	col = mix(col, d * vec3(0.86, 0.87, 0.91), smoothstep(0.70, 0.86, biome) * 0.22);
+	col = mix(col, col * vec3(0.82, 1.02, 0.72), smoothstep(0.30, 0.16, biome) * 0.18);
+
+	// Intentional ground from the control splat (resources embedded in terrain).
 	vec4 c = texture(control, UV);
 	col = mix(col, d, clamp(c.r, 0.0, 1.0));                          // compacted earth
 	col = mix(col, d * vec3(0.82, 0.83, 0.87), clamp(c.a, 0.0, 1.0)); // rocky ground
-	col = mix(col, col * vec3(0.55, 0.60, 0.46), c.g * 0.85);         // dark forest soil
+	col = mix(col, col * vec3(0.50, 0.55, 0.42), c.g * 0.9);          // dark forest soil
 	col = mix(col, col * vec3(0.72, 1.04, 0.60), c.b * 0.55);         // fertile soil
 
-	// Very subtle grain (half of before).
-	col *= 0.985 + n(world / 72.0) * 0.035;
+	// Very subtle grain (~30% less than before).
+	col *= 0.99 + n(world / 72.0) * 0.024;
 
 	COLOR = vec4(col, 1.0);
 }

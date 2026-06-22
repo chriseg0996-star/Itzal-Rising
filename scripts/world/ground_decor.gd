@@ -58,7 +58,7 @@ func _build_control() -> ImageTexture:
 	img.fill(Color(0, 0, 0, 0))
 	var k: float = float(CONTROL_SIZE) / _world
 	for c in _arr("golds"):
-		_stamp(img, c * k, 15.0, 3)   # rocky ground around mines
+		_stamp(img, c * k, 26.0, 3)   # expanded disturbed/rocky ground around mines
 	for c in _arr("rocky"):
 		_stamp(img, c * k, 22.0, 3)
 	for c in _arr("forests"):
@@ -127,7 +127,6 @@ func _draw() -> void:
 			_small_stone(c + Vector2(_rng.randf_range(-95.0, 95.0), _rng.randf_range(-80.0, 80.0)))
 	for c in _arr("forests"):
 		_leaf_litter(c)
-		_roots(c)
 	for c in _arr("golds"):
 		_mining_debris(c)
 
@@ -175,16 +174,6 @@ func _leaf_litter(c: Vector2) -> void:
 	for k in 6:
 		var p := c + Vector2(_rng.randf_range(-90.0, 90.0), _rng.randf_range(-75.0, 75.0))
 		draw_circle(p, _rng.randf_range(1.2, 2.6), cols[_rng.randi() % cols.size()])
-
-## Roots creeping out from a grove base.
-func _roots(c: Vector2) -> void:
-	var col := Color(0.32, 0.22, 0.12)
-	var base := c + Vector2(0.0, 18.0)
-	for k in 4:
-		var a := PI * 0.5 + _rng.randf_range(-1.1, 1.1)
-		var tip := base + Vector2(cos(a), sin(a)) * _rng.randf_range(18.0, 34.0)
-		draw_line(base, tip, col, 2.0)
-		draw_line(tip, tip + Vector2(cos(a), sin(a)).rotated(0.5) * 10.0, col, 1.4)
 
 ## Rubble + a couple of tailing piles near a mine.
 func _mining_debris(c: Vector2) -> void:
