@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build 4 stone/ore mine resource sprites from the source renders.
+"""Crop the 2x2 gold-mine reference sheet into 4 transparent mine sprites.
 
-Some sources carry real alpha, others are flattened on a near-white background.
-We use the existing alpha when present, otherwise key the near-white background
-to transparent, then erode the fringe and crop to content.
-Output: assets/world/mine_a..d.png.
+The source flattens the editor transparency grid into opaque light grey/white
+checker pixels. We split into quadrants, key out the neutral-light checker to
+real alpha (band detected from each quadrant's border), erode the fringe, and
+trim to content. Output: assets/world/mine_a..d.png (used by the gold node).
 
 Usage:  python tools/make_mine_assets.py
 """
@@ -18,37 +18,46 @@ from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "world"
-SRC = Path("C:/Users/chris/Downloads")
-SOURCES = [
-    "ChatGPT Image Jun 21, 2026, 07_32_00 PM.png",
-    "ChatGPT Image Jun 21, 2026, 07_29_54 PM.png",
-    "ChatGPT Image Jun 21, 2026, 07_27_58 PM.png",
-    "ChatGPT Image Jun 21, 2026, 07_27_55 PM.png",
-]
+SRC = "C:/Users/chris/Downloads/ChatGPT Image Jun 21, 2026, 07_44_15 PM.png"
 
 
-def _process(name: str) -> Image.Image:
-    im = Image.open(SRC / name).convert("RGBA")
-    arr = np.array(im)
-    if arr[:, :, 3].min() >= 250:  # opaque: key the near-white background
-        rgb = arr[:, :, :3].astype(np.int16)
-        spread = rgb.max(2) - rgb.min(2)
-        lum = rgb.mean(2)
-        arr[(spread <= 18) & (lum >= 232), 3] = 0
-        im = Image.fromarray(arr, "RGBA")
-    # Erode ~2px to drop the anti-aliased halo, soften, crop to content.
-    a = im.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MinFilter(3))
+def _key_checker(q: np.ndarray) -> np.ndarray:
+    h, w = q.shape[:2]
+    border = np.concatenate([
+        q[0:8, :].reshape(-1, 4), q[h - 8:h, :].reshape(-1, 4),
+        q[:, 0:8].reshape(-1, 4), q[:, w - 8:w].reshape(-1, 4)]).astype(np.int16)
+    brgb = border[:, :3]
+    neutral = (brgb.max(1) - brgb.min(1)) <= 24
+    blum = brgb.mean(1)
+    lo = float(blum[neutral].min()) - 12 if neutral.any() else 165.0
+    rgb = q[:, :, :3].astype(np.int16)
+    spread = rgb.max(2) - rgb.min(2)
+    lum = rgb.mean(2)
+    q[(spread <= 26) & (lum >= lo), 3] = 0
+    return q
+
+
+def _process(q: np.ndarray) -> Image.Image:
+    img = Image.fromarray(_key_checker(q), "RGBA")
+    a = img.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MinFilter(3))
     a = a.filter(ImageFilter.GaussianBlur(0.6))
-    im.putalpha(a)
+    img.putalpha(a)
     bb = a.getbbox()
-    return im.crop(bb) if bb else im
+    return img.crop(bb) if bb else img
 
 
 def main() -> None:
+    im = np.array(Image.open(SRC).convert("RGBA"))
+    h, w = im.shape[:2]
+    hw, hh = w // 2, h // 2
+    quads = {
+        "mine_a": im[0:hh, 0:hw], "mine_b": im[0:hh, hw:w],
+        "mine_c": im[hh:h, 0:hw], "mine_d": im[hh:h, hw:w],
+    }
     OUT.mkdir(parents=True, exist_ok=True)
-    for i, name in enumerate(SOURCES):
-        out = _process(name)
-        path = OUT / ("mine_%s.png" % "abcd"[i])
+    for name, q in quads.items():
+        out = _process(q.copy())
+        path = OUT / ("%s.png" % name)
         out.save(path)
         print("WROTE %s (%dx%d)" % (path.relative_to(ROOT), out.width, out.height))
 
