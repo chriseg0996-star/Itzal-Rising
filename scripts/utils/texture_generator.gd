@@ -50,7 +50,22 @@ func _create_image(asset: String) -> Image:
 			return _make_gradient(Color(0.039, 0.051, 0.078, 1), Color(0.106, 0.129, 0.188, 1), 128, 256)
 		"soft_blob":
 			return _make_soft_blob()
+		"soft_patch":
+			return _make_soft_patch()
 	return _make_blank()
+
+## Like soft_blob but with a flatter, mostly-solid centre and a soft edge — for
+## terrain tone/dirt patches that need to actually read, not fade to nothing.
+func _make_soft_patch() -> Image:
+	var size := 64
+	var img: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var c := float(size - 1) * 0.5
+	for y in range(size):
+		for x in range(size):
+			var d: float = Vector2(float(x) - c, float(y) - c).length() / c
+			var a: float = clampf((1.0 - d) * 2.1, 0.0, 1.0)  # solid core, soft rim
+			img.set_pixel(x, y, Color(1, 1, 1, a))
+	return img
 
 ## White radial gradient (opaque centre → transparent edge). Tinted via modulate
 ## it serves as every soft terrain primitive: grass-tone patches, dirt, forest

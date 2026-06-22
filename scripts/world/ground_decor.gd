@@ -20,6 +20,7 @@ const FOG_COLOR: Color = Color(0.035, 0.045, 0.060, 1.0)
 const VIGNETTE_EDGE: Color = Color(0.02, 0.03, 0.045, 0.92)
 
 var _tex: Texture2D
+var _patch_tex: Texture2D
 var _rng := RandomNumberGenerator.new()
 var _world: float = MapConfig.WORLD_SIZE
 var _scale: float = MapConfig.SCALE
@@ -27,12 +28,17 @@ var _scale: float = MapConfig.SCALE
 func _ready() -> void:
 	z_index = -9
 	_tex = TextureGenerator.get_texture("soft_blob")
+	_patch_tex = TextureGenerator.get_texture("soft_patch")
 	_rng.seed = hash(GameSettings.selected_map)
 	queue_redraw()
 
-# ── soft primitive ─────────────────────────────────────────
+# ── soft primitives ────────────────────────────────────────
 func _blob(c: Vector2, rx: float, ry: float, col: Color) -> void:
 	draw_texture_rect(_tex, Rect2(c.x - rx, c.y - ry, rx * 2.0, ry * 2.0), false, col)
+
+## Flatter, solid-core patch — for terrain tone/dirt that must read clearly.
+func _patch(c: Vector2, rx: float, ry: float, col: Color) -> void:
+	draw_texture_rect(_patch_tex, Rect2(c.x - rx, c.y - ry, rx * 2.0, ry * 2.0), false, col)
 
 func _cfg() -> Dictionary:
 	return MapConfig.get_map(GameSettings.selected_map)
@@ -64,24 +70,31 @@ func _draw_void_fog() -> void:
 	draw_rect(Rect2(-EXT, 0.0, EXT, w), FOG_COLOR)                          # left
 	draw_rect(Rect2(w, 0.0, EXT, w), FOG_COLOR)                             # right
 
-# 2 ── grass tone variation patches ────────────────────────
+# 2 ── grass tone variation + scattered dirt patches ───────
 func _draw_grass_variation() -> void:
-	# Near-neutral value shifts (not strongly green) so they read as tonal
-	# variation on any biome — grass, sand, azure or volcanic.
-	var dark := Color(0.06, 0.09, 0.07, 0.18)
-	var light := Color(0.62, 0.62, 0.50, 0.10)
-	var n := int(_world * _world / 95000.0)  # density scales with map area
+	var n := int(_world * _world / 52000.0)  # density scales with map area
 	for i in n:
 		var p := _rand_pt(40.0)
-		var r := _rng.randf_range(150.0, 360.0)
-		_blob(p, r, r * _rng.randf_range(0.6, 0.9), dark if (i % 2 == 0) else light)
+		var r := _rng.randf_range(110.0, 300.0)
+		var roll := _rng.randf()
+		var col: Color
+		if roll < 0.42:
+			col = Color(0.10, 0.18, 0.09, 0.30)    # darker grass
+			_patch(p, r, r * _rng.randf_range(0.6, 0.85), col)
+		elif roll < 0.78:
+			col = Color(0.54, 0.55, 0.35, 0.22)    # warm lighter grass
+			_patch(p, r, r * _rng.randf_range(0.6, 0.85), col)
+		else:
+			r *= 0.55
+			# layered for a solid bare-dirt centre with a soft rim
+			_patch(p, r, r * 0.78, Color(0.37, 0.28, 0.17, 0.5))
+			_patch(p, r * 0.6, r * 0.46, Color(0.32, 0.24, 0.14, 0.55))
 
 # 3 ── darker forest floor under tree groves ───────────────
 func _draw_forest_floor() -> void:
-	var floor_col := Color(0.07, 0.12, 0.08, 0.5)
 	for c in _seeds("trees") + _seeds("extra_trees"):
-		_blob(c, 150.0, 130.0, floor_col)
-		_blob(c, 95.0, 80.0, Color(0.06, 0.09, 0.06, 0.45))
+		_patch(c, 120.0, 100.0, Color(0.08, 0.13, 0.08, 0.5))
+		_patch(c, 70.0, 58.0, Color(0.06, 0.09, 0.06, 0.5))
 
 # 4 ── dirt patches under bases + resource clusters ────────
 func _draw_dirt() -> void:
@@ -90,12 +103,12 @@ func _draw_dirt() -> void:
 	var player_tc: Vector2 = (_cfg().get("player_start", Vector2(300, 500)) as Vector2) * _scale
 	var enemy_tc: Vector2 = (_cfg().get("enemy_tc", MapConfig.DEFAULT_ENEMY_TC) as Vector2) * _scale
 	for base in [player_tc, enemy_tc]:
-		_blob(base, 170.0, 130.0, dirt)
-		_blob(base, 240.0, 180.0, dirt_soft)
+		_patch(base, 170.0, 130.0, dirt)
+		_patch(base, 240.0, 180.0, dirt_soft)
 	for c in _seeds("gold_mines") + _seeds("extra_gold_mines"):
-		_blob(c, 95.0, 78.0, dirt)
+		_patch(c, 95.0, 78.0, dirt)
 	for c in _seeds("food_nodes"):
-		_blob(c, 80.0, 66.0, dirt_soft)
+		_patch(c, 80.0, 66.0, dirt_soft)
 
 # 5 ── worn dirt path between the two bases ────────────────
 func _draw_path() -> void:
@@ -109,32 +122,43 @@ func _draw_path() -> void:
 		var perp := (b - a).orthogonal().normalized()
 		var off := perp * sin(t * PI) * 120.0 * sin(t * 9.0 + _rng.randf())
 		var p := a.lerp(b, t) + off * 0.15
-		_blob(p, 46.0, 30.0, path_col)
+		_patch(p, 46.0, 30.0, path_col)
 
-# 6 ── scattered decals (rocks / flowers / moss / litter) ──
+# 6 ── scattered decals (rocks / grass tufts / flowers / moss) ──
 func _draw_decals() -> void:
 	var area := _world * _world
-	for i in int(area / 110000.0):
-		_rock(_rand_pt(60.0), _rng.randf_range(9.0, 20.0))
-	for i in int(area / 150000.0):
+	for i in int(area / 170000.0):
+		_rock(_rand_pt(60.0), _rng.randf_range(11.0, 24.0))
+	for i in int(area / 80000.0):
+		_grass_tuft(_rand_pt(40.0))
+	for i in int(area / 140000.0):
 		_flower(_rand_pt(60.0))
-	for i in int(area / 130000.0):
+	for i in int(area / 200000.0):
 		_moss(_rand_pt(40.0))
 	for c in _seeds("trees") + _seeds("extra_trees"):
 		_leaf_litter(c)
 
+## A light-grey boulder (rounded, soft contact shadow) that reads as a rock, not
+## a dark blob.
 func _rock(c: Vector2, s: float) -> void:
-	_blob(c + Vector2(0, s * 0.35), s * 1.2, s * 0.5, Color(0, 0, 0, 0.22))  # ground shadow
-	var grey := Color(0.30, 0.31, 0.34).lerp(Color(0.20, 0.21, 0.24), _rng.randf())
-	var pts := PackedVector2Array([
-		c + Vector2(-s, s * 0.2), c + Vector2(-s * 0.6, -s * 0.7),
-		c + Vector2(s * 0.45, -s * 0.85), c + Vector2(s, s * 0.1),
-		c + Vector2(s * 0.4, s * 0.55), c + Vector2(-s * 0.5, s * 0.55)])
-	draw_colored_polygon(pts, grey)
-	draw_colored_polygon(PackedVector2Array([
-		c + Vector2(-s * 0.6, -s * 0.7), c + Vector2(s * 0.45, -s * 0.85),
-		c + Vector2(s * 0.1, -s * 0.2), c + Vector2(-s * 0.3, -s * 0.1)]),
-		grey.lightened(0.22))
+	_blob(c + Vector2(0, s * 0.42), s * 1.25, s * 0.42, Color(0, 0, 0, 0.16))  # soft contact shadow
+	var base := Color(0.46, 0.47, 0.50).lerp(Color(0.34, 0.35, 0.39), _rng.randf())
+	var pts := PackedVector2Array()
+	for k in 9:
+		var ang := float(k) / 9.0 * TAU
+		var rad := s * (0.78 + 0.22 * _rng.randf())
+		pts.append(c + Vector2(cos(ang) * rad, sin(ang) * rad * 0.72 - s * 0.12))
+	draw_colored_polygon(pts, base)
+	# top-left light face
+	draw_circle(c + Vector2(-s * 0.22, -s * 0.34), s * 0.42, base.lightened(0.22))
+
+## A small clump of grass blades.
+func _grass_tuft(c: Vector2) -> void:
+	var g := Color(0.24, 0.42, 0.18).lerp(Color(0.42, 0.54, 0.26), _rng.randf())
+	for k in 5:
+		var x := c.x + _rng.randf_range(-7.0, 7.0)
+		var h := _rng.randf_range(7.0, 13.0)
+		draw_line(Vector2(x, c.y), Vector2(x + _rng.randf_range(-3.0, 3.0), c.y - h), g, 1.6)
 
 func _flower(c: Vector2) -> void:
 	var palette := [Color(0.92, 0.92, 0.95), Color(0.95, 0.82, 0.30),
