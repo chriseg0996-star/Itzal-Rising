@@ -21,8 +21,6 @@ func _ready() -> void:
 	var player_start: Vector2 = cfg.get("player_start", Vector2(300, 500)) as Vector2
 	_move(world, "PlayerTC", player_start)
 	_apply_list(world, "Villager", cfg.get("villagers", []) as Array)
-	_apply_list(world, "Tree", cfg.get("trees", []) as Array)
-	_apply_list(world, "GoldMine", cfg.get("gold_mines", []) as Array)
 	_apply_list(world, "Enemy", cfg.get("enemy_soldiers", []) as Array)
 	var enemy_base: Node = world.get_node_or_null("EnemyBase")
 	if enemy_base != null and enemy_base is Node2D:
@@ -35,13 +33,18 @@ func _ready() -> void:
 		var tex_path: String = String(cfg.get("ground_texture", MapConfig.DEFAULT_GROUND_TEXTURE))
 		if ResourceLoader.exists(tex_path):
 			(ground as Sprite2D).texture = load(tex_path)
-	for p in cfg.get("extra_trees", []) as Array:
-		_spawn(TREE_SCENE, world, p as Vector2)
-	for p in cfg.get("extra_gold_mines", []) as Array:
-		_spawn(GOLD_SCENE, world, p as Vector2)
-	for p in cfg.get("food_nodes", []) as Array:
-		_spawn(FOOD_SCENE, world, p as Vector2)
-	_grow_clusters(world, cfg)
+	# Structured procedural layout (MapGen) replaces the authored resource lists
+	# with strategic geography — same seed as ground_decor, so terrain matches.
+	_clear_baked(world, "Tree")
+	_clear_baked(world, "GoldMine")
+	var enemy_tc_pos: Vector2 = cfg.get("enemy_tc", MapConfig.DEFAULT_ENEMY_TC) as Vector2
+	var layout: Dictionary = MapGen.generate(player_start, enemy_tc_pos, MapConfig.WORLD_SIZE, int(hash(GameSettings.selected_map)))
+	for fp in layout["forests"]:
+		_spawn(TREE_SCENE, world, fp as Vector2)
+	for bp in layout["berries"]:
+		_spawn(FOOD_SCENE, world, bp as Vector2)
+	for gp in layout["golds"]:
+		_spawn(GOLD_SCENE, world, gp as Vector2)
 	var cam: Node = world.get_node_or_null("RTSCamera")
 	if cam != null and cam is Node2D:
 		# A Decay player starts at the enemy base — open the camera there.
@@ -154,35 +157,13 @@ func _spawn(scene: PackedScene, parent: Node, pos: Vector2) -> void:
 	if node is Node2D:
 		(node as Node2D).call_deferred("set_global_position", pos)
 
-## AoE-style abundance: every resource seed becomes the centre of a cluster —
-## dense tree groves, gold veins, berry patches — instead of a lone node. Seeds
-## already exist (baked or _spawned); this only adds the surrounding ring(s).
-## Counts/radii are deterministic so a map always lays out the same. Forests use
-## painted grove sprites (each is already a clump), so a seed only needs 1 extra
-## grove spread wide — not a dense ring of small trees.
-const _CLUSTER_TREE: int = 1
-const _CLUSTER_GOLD: int = 0   # each mine is a full formation — one per seed
-const _CLUSTER_FOOD: int = 3
-
-func _grow_clusters(world: Node, cfg: Dictionary) -> void:
-	var trees: Array = (cfg.get("trees", []) as Array) + (cfg.get("extra_trees", []) as Array)
-	for p in trees:
-		_spawn_ring(TREE_SCENE, world, p as Vector2, _CLUSTER_TREE, 130.0)
-	var golds: Array = (cfg.get("gold_mines", []) as Array) + (cfg.get("extra_gold_mines", []) as Array)
-	for p in golds:
-		_spawn_ring(GOLD_SCENE, world, p as Vector2, _CLUSTER_GOLD, 46.0)
-	for p in cfg.get("food_nodes", []) as Array:
-		_spawn_ring(FOOD_SCENE, world, p as Vector2, _CLUSTER_FOOD, 50.0)
-
-## Spawns `count` nodes in an organic ring around `center` (alternating radius
-## for a blobby, non-circular look), clamped inside the playfield.
-func _spawn_ring(scene: PackedScene, parent: Node, center: Vector2, count: int, radius: float) -> void:
-	var lo: float = 80.0
-	var hi: float = MapConfig.WORLD_SIZE - 80.0
-	for i in count:
-		var ang: float = (float(i) / float(count)) * TAU + radius * 0.013
-		var rr: float = radius * (0.78 if i % 2 == 0 else 1.18)
-		var pos: Vector2 = center + Vector2(cos(ang), sin(ang)) * rr
-		pos.x = clampf(pos.x, lo, hi)
-		pos.y = clampf(pos.y, lo, hi)
-		_spawn(scene, parent, pos)
+## Frees the baked numbered resource nodes (Name1..NameN) — the procedural
+## MapGen layout supplies all resources now.
+func _clear_baked(world: Node, base_name: String) -> void:
+	var i: int = 1
+	while true:
+		var n: Node = world.get_node_or_null(NodePath("%s%d" % [base_name, i]))
+		if n == null:
+			break
+		n.queue_free()
+		i += 1
