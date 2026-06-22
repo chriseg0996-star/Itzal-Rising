@@ -23,7 +23,9 @@ const FOREST_VARIANTS: Array[String] = [
 	"res://assets/world/forest_c.png",
 	"res://assets/world/forest_d.png",
 ]
-const FOREST_WIDTH: float = 200.0
+# ~1.5x the Town Centre's visible core, sized like an RTS resource node rather
+# than environmental scenery (40% smaller than the first pass).
+const FOREST_WIDTH: float = 120.0
 const FOREST_AMOUNT: int = 2200
 
 var forest_variant: int = -1
@@ -36,7 +38,9 @@ func _ready() -> void:
 		amount = maxi(amount, FOREST_AMOUNT)
 		forest_variant = randi() % FOREST_VARIANTS.size()
 		_apply_forest_sprite()
-		TextureGenerator.attach_shadow(self, FOREST_WIDTH * 0.60, FOREST_WIDTH * 0.22, 8.0, 0.34)
+		TextureGenerator.attach_shadow(self, FOREST_WIDTH * 0.60, FOREST_WIDTH * 0.22, 5.0, 0.34)
+		z_index = -2  # always draw below units so a unit is never hidden by a grove
+		_fit_forest_collision()
 	else:
 		_apply_sprite(sprite_asset)
 		TextureGenerator.attach_shadow(self, 32.0, 13.0, 2.0, 0.30)
@@ -61,6 +65,18 @@ func _apply_forest_sprite() -> void:
 	s.scale = Vector2(sc, sc)
 	s.centered = true
 	s.position = Vector2(0.0, -float(tex.get_height()) * sc * 0.40)
+
+## Shrinks the harvest/click footprint to the grove's visible base (the trunk
+## cluster at the bottom) rather than the whole canopy, so it targets like an
+## RTS resource node.
+func _fit_forest_collision() -> void:
+	var col: Node = get_node_or_null("Area2D/CollisionShape2D")
+	if not (col is CollisionShape2D):
+		return
+	var rs := RectangleShape2D.new()
+	rs.size = Vector2(FOREST_WIDTH * 0.5, FOREST_WIDTH * 0.30)
+	(col as CollisionShape2D).shape = rs
+	(col as CollisionShape2D).position = Vector2(0.0, -FOREST_WIDTH * 0.05)
 
 ## Used by MapLoader's de-dup pass to avoid same-variant neighbours.
 func set_forest_variant(i: int) -> void:
