@@ -35,6 +35,7 @@ var _stat: StatComponent = null
 var _base_modulate: Color = Color(1, 1, 1, 1)
 
 func _ready() -> void:
+	TextureGenerator.attach_shadow(self, 24.0, 10.0, 7.0, 0.32)
 	add_to_group("soldiers")
 	add_to_group("combat_units")
 	var fac: FactionData = FactionManager.get_faction(faction_id)

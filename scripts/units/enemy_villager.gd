@@ -38,6 +38,7 @@ var _hp_bar_width: float  = 32.0
 var _base_modulate: Color = Color(1, 1, 1, 1)
 
 func _ready() -> void:
+	TextureGenerator.attach_shadow(self, 22.0, 9.0, 7.0, 0.32)
 	add_to_group("villagers")
 	add_to_group("combat_units")
 	var fac: FactionData = FactionManager.get_faction(faction_id)

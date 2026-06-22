@@ -18,6 +18,7 @@ const TINT_FOOD: Color = Color(0.90, 0.27, 0.36, 1.0)
 func _ready() -> void:
 	add_to_group("resources")
 	_apply_sprite(sprite_asset)
+	TextureGenerator.attach_shadow(self, 32.0, 13.0, 2.0, 0.30)
 	queue_redraw()
 
 ## A soft color-coded pad on the ground under the node + a brighter ring.

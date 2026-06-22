@@ -123,6 +123,7 @@ func _ready() -> void:
 		_apply_lattice_network()
 	_apply_sprite(sprite_asset)
 	_hp_bar_y = _compute_hp_bar_y()
+	_attach_building_shadow()
 	_base_modulate = modulate
 	var fac: FactionData = FactionManager.get_faction(faction_id)
 	if fac != null:
@@ -397,6 +398,16 @@ func _flash_hit() -> void:
 	modulate = Color(2.0, 2.0, 2.0, _base_modulate.a)
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", _base_modulate, 0.1)
+
+## Soft ground shadow scaled to the building's footprint (from its sprite),
+## so big Town Centers and small Houses each get a fitting shadow.
+func _attach_building_shadow() -> void:
+	var w: float = 72.0
+	var spr: Node = get_node_or_null("BuildingSprite")
+	if spr is Sprite2D and (spr as Sprite2D).texture != null:
+		var s := spr as Sprite2D
+		w = float(s.texture.get_width()) * s.scale.x * 0.92
+	TextureGenerator.attach_shadow(self, w, w * 0.42, -2.0, 0.36)
 
 ## Sits the HP bar just above the building's rendered sprite (centered Sprite2D),
 ## so it hugs each building instead of floating at a fixed height.

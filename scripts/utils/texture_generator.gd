@@ -48,7 +48,38 @@ func _create_image(asset: String) -> Image:
 			return _make_farm()
 		"menu_bg":
 			return _make_gradient(Color(0.039, 0.051, 0.078, 1), Color(0.106, 0.129, 0.188, 1), 128, 256)
+		"soft_blob":
+			return _make_soft_blob()
 	return _make_blank()
+
+## White radial gradient (opaque centre → transparent edge). Tinted via modulate
+## it serves as every soft terrain primitive: grass-tone patches, dirt, forest
+## floor, edge fog and object shadows — one cached texture, batched draws.
+func _make_soft_blob() -> Image:
+	var size := 64
+	var img: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var c := float(size - 1) * 0.5
+	for y in range(size):
+		for x in range(size):
+			var d: float = Vector2(float(x) - c, float(y) - c).length() / c
+			var a: float = clampf(1.0 - d, 0.0, 1.0)
+			a = a * a  # ease so the falloff is soft, not linear
+			img.set_pixel(x, y, Color(1, 1, 1, a))
+	return img
+
+## Attaches a soft elliptical ground shadow under a Node2D (one shared cached
+## texture, batched, zero per-frame cost — it just rides the parent transform).
+## Drawn behind the node's art and above the terrain decor.
+func attach_shadow(node: Node2D, width: float, height: float, y_offset: float = 0.0, alpha: float = 0.34) -> void:
+	var s := Sprite2D.new()
+	s.texture = get_texture("soft_blob")
+	s.modulate = Color(0.0, 0.0, 0.0, alpha)
+	s.position = Vector2(0.0, y_offset)
+	s.scale = Vector2(width / 64.0, height / 64.0)
+	s.z_index = -1
+	s.z_as_relative = true
+	node.add_child(s)
+	node.move_child(s, 0)
 
 func _make_gradient(top: Color, bottom: Color, w: int, h: int) -> Image:
 	var img: Image = Image.create(w, h, false, Image.FORMAT_RGBA8)

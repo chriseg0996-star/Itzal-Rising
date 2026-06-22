@@ -1,6 +1,7 @@
-[gd_scene load_steps=28 format=3 uid="uid://d8w3r5y6q1n2v"]
+[gd_scene load_steps=29 format=3 uid="uid://d8w3r5y6q1n2v"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/Ground.tscn" id="1_ground"]
+[ext_resource type="Script" path="res://scripts/world/ground_decor.gd" id="28_gdecor"]
 [ext_resource type="PackedScene" path="res://scenes/camera/RTSCamera.tscn" id="2_camscn"]
 [ext_resource type="PackedScene" path="res://scenes/units/Villager.tscn" id="3_vil"]
 [ext_resource type="Script" path="res://scripts/units/selection_box.gd" id="4_sel"]
@@ -35,6 +36,9 @@ outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 4096, 0, 4096, 40
 [node name="World" type="Node2D"]
 
 [node name="Ground" parent="." instance=ExtResource("1_ground")]
+
+[node name="GroundDecor" type="Node2D" parent="."]
+script = ExtResource("28_gdecor")
 
 [node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
 navigation_polygon = SubResource("NavPoly_1")
