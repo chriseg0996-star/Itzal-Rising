@@ -50,6 +50,35 @@ func _ready() -> void:
 		else:
 			(cam as Node2D).position = player_start
 	_apply_mission_modifier(world, player_start)
+	# Run after the deferred spawns have positioned every grove.
+	_dedup_forest_variants.call_deferred(world)
+
+## Avoid identical forest variants sitting next to each other: walk the groves and
+## re-roll any whose variant matches a close neighbour, to a variant none of its
+## neighbours use (best effort). Runs deferred, once positions are set.
+func _dedup_forest_variants(world: Node) -> void:
+	var forests: Array = world.get_tree().get_nodes_in_group("forests")
+	var radius: float = 300.0
+	for f in forests:
+		if not (is_instance_valid(f) and f is Node2D):
+			continue
+		var used: Dictionary = {}
+		var clash: bool = false
+		for o in forests:
+			if o == f or not (is_instance_valid(o) and o is Node2D):
+				continue
+			if (o as Node2D).global_position.distance_to((f as Node2D).global_position) < radius:
+				used[int(o.get("forest_variant"))] = true
+				if int(o.get("forest_variant")) == int(f.get("forest_variant")):
+					clash = true
+		if not clash:
+			continue
+		var free: Array = []
+		for i in 4:
+			if not used.has(i):
+				free.append(i)
+		if not free.is_empty() and f.has_method("set_forest_variant"):
+			f.set_forest_variant(free[(int(f.get("forest_variant")) + 1) % free.size()])
 
 ## Campaign handicaps that need the live world. fast_aggro is handled in
 ## EnemyAI.reset(); the rest are applied here.
@@ -124,15 +153,17 @@ func _spawn(scene: PackedScene, parent: Node, pos: Vector2) -> void:
 ## AoE-style abundance: every resource seed becomes the centre of a cluster —
 ## dense tree groves, gold veins, berry patches — instead of a lone node. Seeds
 ## already exist (baked or _spawned); this only adds the surrounding ring(s).
-## Counts/radii are deterministic so a map always lays out the same.
-const _CLUSTER_TREE: int = 6
+## Counts/radii are deterministic so a map always lays out the same. Forests use
+## painted grove sprites (each is already a clump), so a seed only needs 1 extra
+## grove spread wide — not a dense ring of small trees.
+const _CLUSTER_TREE: int = 1
 const _CLUSTER_GOLD: int = 2
 const _CLUSTER_FOOD: int = 4
 
 func _grow_clusters(world: Node, cfg: Dictionary) -> void:
 	var trees: Array = (cfg.get("trees", []) as Array) + (cfg.get("extra_trees", []) as Array)
 	for p in trees:
-		_spawn_ring(TREE_SCENE, world, p as Vector2, _CLUSTER_TREE, 54.0)
+		_spawn_ring(TREE_SCENE, world, p as Vector2, _CLUSTER_TREE, 130.0)
 	var golds: Array = (cfg.get("gold_mines", []) as Array) + (cfg.get("extra_gold_mines", []) as Array)
 	for p in golds:
 		_spawn_ring(GOLD_SCENE, world, p as Vector2, _CLUSTER_GOLD, 46.0)
