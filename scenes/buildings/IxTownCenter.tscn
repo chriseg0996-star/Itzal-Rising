@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/ix_tc_sheet.png" id="bld_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_IXTC"]
-size = Vector2(159, 158)
+size = Vector2(239, 237)
 
 [node name="IxTownCenter" type="Node2D" groups=["town_center"]]
 script = ExtResource("1_bldg_script")
@@ -50,5 +50,5 @@ shape = SubResource("RectShape_IXTC")
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]
 texture = ExtResource("bld_tex")
-scale = Vector2(0.08, 0.08)
+scale = Vector2(0.12, 0.12)
 offset = Vector2(0, -1024)
