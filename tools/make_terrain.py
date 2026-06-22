@@ -22,7 +22,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "assets" / "terrain"
-SIZE = 512
+SIZE = 1024   # higher-res tiles so terrain matches the crisp assets
 
 
 def _noise(size: int, n_waves: int, fmin: float, fmax: float, seed: int) -> np.ndarray:
@@ -56,16 +56,17 @@ def _tile(base, accent, accent_amt, dark, seed,
     img = np.empty((SIZE, SIZE, 3))
     for c in range(3):
         ch = base[c] + (accent[c] - base[c]) * (patches * accent_amt)
-        ch += (dark[c] - ch) * (mottle * 0.16)   # gentler shading
-        ch += grain * 0.025                       # half the grain
+        ch += (dark[c] - ch) * (mottle * 0.20)   # gentle shading
+        ch += grain * 0.025                       # grain unchanged (not more noise)
         img[:, :, c] = ch
-    # baked fine detail — sparse & low-contrast so it never reads as a pattern.
-    fl = _noise(SIZE, 70, 60, 150, seed + 11)
+    # baked fine detail — same density, but CRISP edges (high slope) so it reads
+    # as sharp ground detail, not a soft wash.
+    fl = _noise(SIZE, 90, 90, 230, seed + 11)     # finer, sharper flecks
     if fleck_light is not None:
-        m = np.clip((fl - 0.82) * 5.0, 0, 1)[:, :, None]
+        m = np.clip((fl - 0.80) * 12.0, 0, 1)[:, :, None]
         img = img * (1 - m) + np.array(fleck_light, float) / 255.0 * m
     if fleck_dark is not None:
-        m = np.clip((0.18 - fl) * 5.0, 0, 1)[:, :, None]
+        m = np.clip((0.20 - fl) * 12.0, 0, 1)[:, :, None]
         img = img * (1 - m) + np.array(fleck_dark, float) / 255.0 * m
     if pebble is not None and pebble_amt > 0.0:
         pb = _noise(SIZE, 60, 70, 170, seed + 23)

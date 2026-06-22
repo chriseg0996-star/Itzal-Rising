@@ -19,18 +19,20 @@ uniform float tile_px = 512.0;
 
 float n(vec2 p) { return texture(noise_tex, p).r; }
 
-// Two-scale sample of a tiling texture — the large second scale gives broad,
-// natural variation and hides the repeat.
+// Anti-tiling WITHOUT blur: blend in a second sample at the SAME scale but
+// rotated, so the axis-aligned repeat is broken while every sample stays at full
+// texel detail (no zoomed-in, blurry octave).
 vec3 detile(sampler2D tex, vec2 t) {
-	return mix(texture(tex, t).rgb, texture(tex, t * 0.34 + vec2(0.5)).rgb, 0.5);
+	vec2 r = vec2(t.x * 0.80 - t.y * 0.60, t.x * 0.60 + t.y * 0.80) + vec2(0.5);
+	return mix(texture(tex, t).rgb, texture(tex, r).rgb, 0.32);
 }
 
 void fragment() {
 	vec2 world = UV * world_size;
 
-	// Domain warp breaks the regular tile grid (no stripes / lattice).
+	// Gentle domain warp breaks the regular tile grid (no stripes / lattice).
 	vec2 warp = vec2(n(world / 820.0), n(world / 820.0 + vec2(37.0))) - vec2(0.5);
-	vec2 t = (world + warp * 110.0) / tile_px;
+	vec2 t = (world + warp * 70.0) / tile_px;
 
 	vec3 g  = detile(grass, t);
 	vec3 dg = detile(drygrass, t * 1.1 + vec2(0.2));

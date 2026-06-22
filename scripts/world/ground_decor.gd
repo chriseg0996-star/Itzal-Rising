@@ -11,7 +11,7 @@ extends Node2D
 const EXT: float = 2600.0
 const FOG_COLOR: Color = Color(0.035, 0.045, 0.060, 1.0)
 const SHADER: String = "res://assets/shaders/terrain.gdshader"
-const CONTROL_SIZE: int = 256
+const CONTROL_SIZE: int = 512   # higher-res control = crisper dirt transitions
 
 var _rng := RandomNumberGenerator.new()
 var _world: float = MapConfig.WORLD_SIZE
@@ -56,37 +56,38 @@ func _setup_ground_shader() -> void:
 func _build_control() -> ImageTexture:
 	var img := Image.create(CONTROL_SIZE, CONTROL_SIZE, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
+	# Radii in WORLD px (× k → control px) so changing CONTROL_SIZE keeps sizes.
 	var k: float = float(CONTROL_SIZE) / _world
 	for c in _arr("golds"):
-		_stamp(img, c * k, 26.0, 3)   # expanded disturbed/rocky ground around mines
+		_stamp(img, c * k, 420.0 * k, 3)   # expanded disturbed/rocky ground around mines
 	for c in _arr("rocky"):
-		_stamp(img, c * k, 22.0, 3)
+		_stamp(img, c * k, 352.0 * k, 3)
 	for c in _arr("forests"):
-		_stamp(img, c * k, 10.0, 1)   # dark forest soil
+		_stamp(img, c * k, 165.0 * k, 1)   # dark forest soil
 	for c in _arr("berries"):
-		_stamp(img, c * k, 9.0, 2)
+		_stamp(img, c * k, 145.0 * k, 2)
 	for c in _arr("fertile"):
-		_stamp(img, c * k, 24.0, 2)
+		_stamp(img, c * k, 384.0 * k, 2)
 	for b in _arr("bases"):
-		_stamp(img, b * k, 17.0, 0)   # compacted earth
+		_stamp(img, b * k, 272.0 * k, 0)   # compacted earth
 	for road in _layout.get("roads", []):
-		_stamp_road(img, road, k)     # roads -> channel 0 (see _stamp_road)
+		_stamp_road(img, road, k)
 	return ImageTexture.create_from_image(img)
 
 ## A dirt road: discs along the polyline with varying width, small jitter and
-## occasional gaps so grass intrudes — never a perfectly smooth band.
+## occasional gaps so grass intrudes — never a perfectly smooth band. World units.
 func _stamp_road(img: Image, pts: Array, k: float) -> void:
 	for s in range(pts.size() - 1):
-		var a: Vector2 = (pts[s] as Vector2) * k
-		var b: Vector2 = (pts[s + 1] as Vector2) * k
-		var steps: int = maxi(1, int(a.distance_to(b) / 2.5))
+		var a: Vector2 = pts[s] as Vector2
+		var b: Vector2 = pts[s + 1] as Vector2
+		var steps: int = maxi(1, int(a.distance_to(b) / 40.0))
 		for i in range(steps + 1):
 			if _rng.randf() < 0.12:
 				continue  # grass intrusion
 			var t: float = float(i) / float(steps)
-			var pos: Vector2 = a.lerp(b, t) + Vector2(_rng.randf_range(-1.6, 1.6), _rng.randf_range(-1.6, 1.6))
-			var w: float = 3.2 + 1.5 * sin(t * 9.0 + float(s) * 1.7)
-			_stamp(img, pos, w, 0)
+			var pos: Vector2 = a.lerp(b, t) + Vector2(_rng.randf_range(-26.0, 26.0), _rng.randf_range(-26.0, 26.0))
+			var w: float = 52.0 + 24.0 * sin(t * 9.0 + float(s) * 1.7)
+			_stamp(img, pos * k, w * k, 0)
 
 func _stamp(img: Image, center: Vector2, radius: float, channel: int) -> void:
 	var s := img.get_width()
