@@ -50,26 +50,29 @@ func _ready() -> void:
 		else:
 			(cam as Node2D).position = player_start
 	_apply_mission_modifier(world, player_start)
-	# Run after the deferred spawns have positioned every grove.
-	_dedup_forest_variants.call_deferred(world)
+	# Run after the deferred spawns have positioned every node.
+	_dedup_painted.call_deferred(world)
 
-## Avoid identical forest variants sitting next to each other: walk the groves and
-## re-roll any whose variant matches a close neighbour, to a variant none of its
-## neighbours use (best effort). Runs deferred, once positions are set.
-func _dedup_forest_variants(world: Node) -> void:
-	var forests: Array = world.get_tree().get_nodes_in_group("forests")
-	var radius: float = 300.0
-	for f in forests:
+## Avoid identical painted variants sitting next to each other. Forests and berry
+## bushes are de-duped within their own group (their variant indices are
+## independent). Runs deferred, once positions are set.
+func _dedup_painted(world: Node) -> void:
+	_dedup_group(world, "forests", 300.0)
+	_dedup_group(world, "berries", 120.0)
+
+func _dedup_group(world: Node, group: String, radius: float) -> void:
+	var nodes: Array = world.get_tree().get_nodes_in_group(group)
+	for f in nodes:
 		if not (is_instance_valid(f) and f is Node2D):
 			continue
 		var used: Dictionary = {}
 		var clash: bool = false
-		for o in forests:
+		for o in nodes:
 			if o == f or not (is_instance_valid(o) and o is Node2D):
 				continue
 			if (o as Node2D).global_position.distance_to((f as Node2D).global_position) < radius:
-				used[int(o.get("forest_variant"))] = true
-				if int(o.get("forest_variant")) == int(f.get("forest_variant")):
+				used[int(o.get("variant"))] = true
+				if int(o.get("variant")) == int(f.get("variant")):
 					clash = true
 		if not clash:
 			continue
@@ -77,8 +80,8 @@ func _dedup_forest_variants(world: Node) -> void:
 		for i in 4:
 			if not used.has(i):
 				free.append(i)
-		if not free.is_empty() and f.has_method("set_forest_variant"):
-			f.set_forest_variant(free[(int(f.get("forest_variant")) + 1) % free.size()])
+		if not free.is_empty() and f.has_method("set_painted_variant"):
+			f.set_painted_variant(free[(int(f.get("variant")) + 1) % free.size()])
 
 ## Campaign handicaps that need the live world. fast_aggro is handled in
 ## EnemyAI.reset(); the rest are applied here.
@@ -158,7 +161,7 @@ func _spawn(scene: PackedScene, parent: Node, pos: Vector2) -> void:
 ## grove spread wide — not a dense ring of small trees.
 const _CLUSTER_TREE: int = 1
 const _CLUSTER_GOLD: int = 2
-const _CLUSTER_FOOD: int = 4
+const _CLUSTER_FOOD: int = 3
 
 func _grow_clusters(world: Node, cfg: Dictionary) -> void:
 	var trees: Array = (cfg.get("trees", []) as Array) + (cfg.get("extra_trees", []) as Array)
@@ -168,7 +171,7 @@ func _grow_clusters(world: Node, cfg: Dictionary) -> void:
 	for p in golds:
 		_spawn_ring(GOLD_SCENE, world, p as Vector2, _CLUSTER_GOLD, 46.0)
 	for p in cfg.get("food_nodes", []) as Array:
-		_spawn_ring(FOOD_SCENE, world, p as Vector2, _CLUSTER_FOOD, 40.0)
+		_spawn_ring(FOOD_SCENE, world, p as Vector2, _CLUSTER_FOOD, 50.0)
 
 ## Spawns `count` nodes in an organic ring around `center` (alternating radius
 ## for a blobby, non-circular look), clamped inside the playfield.
