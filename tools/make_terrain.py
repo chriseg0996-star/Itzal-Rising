@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Generate seamless tileable biome ground textures for the RTS world.
 
-Each map's flat 2048x2048 ground is a single Sprite2D with texture_repeat
-enabled, so these tiles must be SEAMLESS (wrap top/bottom and left/right).
-Seamlessness is achieved by building the noise from sine waves whose periods
-divide the tile size exactly — so the pattern is continuous across the edge.
+Each map's ground is one Sprite2D with texture_repeat, so the tiles must be
+SEAMLESS (wrap on both axes). Seamlessness comes from summing sine waves with
+INTEGER wavevectors (kx, ky) — each term is exactly periodic over the tile.
+Using many random integer wavevectors (rather than a few fixed orientations)
+makes the noise isotropic, which kills the diagonal moiré "fabric" banding the
+old 4-grating version produced.
 
 Keep luma in ~0.4-0.6 so per-map MapConfig tints (Jungle = white = identity,
 Volcanic = warm 1.15x) don't blow out to white.
@@ -24,37 +26,48 @@ OUT_DIR = ROOT / "assets" / "terrain"
 SIZE = 512
 
 
-def _seamless_noise(size: int, freqs: list[int], seed: int) -> np.ndarray:
-    """Sum of sine gratings at integer frequencies (cycles per tile) with random
-    phases/orientations. Integer freqs => period divides the tile => seamless.
-    Returns a float field roughly in [-1, 1]."""
+def _seamless_noise(size: int, n_waves: int, fmin: float, fmax: float, seed: int) -> np.ndarray:
+    """Isotropic seamless value noise: sum of sine gratings with random INTEGER
+    wavevectors of magnitude in [fmin, fmax], 1/|k| (pink) weighting. Integer
+    wavevectors => each grating wraps the tile exactly => seamless. Returns a
+    field in [-1, 1]."""
     rng = np.random.default_rng(seed)
     xs = np.linspace(0.0, 2.0 * np.pi, size, endpoint=False)
     gx, gy = np.meshgrid(xs, xs)
     field = np.zeros((size, size), dtype=np.float64)
-    for f in freqs:
+    made = 0
+    while made < n_waves:
+        kx = int(rng.integers(-int(fmax), int(fmax) + 1))
+        ky = int(rng.integers(-int(fmax), int(fmax) + 1))
+        m = float(np.hypot(kx, ky))
+        if m < fmin or m > fmax:
+            continue
         ph = rng.uniform(0.0, 2.0 * np.pi)
-        ang = rng.uniform(0.0, 2.0 * np.pi)
-        ux, uy = np.cos(ang), np.sin(ang)
-        field += np.sin(f * (gx * ux + gy * uy) + ph) / f
+        field += np.sin(kx * gx + ky * gy + ph) / m
+        made += 1
     field -= field.min()
     field /= max(field.max(), 1e-6)
-    return field * 2.0 - 1.0  # [-1, 1]
+    return field * 2.0 - 1.0
 
 
-def make_tile(name: str, base_rgb, accent_rgb, accent_amount: float,
-              freqs: list[int], seed: int) -> None:
-    """Blend a base colour with an accent by a seamless noise mask, plus a fine
-    grain so it doesn't look flat. Output stays mid-luma."""
+def make_tile(name: str, base_rgb, accent_rgb, accent_amount: float, seed: int,
+              dark_rgb=None) -> None:
+    """Blend base->accent by a low-frequency seamless mask (broad tonal patches),
+    darken with a second mask (mottled shade), and add fine grain so it reads as
+    organic ground, not a flat fill."""
     base = np.array(base_rgb, dtype=np.float64) / 255.0
     accent = np.array(accent_rgb, dtype=np.float64) / 255.0
+    dark = np.array(dark_rgb if dark_rgb else accent_rgb, dtype=np.float64) / 255.0
 
-    mask = (_seamless_noise(SIZE, freqs, seed) * 0.5 + 0.5)  # [0,1]
-    grain = _seamless_noise(SIZE, [32, 48, 64], seed + 99) * 0.05
+    patches = _seamless_noise(SIZE, 40, 2.0, 9.0, seed) * 0.5 + 0.5          # broad tone
+    mottle = _seamless_noise(SIZE, 48, 9.0, 22.0, seed + 7) * 0.5 + 0.5      # mid shade
+    grain = _seamless_noise(SIZE, 80, 24.0, 80.0, seed + 99) * 0.045         # fine grain
 
     img = np.empty((SIZE, SIZE, 3), dtype=np.float64)
     for c in range(3):
-        chan = base[c] + (accent[c] - base[c]) * (mask * accent_amount) + grain
+        chan = base[c] + (accent[c] - base[c]) * (patches * accent_amount)
+        chan += (dark[c] - chan) * (mottle * 0.28)
+        chan += grain
         img[:, :, c] = np.clip(chan, 0.0, 1.0)
 
     out = OUT_DIR / ("%s.png" % name)
@@ -64,11 +77,11 @@ def make_tile(name: str, base_rgb, accent_rgb, accent_amount: float,
 
 
 def main() -> None:
-    # base, accent, accent_amount, frequencies, seed
-    make_tile("grass", (62, 107, 71), (44, 84, 54), 0.7, [3, 5, 8, 13], 1)
-    make_tile("sand_reef", (188, 168, 120), (120, 150, 140), 0.55, [2, 4, 7, 11], 2)
-    make_tile("azure_coast", (150, 178, 196), (110, 150, 180), 0.6, [3, 6, 9, 14], 3)
-    make_tile("volcanic", (74, 58, 52), (120, 60, 38), 0.5, [4, 6, 10, 16], 4)
+    # base, accent, accent_amount, seed, dark
+    make_tile("grass", (74, 102, 64), (96, 120, 70), 0.7, 1, dark_rgb=(40, 58, 36))
+    make_tile("sand_reef", (188, 168, 120), (150, 158, 120), 0.55, 2, dark_rgb=(120, 110, 78))
+    make_tile("azure_coast", (150, 178, 196), (120, 156, 176), 0.6, 3, dark_rgb=(92, 120, 140))
+    make_tile("volcanic", (74, 58, 52), (110, 64, 42), 0.5, 4, dark_rgb=(40, 30, 28))
 
 
 if __name__ == "__main__":
