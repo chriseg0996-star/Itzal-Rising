@@ -56,16 +56,16 @@ def _tile(base, accent, accent_amt, dark, seed,
     img = np.empty((SIZE, SIZE, 3))
     for c in range(3):
         ch = base[c] + (accent[c] - base[c]) * (patches * accent_amt)
-        ch += (dark[c] - ch) * (mottle * 0.30)
-        ch += grain * 0.05
+        ch += (dark[c] - ch) * (mottle * 0.16)   # gentler shading
+        ch += grain * 0.025                       # half the grain
         img[:, :, c] = ch
-    # baked fine detail: flecks (grass blades) and pebbles (gravel)
+    # baked fine detail — sparse & low-contrast so it never reads as a pattern.
     fl = _noise(SIZE, 70, 60, 150, seed + 11)
     if fleck_light is not None:
-        m = np.clip((fl - 0.74) * 6.0, 0, 1)[:, :, None]
+        m = np.clip((fl - 0.82) * 5.0, 0, 1)[:, :, None]
         img = img * (1 - m) + np.array(fleck_light, float) / 255.0 * m
     if fleck_dark is not None:
-        m = np.clip((0.26 - fl) * 6.0, 0, 1)[:, :, None]
+        m = np.clip((0.18 - fl) * 5.0, 0, 1)[:, :, None]
         img = img * (1 - m) + np.array(fleck_dark, float) / 255.0 * m
     if pebble is not None and pebble_amt > 0.0:
         pb = _noise(SIZE, 60, 70, 170, seed + 23)
@@ -82,13 +82,13 @@ def _save(name: str, arr: np.ndarray) -> None:
 
 
 def main() -> None:
-    _save("grass", _tile((72, 100, 60), (96, 120, 70), 0.7, (40, 58, 36), 1,
-                         fleck_light=(120, 150, 86), fleck_dark=(44, 64, 38)))
-    _save("grass_dry", _tile((118, 124, 74), (150, 150, 96), 0.6, (86, 92, 52), 5,
-                            fleck_light=(170, 168, 108), fleck_dark=(92, 96, 54)))
-    _save("dirt", _tile((104, 80, 52), (126, 100, 66), 0.6, (70, 52, 32), 6,
-                       pebble=(150, 146, 138), pebble_amt=0.10,
-                       fleck_dark=(60, 44, 28)))
+    _save("grass", _tile((74, 100, 62), (90, 112, 70), 0.4, (54, 76, 48), 1,
+                         fleck_light=(98, 122, 76), fleck_dark=(58, 80, 50)))
+    _save("grass_dry", _tile((116, 122, 78), (140, 142, 96), 0.4, (94, 100, 62), 5,
+                            fleck_light=(150, 150, 104), fleck_dark=(100, 104, 64)))
+    _save("dirt", _tile((100, 78, 52), (116, 94, 64), 0.4, (78, 58, 38), 6,
+                       pebble=(140, 134, 124), pebble_amt=0.06,
+                       fleck_dark=(78, 58, 38)))
     _save("sand_reef", _tile((188, 168, 120), (150, 158, 120), 0.55, (120, 110, 78), 2,
                             pebble=(170, 165, 150), pebble_amt=0.05))
     _save("azure_coast", _tile((150, 178, 196), (120, 156, 176), 0.6, (92, 120, 140), 3))

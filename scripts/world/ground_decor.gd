@@ -50,26 +50,27 @@ func _setup_ground_shader() -> void:
 	ground.material = mat
 	ground.set_deferred("modulate", Color.WHITE)
 
-## RGBA control splat. r = excavated dirt/gravel + roads, g = leaf litter,
-## b = fertile soil. Crisp noisy discs from the structured layout.
+## RGBA control splat. r = compacted earth (roads/bases), g = dark forest soil,
+## b = fertile soil (berries), a = rocky ground (mines/rocky). Crisp discs from
+## the structured layout. NOTE alpha starts at 0 — it is the rocky channel now.
 func _build_control() -> ImageTexture:
 	var img := Image.create(CONTROL_SIZE, CONTROL_SIZE, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0, 0, 0, 1))
+	img.fill(Color(0, 0, 0, 0))
 	var k: float = float(CONTROL_SIZE) / _world
 	for c in _arr("golds"):
-		_stamp(img, c * k, 14.0, 0)
+		_stamp(img, c * k, 15.0, 3)   # rocky ground around mines
 	for c in _arr("rocky"):
-		_stamp(img, c * k, 22.0, 0)
+		_stamp(img, c * k, 22.0, 3)
 	for c in _arr("forests"):
-		_stamp(img, c * k, 10.0, 1)
+		_stamp(img, c * k, 10.0, 1)   # dark forest soil
 	for c in _arr("berries"):
 		_stamp(img, c * k, 9.0, 2)
 	for c in _arr("fertile"):
 		_stamp(img, c * k, 24.0, 2)
 	for b in _arr("bases"):
-		_stamp(img, b * k, 17.0, 0)
+		_stamp(img, b * k, 17.0, 0)   # compacted earth
 	for road in _layout.get("roads", []):
-		_stamp_road(img, road, k)
+		_stamp_road(img, road, k)     # roads -> channel 0 (see _stamp_road)
 	return ImageTexture.create_from_image(img)
 
 ## A dirt road: discs along the polyline with varying width, small jitter and
