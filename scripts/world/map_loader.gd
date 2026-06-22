@@ -45,6 +45,7 @@ func _ready() -> void:
 		_spawn(FOOD_SCENE, world, bp as Vector2)
 	for gp in layout["golds"]:
 		_spawn(GOLD_SCENE, world, gp as Vector2)
+	_bake_nav(world, layout.get("blockers", []) as Array)
 	var cam: Node = world.get_node_or_null("RTSCamera")
 	if cam != null and cam is Node2D:
 		# A Decay player starts at the enemy base — open the camera there.
@@ -156,6 +157,25 @@ func _spawn(scene: PackedScene, parent: Node, pos: Vector2) -> void:
 	parent.add_child.call_deferred(node)
 	if node is Node2D:
 		(node as Node2D).call_deferred("set_global_position", pos)
+
+## Re-bakes the navigation polygon with forest formations carved out, so forests
+## block movement and the wall gaps become real chokepoints. Falls back silently
+## if anything is off (units keep the open baked mesh).
+func _bake_nav(world: Node, blockers: Array) -> void:
+	var region := world.get_node_or_null("NavigationRegion2D") as NavigationRegion2D
+	if region == null or blockers.is_empty():
+		return
+	var w: float = MapConfig.WORLD_SIZE
+	var bounds := PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, w), Vector2(0, w)])
+	var src := NavigationMeshSourceGeometryData2D.new()
+	src.add_traversable_outline(bounds)
+	for b in blockers:
+		src.add_obstruction_outline(b as PackedVector2Array)
+	var np := NavigationPolygon.new()
+	np.agent_radius = 18.0
+	np.add_outline(bounds)
+	NavigationServer2D.bake_from_source_geometry_data(np, src)
+	region.navigation_polygon = np
 
 ## Frees the baked numbered resource nodes (Name1..NameN) — the procedural
 ## MapGen layout supplies all resources now.
