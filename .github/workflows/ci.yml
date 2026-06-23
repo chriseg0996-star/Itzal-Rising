@@ -67,8 +67,9 @@ jobs:
             check "campaign ${mid}" GATE_CAMPAIGN_OK "$log"
           done
           echo "::endgroup::"
-          echo "::group::saveload + audio"
-          check "saveload" GATE_SAVELOAD_OK "$("$GODOT" --headless --path . --script tools/gate_saveload.gd 2>&1)"
-          check "audio"    GATE_AUDIO_OK    "$("$GODOT" --headless --path . --script tools/gate_audio.gd 2>&1)"
+          echo "::group::saveload + audio + unlock"
+          check "saveload"     GATE_SAVELOAD_OK "$("$GODOT" --headless --path . --script tools/gate_saveload.gd 2>&1)"
+          check "audio"        GATE_AUDIO_OK    "$("$GODOT" --headless --path . --script tools/gate_audio.gd 2>&1)"
+          check "unlock chain" GATE_UNLOCK_OK   "$("$GODOT" --headless --path . --script tools/gate_unlock.gd 2>&1)"
           echo "::endgroup::"
           exit $fail
