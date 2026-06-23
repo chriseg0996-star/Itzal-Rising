@@ -32,7 +32,7 @@ const MINE_VARIANTS: Array[String] = [
 const FOREST_WIDTH: float = 120.0   # ~1.5x the Town Hall's visible core
 const BERRY_WIDTH: float = 42.0     # ~35% of a forest — a compact food node
 const MINE_WIDTH: float = 140.0     # between a berry patch and a forest cluster
-const FOREST_AMOUNT: int = 2200
+const FOREST_AMOUNT: int = 320    # forests are now dense walls (many groves) — low per grove
 const MINE_AMOUNT: int = 3500     # fewer, larger formations carry more ore
 
 var variant: int = -1
@@ -43,7 +43,7 @@ var _width: float = 0.0
 func _ready() -> void:
 	add_to_group("resources")
 	if is_forest():
-		amount = maxi(amount, FOREST_AMOUNT)
+		amount = FOREST_AMOUNT   # set (not floor) — the scene default would override
 		_setup_painted(FOREST_VARIANTS, FOREST_WIDTH, "forests", -2)
 	elif is_food():
 		_setup_painted(BERRY_VARIANTS, BERRY_WIDTH, "berries", -1)
