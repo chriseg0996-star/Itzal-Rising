@@ -32,6 +32,7 @@ var _focus: Node = null
 var _hp_fill: StyleBoxFlat = null
 
 func _ready() -> void:
+	add_theme_stylebox_override("panel", MenuKit.chip_box(10.0))
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	if SelectionManager.has_signal("inspect_changed"):
 		SelectionManager.inspect_changed.connect(_on_inspect_changed)

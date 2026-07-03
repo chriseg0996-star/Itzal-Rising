@@ -65,23 +65,17 @@ func _ready() -> void:
 # ── Card scaffold ──────────────────────────────────────────
 func _build_card() -> void:
 	_card = PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = PANEL_BG
-	sb.set_border_width_all(1)
-	sb.border_color = PANEL_BORDER
-	sb.set_corner_radius_all(6)
-	sb.set_content_margin_all(10)
-	_card.add_theme_stylebox_override("panel", sb)
+	_card.add_theme_stylebox_override("panel", MenuKit.console_box(12.0))
 	add_child(_card)
 	_card.anchor_left = 1.0
 	_card.anchor_top = 1.0
 	_card.anchor_right = 1.0
 	_card.anchor_bottom = 1.0
 	# Bottom-centre, flush left of the minimap (AoE4 command-card position).
-	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 20.0 + 240.0)
-	_card.offset_right = -240.0
-	_card.offset_top = -300.0   # fixed height — the card never jumps between contexts
-	_card.offset_bottom = -16.0
+	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 24.0 + 232.0)
+	_card.offset_right = -232.0
+	_card.offset_top = -292.0   # fixed height — the card never jumps between contexts
+	_card.offset_bottom = -8.0   # docked to the screen edge (console feel)
 	_card.grow_horizontal = 0
 	_card.grow_vertical = 0
 

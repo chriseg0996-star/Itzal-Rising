@@ -13,6 +13,27 @@ const MUTED: Color = Color(0.48, 0.55, 0.62, 1.0)
 const DISABLED: Color = Color(0.33, 0.38, 0.43, 1.0)
 const MENU_X: float = 0.115
 
+## HUD plate tiers (nine-patch frames from tools/make_ui_frames.py). Console =
+## heavy bottom plates (chamfered, gradient, lit rim); chip = light secondary.
+static func console_box(pad: float = 12.0) -> StyleBoxTexture:
+	return _tex_box("res://assets/ui/frame_console.png", 18.0, pad)
+
+static func chip_box(pad: float = 8.0) -> StyleBoxTexture:
+	return _tex_box("res://assets/ui/frame_chip.png", 10.0, pad)
+
+static func _tex_box(path: String, margin: float, pad: float) -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = load(path)
+	sb.texture_margin_left = margin
+	sb.texture_margin_top = margin
+	sb.texture_margin_right = margin
+	sb.texture_margin_bottom = margin
+	sb.content_margin_left = pad
+	sb.content_margin_top = pad
+	sb.content_margin_right = pad
+	sb.content_margin_bottom = pad
+	return sb
+
 static func build_background(root: Control) -> void:
 	var bg := ColorRect.new()
 	bg.color = BG

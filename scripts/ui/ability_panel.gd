@@ -64,21 +64,15 @@ func _build() -> void:
 	if fac != null:
 		accent = fac.primary_color
 
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.07, 0.09, 0.12, 0.9)
-	sb.set_border_width_all(1)
-	sb.border_color = Color(accent.r, accent.g, accent.b, 0.22)
-	sb.set_corner_radius_all(6)
-	sb.set_content_margin_all(8)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", sb)
+	panel.add_theme_stylebox_override("panel", MenuKit.chip_box(8.0))
 	add_child(panel)
 	# Docked flush above the command card (same right edge), AoE4-style.
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	panel.offset_left = -586.0
-	panel.offset_top = -356.0
-	panel.offset_right = -240.0
-	panel.offset_bottom = -308.0
+	panel.offset_left = -578.0
+	panel.offset_top = -348.0
+	panel.offset_right = -232.0
+	panel.offset_bottom = -300.0
 
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)

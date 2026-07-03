@@ -25,6 +25,7 @@ var _pulse_overlay: ColorRect = null
 var _pulse_cooldown: float = 0.0
 
 func _ready() -> void:
+	($ResBlock as PanelContainer).add_theme_stylebox_override("panel", MenuKit.console_box(10.0))
 	ResourceManager.resource_changed.connect(_on_resource_changed)
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	AlertManager.alert_pushed.connect(_on_alert_pushed)
@@ -172,14 +173,7 @@ var _deal_countdown: Label = null
 ## Slim strip across the bottom, just above the build bar.
 func _build_ticker() -> void:
 	var panel := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = TICKER_BG
-	sb.set_corner_radius_all(3)
-	sb.content_margin_left = 12.0
-	sb.content_margin_right = 12.0
-	sb.content_margin_top = 3.0
-	sb.content_margin_bottom = 3.0
-	panel.add_theme_stylebox_override("panel", sb)
+	panel.add_theme_stylebox_override("panel", MenuKit.chip_box(4.0))
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
 	# Top-centre, under the era numeral (AoE4 events position).
