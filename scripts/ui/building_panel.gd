@@ -79,6 +79,7 @@ func _build_card() -> void:
 	_card.anchor_bottom = 1.0
 	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 20.0 + 16.0)
 	_card.offset_right = -16.0
+	_card.offset_top = -300.0   # fixed height — the card never jumps between contexts
 	_card.offset_bottom = -16.0
 	_card.grow_horizontal = 0
 	_card.grow_vertical = 0
@@ -117,6 +118,8 @@ func _build_card() -> void:
 	_grid.columns = COLS
 	_grid.add_theme_constant_override("h_separation", 6)
 	_grid.add_theme_constant_override("v_separation", 6)
+	# Reserve two rows so the card doesn't jump height between contexts/tabs.
+	_grid.custom_minimum_size = Vector2(0, CELL * 2.0 + 6.0)
 	v.add_child(_grid)
 
 # ── Selection routing ──────────────────────────────────────
@@ -336,15 +339,15 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 	btn.add_theme_stylebox_override("hover", hb)
 	btn.add_theme_stylebox_override("pressed", hb)
 	btn.add_theme_stylebox_override("focus", sb)
+	# AoE4-style: icon-only cells (name + cost live in the tooltip); text is the
+	# fallback when no icon exists. Keeps every cell exactly CELL-sized.
 	var icon_path: String = "res://assets/ui/icons/%s.png" % icon_key
 	if icon_key != "" and ResourceLoader.exists(icon_path):
 		btn.icon = load(icon_path)
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-		btn.add_theme_constant_override("icon_max_width", 34)
-		btn.text = _short(label)
-		btn.add_theme_font_size_override("font_size", 9)
+		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+		btn.add_theme_constant_override("icon_max_width", 44)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)
