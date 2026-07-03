@@ -23,6 +23,7 @@ func _ready() -> void:
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
 	_build_continue_button()
+	_dim_multiplayer()
 	_build_version_label()
 	SoundManager.start_menu_music()
 	_maybe_offer_tutorial()
@@ -58,34 +59,63 @@ func _maybe_offer_tutorial() -> void:
 	dialog.canceled.connect(func() -> void: ProfileManager.clear_first_run())
 	dialog.popup_centered()
 
-## CONTINUE is code-built bottom-left so it never collides with the painted
-## center-stack buttons (anchors .398-.601 x .381-.735). Only shown when a
-## quicksave exists.
+## CONTINUE joins the painted button column (right under QUIT), styled to match
+## the baked buttons: dark bevelled plate, light stone border, spaced caps.
+## Only shown when a quicksave exists.
 func _build_continue_button() -> void:
 	if not SaveManager.has_save():
 		return
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.04, 0.07, 0.11, 0.82)
-	sb.set_corner_radius_all(4)
-	sb.set_border_width_all(1)
-	sb.border_color = Color(0.0, 0.90, 0.78, 0.35)
+	sb.bg_color = Color(0.075, 0.145, 0.155, 0.96)
+	sb.set_corner_radius_all(6)
+	sb.set_border_width_all(2)
+	sb.border_color = Color(0.55, 0.72, 0.70, 0.85)
+	sb.shadow_color = Color(0, 0, 0, 0.45)
+	sb.shadow_size = 4
 	var sb_hover: StyleBoxFlat = sb.duplicate()
+	sb_hover.bg_color = Color(0.10, 0.20, 0.21, 0.96)
 	sb_hover.border_color = Color(0.0, 0.90, 0.78, 1.0)
 	var btn := Button.new()
-	btn.text = "CONTINUE"
-	btn.add_theme_color_override("font_color", Color(0.7, 0.75, 0.8, 1.0))
+	btn.text = "C O N T I N U E"
+	btn.add_theme_color_override("font_color", Color(0.85, 0.93, 0.92, 1.0))
 	btn.add_theme_color_override("font_hover_color", Color(0.0, 0.90, 0.78, 1.0))
-	btn.add_theme_font_size_override("font_size", 16)
+	btn.add_theme_font_size_override("font_size", 17)
 	btn.add_theme_stylebox_override("normal", sb)
 	btn.add_theme_stylebox_override("hover", sb_hover)
 	btn.add_theme_stylebox_override("pressed", sb_hover)
 	btn.pressed.connect(func() -> void: SaveManager.request_load())
 	add_child(btn)
-	btn.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	btn.offset_left = 24.0
-	btn.offset_top = -76.0
-	btn.offset_right = 220.0
-	btn.offset_bottom = -28.0
+	# Same column as the painted stack (x .412-.588), one row below QUIT (.740-.800).
+	btn.anchor_left = 0.412
+	btn.anchor_right = 0.588
+	btn.anchor_top = 0.822
+	btn.anchor_bottom = 0.882
+	btn.offset_left = 0.0
+	btn.offset_top = 0.0
+	btn.offset_right = 0.0
+	btn.offset_bottom = 0.0
+
+## The baked MULTIPLAYER button stays clickable (honest popup) but reads as
+## not-yet-available: dimmed plate + a small COMING SOON tag.
+func _dim_multiplayer() -> void:
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.03, 0.04, 0.55)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(dim)
+	dim.anchor_left = 0.412
+	dim.anchor_right = 0.588
+	dim.anchor_top = 0.579
+	dim.anchor_bottom = 0.639
+	var tag := Label.new()
+	tag.text = "COMING SOON"
+	tag.add_theme_font_size_override("font_size", 10)
+	tag.add_theme_color_override("font_color", Color(0.75, 0.80, 0.82, 0.85))
+	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(tag)
+	tag.anchor_left = 0.591
+	tag.anchor_right = 0.68
+	tag.anchor_top = 0.596
+	tag.anchor_bottom = 0.625
 
 func _on_campaign() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/CampaignMenu.tscn")
