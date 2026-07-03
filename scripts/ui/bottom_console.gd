@@ -5,4 +5,4 @@ extends CanvasLayer
 ## sections are laid out by the HBox — no floating panels, no gaps.
 
 func _ready() -> void:
-	($Frame as PanelContainer).add_theme_stylebox_override("panel", MenuKit.flat_box(0.0, 0.11))
+	($Frame as PanelContainer).add_theme_stylebox_override("panel", MenuKit.family_box(2.0))

@@ -33,7 +33,7 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
 [node name="UnitInfoPanel" type="PanelContainer"]
-custom_minimum_size = Vector2(176, 0)
+custom_minimum_size = Vector2(160, 0)
 theme_override_styles/panel = SubResource("PanelStyle")
 script = ExtResource("1_uip")
 

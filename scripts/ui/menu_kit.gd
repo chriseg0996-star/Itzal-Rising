@@ -21,6 +21,12 @@ static func console_box(pad: float = 14.0) -> StyleBoxTexture:
 static func chip_box(pad: float = 10.0) -> StyleBoxTexture:
 	return _tex_box("res://assets/ui/frame_chip.png", 14.0, pad)
 
+## THE master HUD plate — every panel (objectives, resources, bottom console)
+## wears this exact frame so the whole HUD reads as one family: dark outer
+## bevel, teal hairline, gold corner ticks, faint engraved greca in the band.
+static func family_box(pad: float = 10.0) -> StyleBoxTexture:
+	return _tex_box("res://assets/ui/plate_frame.png", 12.0, pad)
+
 ## Bottom-dock section style: obsidian fill + hairline separator instead of the
 ## heavy neon plate. Sections placed flush read as one continuous console.
 static func flat_box(pad: float = 10.0, border_alpha: float = 0.11, sep_only: bool = false) -> StyleBoxFlat:

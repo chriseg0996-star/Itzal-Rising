@@ -17,7 +17,7 @@ const PANEL_BG: Color = Color(0.07, 0.09, 0.12, 0.94)
 const PANEL_BORDER: Color = Color(0.0, 0.85, 0.85, 0.35)
 const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
 const MUTED: Color = Color(0.55, 0.62, 0.68, 1.0)
-const CELL: float = 42.0   # 4-wide grid inside the 200px console section
+const CELL: float = 48.0   # 4-wide grid inside the 224px console section
 const COLS: int = 4
 
 ## Build-tab data: key = BuildingPlacer type, icon = assets/ui/icons/<icon>.png
@@ -403,7 +403,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		btn.add_theme_constant_override("icon_max_width", 36)
+		btn.add_theme_constant_override("icon_max_width", 42)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)

@@ -23,7 +23,7 @@ var _bars: Array[ProgressBar] = []
 @onready var _collapse_btn: Button = $Root/Panel/VBox/Header/Collapse
 
 func _ready() -> void:
-	($Root/Panel as PanelContainer).add_theme_stylebox_override("panel", MenuKit.chip_box(10.0))
+	($Root/Panel as PanelContainer).add_theme_stylebox_override("panel", MenuKit.family_box(10.0))
 	_build_rows()
 	_collapse_btn.pressed.connect(_on_collapse_pressed)
 	ObjectiveManager.objective_completed.connect(_on_objective_completed)
