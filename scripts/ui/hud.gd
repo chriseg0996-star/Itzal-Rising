@@ -25,7 +25,7 @@ var _pulse_overlay: ColorRect = null
 var _pulse_cooldown: float = 0.0
 
 func _ready() -> void:
-	($ResBlock as PanelContainer).add_theme_stylebox_override("panel", MenuKit.console_box(10.0))
+	($ResBlock as PanelContainer).add_theme_stylebox_override("panel", MenuKit.chip_box(14.0))
 	ResourceManager.resource_changed.connect(_on_resource_changed)
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	AlertManager.alert_pushed.connect(_on_alert_pushed)

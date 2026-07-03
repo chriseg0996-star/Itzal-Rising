@@ -15,11 +15,11 @@ const MENU_X: float = 0.115
 
 ## HUD plate tiers (nine-patch frames from tools/make_ui_frames.py). Console =
 ## heavy bottom plates (chamfered, gradient, lit rim); chip = light secondary.
-static func console_box(pad: float = 12.0) -> StyleBoxTexture:
-	return _tex_box("res://assets/ui/frame_console.png", 18.0, pad)
+static func console_box(pad: float = 14.0) -> StyleBoxTexture:
+	return _tex_box("res://assets/ui/frame_console.png", 44.0, pad)
 
-static func chip_box(pad: float = 8.0) -> StyleBoxTexture:
-	return _tex_box("res://assets/ui/frame_chip.png", 10.0, pad)
+static func chip_box(pad: float = 10.0) -> StyleBoxTexture:
+	return _tex_box("res://assets/ui/frame_chip.png", 14.0, pad)
 
 static func _tex_box(path: String, margin: float, pad: float) -> StyleBoxTexture:
 	var sb := StyleBoxTexture.new()

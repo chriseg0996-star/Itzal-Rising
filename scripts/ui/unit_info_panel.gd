@@ -31,8 +31,24 @@ var _inspect: Node = null
 var _focus: Node = null
 var _hp_fill: StyleBoxFlat = null
 
+var _emblem: TextureRect = null
+
 func _ready() -> void:
 	add_theme_stylebox_override("panel", MenuKit.chip_box(10.0))
+	# Faction emblem medallion, docked at the panel's right edge.
+	_emblem = TextureRect.new()
+	_emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_emblem.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_emblem.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Parent to the name label: PanelContainer force-layouts direct children,
+	# but a Label doesn't — so the medallion can float at the row's right edge.
+	_name_label.add_child(_emblem)
+	_emblem.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+	_emblem.offset_left = -46.0
+	_emblem.offset_right = -2.0
+	_emblem.offset_top = -20.0
+	_emblem.offset_bottom = 24.0
+	_emblem.visible = false
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	if SelectionManager.has_signal("inspect_changed"):
 		SelectionManager.inspect_changed.connect(_on_inspect_changed)
@@ -114,6 +130,8 @@ func _stats_line(node: Node) -> String:
 	return " · ".join(parts)
 
 func _show_multi(units: Array) -> void:
+	if _emblem != null:
+		_emblem.visible = false
 	_name_label.hide()
 	_owner_label.hide()
 	_hp_bar.hide()
@@ -178,6 +196,10 @@ func _set_owner(node: Node) -> void:
 		_owner_label.hide()
 		return
 	var fid: int = int(fid_v)
+	var em_path: String = "res://assets/ui/emblem_%d.png" % fid
+	if _emblem != null and ResourceLoader.exists(em_path):
+		_emblem.texture = load(em_path)
+		_emblem.visible = true
 	_owner_label.show()
 	_owner_label.text = FactionManager.display_name_of(fid)
 	var col: Color = MUTED

@@ -47,9 +47,15 @@ func _process(delta: float) -> void:
 		_pings = _pings.filter(func(p: Dictionary) -> bool: return float(p["ttl"]) > 0.0)
 		queue_redraw()
 
+var _plate: StyleBoxTexture = null
+
 func _draw() -> void:
 	var ms: Vector2 = size
-	draw_rect(Rect2(Vector2.ZERO, ms), BG_COLOR, true)
+	# Chip plate frame (same language as the rest of the HUD), then content.
+	if _plate == null:
+		_plate = MenuKit.chip_box(0.0)
+	draw_style_box(_plate, Rect2(Vector2.ZERO, ms))
+	draw_rect(Rect2(Vector2(6, 6), ms - Vector2(12, 12)), BG_COLOR, true)
 	for d in _dots:
 		var s: float = float(d["size"])
 		var p: Vector2 = d["pos"]
