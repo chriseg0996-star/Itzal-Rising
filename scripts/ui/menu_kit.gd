@@ -21,6 +21,17 @@ static func console_box(pad: float = 14.0) -> StyleBoxTexture:
 static func chip_box(pad: float = 10.0) -> StyleBoxTexture:
 	return _tex_box("res://assets/ui/frame_chip.png", 14.0, pad)
 
+## Bottom-dock section style: obsidian fill + hairline separator instead of the
+## heavy neon plate. Sections placed flush read as one continuous console.
+static func flat_box(pad: float = 10.0, border_alpha: float = 0.22) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.045, 0.06, 0.08, 0.96)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, border_alpha)
+	sb.set_corner_radius_all(3)
+	sb.set_content_margin_all(pad)
+	return sb
+
 static func _tex_box(path: String, margin: float, pad: float) -> StyleBoxTexture:
 	var sb := StyleBoxTexture.new()
 	sb.texture = load(path)

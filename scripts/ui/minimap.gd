@@ -4,7 +4,7 @@ const WORLD_SIZE: Vector2 = Vector2(MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 const POLL_INTERVAL: float = 0.1
 
 const BG_COLOR: Color = Color(0.04, 0.07, 0.10, 0.92)
-const BORDER_COLOR: Color = Color(0.0, 0.85, 0.85, 0.4)   # system teal frame
+const BORDER_COLOR: Color = Color(0.0, 0.85, 0.85, 0.28)   # hairline teal frame
 const PLAYER_UNIT_COLOR: Color = Color(0.0, 0.90, 0.78, 1.0)
 const ENEMY_UNIT_COLOR: Color = Color(0.93, 0.20, 0.20, 1.0)
 const PLAYER_BUILDING_COLOR: Color = Color(0.0, 0.67, 1.0, 0.9)
@@ -47,15 +47,15 @@ func _process(delta: float) -> void:
 		_pings = _pings.filter(func(p: Dictionary) -> bool: return float(p["ttl"]) > 0.0)
 		queue_redraw()
 
-var _plate: StyleBoxTexture = null
+var _plate: StyleBoxFlat = null
 
 func _draw() -> void:
 	var ms: Vector2 = size
-	# Chip plate frame (same language as the rest of the HUD), then content.
+	# Flat dock section (hairline frame) — matches the rest of the bottom console.
 	if _plate == null:
-		_plate = MenuKit.chip_box(0.0)
+		_plate = MenuKit.flat_box(0.0)
 	draw_style_box(_plate, Rect2(Vector2.ZERO, ms))
-	draw_rect(Rect2(Vector2(6, 6), ms - Vector2(12, 12)), BG_COLOR, true)
+	draw_rect(Rect2(Vector2(3, 3), ms - Vector2(6, 6)), BG_COLOR, true)
 	for d in _dots:
 		var s: float = float(d["size"])
 		var p: Vector2 = d["pos"]

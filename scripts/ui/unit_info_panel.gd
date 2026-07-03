@@ -30,7 +30,7 @@ var _status_label: Label = null
 var _queue_row: HBoxContainer = null
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", MenuKit.chip_box(10.0))
+	add_theme_stylebox_override("panel", MenuKit.flat_box(10.0))
 	# Small entity icon (mockup: circular icon, never a big portrait), floating
 	# at the name row's left edge.
 	_icon = TextureRect.new()

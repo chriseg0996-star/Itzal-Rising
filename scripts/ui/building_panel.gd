@@ -16,7 +16,7 @@ const PANEL_BG: Color = Color(0.07, 0.09, 0.12, 0.94)
 const PANEL_BORDER: Color = Color(0.0, 0.85, 0.85, 0.35)
 const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
 const MUTED: Color = Color(0.55, 0.62, 0.68, 1.0)
-const CELL: float = 64.0
+const CELL: float = 52.0   # ~20% smaller cells → a clean 4x4 grid fits the card
 const COLS: int = 4
 
 ## Build-tab data: key = BuildingPlacer type, icon = assets/ui/icons/<icon>.png
@@ -66,16 +66,17 @@ func _ready() -> void:
 # ── Card scaffold ──────────────────────────────────────────
 func _build_card() -> void:
 	_card = PanelContainer.new()
-	_card.add_theme_stylebox_override("panel", MenuKit.console_box(12.0))
+	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(12.0))
 	add_child(_card)
 	_card.anchor_left = 1.0
 	_card.anchor_top = 1.0
 	_card.anchor_right = 1.0
 	_card.anchor_bottom = 1.0
-	# Bottom-centre, flush left of the minimap (AoE4 command-card position).
-	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 24.0 + 232.0)
-	_card.offset_right = -232.0
-	_card.offset_top = -292.0   # fixed height — the card never jumps between contexts
+	# Flush between the selection panel and the minimap — the three sections
+	# share edges and read as one continuous bottom console.
+	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 24.0 + 258.0)
+	_card.offset_right = -258.0
+	_card.offset_top = -180.0   # minimum; the card grows upward to hug its content
 	_card.offset_bottom = -8.0   # docked to the screen edge (console feel)
 	_card.grow_horizontal = 0
 	_card.grow_vertical = 0
@@ -380,7 +381,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.10, 0.13, 0.17, 1.0)
 	sb.set_border_width_all(1)
-	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.30)
+	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.20)
 	sb.set_corner_radius_all(4)
 	var hb: StyleBoxFlat = sb.duplicate()
 	hb.bg_color = Color(0.0, 0.55, 0.50, 0.35)
@@ -397,7 +398,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		btn.add_theme_constant_override("icon_max_width", 44)
+		btn.add_theme_constant_override("icon_max_width", 38)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)

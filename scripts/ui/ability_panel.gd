@@ -65,14 +65,15 @@ func _build() -> void:
 		accent = fac.primary_color
 
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", MenuKit.chip_box(8.0))
+	panel.add_theme_stylebox_override("panel", MenuKit.flat_box(6.0))
 	add_child(panel)
-	# Docked flush above the command card (same right edge), AoE4-style.
+	# Integrated into the bottom console's right column: flush on the minimap's
+	# top edge, same width — always visible, never overlaps the growing card.
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	panel.offset_left = -578.0
-	panel.offset_top = -348.0
-	panel.offset_right = -232.0
-	panel.offset_bottom = -300.0
+	panel.offset_left = -258.0
+	panel.offset_top = -296.0
+	panel.offset_right = -8.0
+	panel.offset_bottom = -258.0
 
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)
@@ -81,14 +82,16 @@ func _build() -> void:
 	for i in _defs.size():
 		var def: Dictionary = _defs[i]
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(126, 34)
-		btn.text = "  %s" % String(def["name"])
+		btn.custom_minimum_size = Vector2(72, 28)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.text = _short_name(def)
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		btn.tooltip_text = String(def["desc"])
+		btn.tooltip_text = "%s (%s)\n%s" % [String(def["name"]), KEY_LABELS[i], String(def["desc"])]
 		btn.flat = true
+		btn.clip_text = true
 		btn.add_theme_color_override("font_color", WHITE)
 		btn.add_theme_color_override("font_hover_color", accent)
-		btn.add_theme_font_size_override("font_size", 11)
+		btn.add_theme_font_size_override("font_size", 10)
 		var idx: int = i
 		btn.pressed.connect(func() -> void: try_cast(idx))
 		hbox.add_child(btn)
@@ -137,13 +140,17 @@ func _process(delta: float) -> void:
 		_cooldowns[i] = maxf(_cooldowns[i] - delta, 0.0)
 		var def: Dictionary = _defs[i]
 		if _cooldowns[i] > 0.0:
-			_buttons[i].text = "%s %.0fs" % [def["name"], ceilf(_cooldowns[i])]
+			_buttons[i].text = "%s %.0fs" % [_short_name(def), ceilf(_cooldowns[i])]
 			_sweeps[i].visible = true
 			_sweeps[i].offset_right = -_buttons[i].size.x * (1.0 - _cooldowns[i] / float(def["cooldown"]))
 		else:
-			_buttons[i].text = "%s (%s)" % [def["name"], KEY_LABELS[i]]
+			_buttons[i].text = _short_name(def)
 			_buttons[i].disabled = false
 			_sweeps[i].visible = false
+
+## Compact label for the integrated ability row ("vigor" -> "Vigor").
+func _short_name(def: Dictionary) -> String:
+	return String(def["id"]).capitalize()
 
 func _unhandled_input(event: InputEvent) -> void:
 	for i in ACTIONS.size():

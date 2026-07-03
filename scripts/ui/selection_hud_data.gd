@@ -89,6 +89,8 @@ static func _fill_status(node: Node, d: Dictionary) -> void:
 		return
 	if bool(node.get("under_construction")):
 		d["status"] = "Under construction"
+	elif bool(node.get("has_rally_point")):
+		d["status"] = "Rally point set"
 
 static func _fill_queue(node: Node, d: Dictionary) -> void:
 	var q_v: Variant = node.get("queue")
