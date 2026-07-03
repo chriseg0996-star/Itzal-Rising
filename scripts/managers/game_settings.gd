@@ -8,27 +8,8 @@ extends Node
 
 const SETTINGS_PATH: String = "user://settings.cfg"
 
-## Absolute ceiling on the player's unit count, regardless of Houses built.
-## The live cap is dynamic (see player_pop_cap) — start small, grow with Houses.
-const MAX_POPULATION: int = 200
-## Floor so a player who lost every supply building can still rebuild a worker.
-const BASE_POPULATION: int = 5
-
-## Live population cap: BASE + the population_supply of every completed player
-## building (Town Centers + Houses), clamped to MAX_POPULATION. Houses are how
-## the player raises it, AoE-style. Enforced in building.gd, shown by the HUD.
-func player_pop_cap() -> int:
-	var cap: int = BASE_POPULATION
-	for b in get_tree().get_nodes_in_group("player_buildings"):
-		if not is_instance_valid(b):
-			continue
-		# Under-construction buildings don't grant supply yet.
-		if bool(b.get("under_construction")):
-			continue
-		var s: Variant = b.get("population_supply")
-		if s != null:
-			cap += int(s)
-	return mini(cap, MAX_POPULATION)
+## NOTE: the unit cap is now the per-faction supply system in ResourceManager
+## (supply_used/supply_cap; buildings grant cap via population_supply).
 
 var difficulty: String = "normal"
 ## Team id the human player controls this match (FactionManager ids).

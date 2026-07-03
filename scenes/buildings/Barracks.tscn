@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://br8q2x5n4k7p3"]
+[gd_scene load_steps=10 format=3 uid="uid://br8q2x5n4k7p3"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/Soldier.tscn" id="2_sol"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/units/Raider.tscn" id="4_rdr"]
 [ext_resource type="PackedScene" path="res://scenes/units/Catapult.tscn" id="6_cat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/barracks_sheet.png" id="bld_tex"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_BRK"]
 size = Vector2(223, 121)
@@ -66,3 +67,5 @@ shape = SubResource("RectShape_BRK")
 texture = ExtResource("bld_tex")
 scale = Vector2(0.08, 0.08)
 offset = Vector2(0, -768)
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]

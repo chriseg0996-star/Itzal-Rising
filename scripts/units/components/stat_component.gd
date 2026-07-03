@@ -21,6 +21,14 @@ func _ready() -> void:
 			armor += fac.armor_bonus
 	_current_health = max_health
 	health_changed.emit(_current_health, max_health)
+	# Every unit occupies 1 supply while alive (freed in _exit_tree, which also
+	# covers death — the unit frees itself — and scene teardown).
+	if _owner_unit != null:
+		ResourceManager.use_supply(int(_owner_unit.get("faction_id")))
+
+func _exit_tree() -> void:
+	if _owner_unit != null:
+		ResourceManager.free_supply(int(_owner_unit.get("faction_id")))
 
 func take_damage(amount: float) -> void:
 	if is_dead():

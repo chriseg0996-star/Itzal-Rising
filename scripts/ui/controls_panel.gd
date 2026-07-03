@@ -17,7 +17,7 @@ const BINDINGS: Array[Array] = [
 	["Ctrl + 1..9 / 1..9", "Set / recall control group (recall twice = centre)"],
 	[".", "Cycle to the next idle worker"],
 	["Z / X / C", "Stance: Aggressive / Defensive / Hold Ground"],
-	["B / T / Y / M / F / H / U", "Build Barracks / TC / Tower / Monument / Farm / Storehouse / House (+pop)"],
+	["B / T / Y / M / F / H / U / P", "Build Barracks / TC / Tower / Monument / Farm / Storehouse / House / Pylon (+supply)"],
 	["Place building", "A villager auto-walks over to build it (vulnerable until done)"],
 	["E / R / Q", "Faction abilities (3 per civ)"],
 	["Town Center", "Train villagers, research ATK/ARM, Advance Era"],

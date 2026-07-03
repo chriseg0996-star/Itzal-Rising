@@ -24,6 +24,7 @@ func _ready() -> void:
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	AlertManager.alert_pushed.connect(_on_alert_pushed)
 	AlertManager.alert_cleared.connect(_on_alert_cleared)
+	ResourceManager.supply_changed.connect(func(_fid: int, _u: int, _c: int) -> void: _update_population())
 	_build_pulse_overlay()
 	for i in range(ALERT_SLOTS):
 		var lbl: Label = _alert_box.get_node_or_null("Alert%d" % i) as Label
@@ -80,12 +81,13 @@ func _update_era() -> void:
 	era_label.text = "Era %s" % ERA_ROMAN[e - 1]
 
 func _update_population() -> void:
-	var count: int = get_tree().get_nodes_in_group("player_units").size()
-	var cap: int = GameSettings.player_pop_cap()
-	pop_label.text = "%d/%d" % [count, cap]
+	var fid: int = GameSettings.player_faction_id
+	var used: int = ResourceManager.get_supply_used(fid)
+	var cap: int = ResourceManager.get_supply_cap(fid)
+	pop_label.text = "⚡ %d/%d" % [used, cap]
 	var col: Color = Color(1, 1, 1, 1)
-	if count >= cap:
-		col = Color(1.0, 0.33, 0.22, 1)  # at cap — build a House
+	if used >= cap:
+		col = Color(1.0, 0.33, 0.22, 1)  # capped — build an Obsidian Pylon
 	pop_label.add_theme_color_override("font_color", col)
 
 func _on_alert_pushed(_text: String, level: String) -> void:

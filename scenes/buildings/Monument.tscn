@@ -1,6 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_MON"]
 size = Vector2(64, 80)
@@ -27,3 +28,5 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectShape_MON")
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]

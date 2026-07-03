@@ -43,7 +43,11 @@ const RESEARCH: Dictionary = {
 
 @export var building_name: String = "Building"
 @export var max_hp: int = 100
-@export var faction_id: int = 0
+@export var faction_id: int = 0:
+	set(value):
+		faction_id = value
+		# Retint the corner glows on a faction change (no-op before _ready).
+		_retint_corner_glows()
 @export var sprite_asset: String = ""
 ## Passive food income per second (Farms). 0 = no income.
 @export var food_per_sec: float = 0.0
@@ -124,12 +128,25 @@ func _ready() -> void:
 	_apply_sprite(sprite_asset)
 	_hp_bar_y = _compute_hp_bar_y()
 	_attach_building_shadow()
+	_build_corner_glows()
 	_base_modulate = modulate
 	var fac: FactionData = FactionManager.get_faction(faction_id)
 	if fac != null:
 		_hp_fill_color = fac.primary_color
 	if FactionManager.is_player_faction(faction_id):
 		AlertManager.register_building(self)
+	# Supply registration is deferred: player-placed foundations get
+	# begin_construction() right after add_child (before the deferred call), so
+	# they correctly wait for completion; AI/baked buildings register at once.
+	_register_supply.call_deferred()
+
+var _supply_registered: bool = false
+
+func _register_supply() -> void:
+	if _supply_registered or dying or under_construction or population_supply <= 0:
+		return
+	_supply_registered = true
+	ResourceManager.add_supply_cap(faction_id, population_supply)
 
 ## Ix "Lattice Network": if an allied Ix building sits within 300px, this building
 ## gains +15% max HP (and is restored to full). Evaluated once, on spawn.
@@ -183,6 +200,8 @@ func contribute_build(delta: float) -> void:
 
 func _finish_construction() -> void:
 	under_construction = false
+	_update_damage_fx()
+	_register_supply()
 	build_progress = 1.0
 	hp = max_hp
 	modulate = _base_modulate
@@ -272,10 +291,11 @@ func try_queue_training(slot: int = 0) -> bool:
 		return false
 	if scene == null:
 		return false
-	# Population cap (player only — the AI is bounded by its own difficulty caps).
-	# Cap is dynamic: build Houses (and Town Centers) to raise it, AoE-style.
-	if FactionManager.is_player_faction(faction_id) and _player_population() >= GameSettings.player_pop_cap():
-		AlertManager.push("Need more Houses (population limit)", "warn")
+	# Supply gate (per faction): living units + already-queued units must stay
+	# under the faction's cap. Raise it with Obsidian Pylons / Houses / TCs.
+	if ResourceManager.get_supply_used(faction_id) + _pending_units(faction_id) >= ResourceManager.get_supply_cap(faction_id):
+		if FactionManager.is_player_faction(faction_id):
+			AlertManager.push("Supply capped — build an Obsidian Pylon", "warn")
 		return false
 	if not ResourceManager.can_afford(costs, faction_id):
 		return false
@@ -283,12 +303,13 @@ func try_queue_training(slot: int = 0) -> bool:
 	_enqueue({"scene": scene, "duration": duration, "label": get_train_label(slot), "cost": costs})
 	return true
 
-## Living player units plus units still queued at any player building, so a full
-## training queue can't push the army past the cap.
-func _player_population() -> int:
-	var count: int = get_tree().get_nodes_in_group("player_units").size()
-	for b in get_tree().get_nodes_in_group("player_buildings"):
-		if not is_instance_valid(b):
+## Units still queued at this faction's buildings, so a full training queue
+## can't push the army past the supply cap (living units are already counted
+## in ResourceManager.get_supply_used).
+func _pending_units(fid: int) -> int:
+	var count: int = 0
+	for b in get_tree().get_nodes_in_group("buildings"):
+		if not is_instance_valid(b) or int(b.get("faction_id")) != fid:
 			continue
 		var q: Variant = b.get("queue")
 		if q is Array:
@@ -370,6 +391,7 @@ func take_damage(amount: int) -> void:
 	SoundManager.play("building_hit", -8.0)
 	_flash_hit()
 	queue_redraw()
+	_update_damage_fx()
 	DamageNumbers.spawn(get_tree().current_scene, float(actual), global_position + Vector2(0, HP_BAR_Y), Color(0.95, 0.95, 0.95))
 	if FactionManager.is_player_faction(faction_id):
 		building_damaged.emit(self)
@@ -382,6 +404,30 @@ func repair(amount: int) -> void:
 		return
 	hp = mini(hp + amount, max_hp)
 	queue_redraw()
+	_update_damage_fx()
+
+## HP-scaled damage visuals (event-driven — called wherever hp changes; never
+## polled). <65% HP: grey smoke; <35% HP: flames layered over the smoke. The
+## particle nodes live in the shared DamageFX child scene (emitting=false by
+## default); emission density scales linearly with missing HP below each
+## threshold via amount_ratio.
+func _update_damage_fx() -> void:
+	var smoke: GPUParticles2D = get_node_or_null("DamageFX/SmokeFX") as GPUParticles2D
+	var flame: GPUParticles2D = get_node_or_null("DamageFX/FlameFX") as GPUParticles2D
+	if smoke == null or flame == null:
+		return
+	var r: float = clampf(float(hp) / float(maxi(max_hp, 1)), 0.0, 1.0)
+	if dying or under_construction or r >= 0.65:
+		smoke.emitting = false
+		flame.emitting = false
+		return
+	smoke.emitting = true
+	smoke.amount_ratio = clampf((0.65 - r) / 0.65, 0.05, 1.0)
+	if r < 0.35:
+		flame.emitting = true
+		flame.amount_ratio = clampf((0.35 - r) / 0.35, 0.05, 1.0)
+	else:
+		flame.emitting = false
 
 ## Ability hook: temporary incoming-damage reduction (0..0.95) for `duration`.
 func apply_shield(reduction: float, duration: float) -> void:
@@ -398,6 +444,45 @@ func _flash_hit() -> void:
 	modulate = Color(2.0, 2.0, 2.0, _base_modulate.a)
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", _base_modulate, 0.1)
+
+## Faction readability at zoom-out: 4 small additive glow dots at the footprint
+## corners, tinted with the owner's colour. Additive-blend sprites (one shared
+## cached blob texture) — far cheaper than PointLight2D at 50+ buildings, no
+## light pass. Subtle by design (small, low alpha).
+const _GLOW_ALPHA: float = 0.5
+const _GLOW_SIZE: float = 14.0
+var _corner_glows: Array[Sprite2D] = []
+
+func _build_corner_glows() -> void:
+	var w: float = 72.0
+	var spr: Node = get_node_or_null("BuildingSprite")
+	if spr is Sprite2D and (spr as Sprite2D).texture != null:
+		var s := spr as Sprite2D
+		w = float(s.texture.get_width()) * s.scale.x * 0.92
+	var hx: float = w * 0.46
+	var hy: float = w * 0.24  # iso-squashed footprint
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	var tex: Texture2D = TextureGenerator.get_texture("soft_blob")
+	for corner in [Vector2(-hx, -hy), Vector2(hx, -hy), Vector2(hx, hy), Vector2(-hx, hy)]:
+		var g := Sprite2D.new()
+		g.texture = tex
+		g.material = mat
+		g.scale = Vector2(_GLOW_SIZE / 64.0, _GLOW_SIZE / 64.0)
+		g.position = corner
+		g.z_index = 1
+		add_child(g)
+		_corner_glows.append(g)
+	_retint_corner_glows()
+
+func _retint_corner_glows() -> void:
+	if _corner_glows.is_empty():
+		return
+	var fac: FactionData = FactionManager.get_faction(faction_id)
+	var col: Color = fac.primary_color if fac != null else Color.WHITE
+	for g in _corner_glows:
+		if is_instance_valid(g):
+			g.modulate = Color(col.r, col.g, col.b, _GLOW_ALPHA)
 
 ## Soft ground shadow scaled to the building's footprint (from its sprite),
 ## so big Town Centers and small Houses each get a fitting shadow.
@@ -467,6 +552,11 @@ func _draw_production_ring() -> void:
 
 func _die() -> void:
 	dying = true
+	# Cap drops with the building; units alive over cap survive (they only
+	# block further training).
+	if _supply_registered:
+		_supply_registered = false
+		ResourceManager.add_supply_cap(faction_id, -population_supply)
 	# Count enemy buildings the player razed (player-side losses aren't tallied
 	# here — only destruction of hostiles matters for the summary).
 	if not FactionManager.is_player_faction(faction_id):

@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://c7ixtc9k3m5p2"]
+[gd_scene load_steps=6 format=3 uid="uid://c7ixtc9k3m5p2"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxWeaver.tscn" id="2_ixw"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ix_tc_sheet.png" id="bld_tex"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_IXTC"]
 size = Vector2(239, 237)
@@ -12,7 +13,7 @@ script = ExtResource("1_bldg_script")
 building_name = "Town Center"
 max_hp = 1500
 sprite_asset = ""
-population_supply = 15
+population_supply = 8
 train_unit_scene = ExtResource("2_ixw")
 train_unit_label = "Weaver"
 train_costs = {"comida": 50}
@@ -52,3 +53,5 @@ shape = SubResource("RectShape_IXTC")
 texture = ExtResource("bld_tex")
 scale = Vector2(0.12, 0.12)
 offset = Vector2(0, -1024)
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]

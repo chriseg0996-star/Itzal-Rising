@@ -2,6 +2,7 @@ extends Node
 
 signal resource_changed(type: StringName, new_amount: int)
 signal resource_insufficient(type: StringName)
+signal supply_changed(faction_id: int, used: int, cap: int)
 
 const WOOD: StringName = &"wood"
 const FOOD: StringName = &"food"
@@ -24,6 +25,10 @@ const _INITIAL: Dictionary = {
 
 var _resources: Dictionary = {}
 var _enemy: Dictionary = {}
+## Per-faction unit supply (energy). Cap is granted by completed buildings
+## (Town Center, Obsidian Pylon, House); every living unit uses 1.
+var _supply_used: Dictionary = {}   # faction_id -> int
+var _supply_cap: Dictionary = {}    # faction_id -> int
 
 func _ready() -> void:
 	reset()
@@ -31,8 +36,35 @@ func _ready() -> void:
 func reset() -> void:
 	_resources = _INITIAL.duplicate(true)
 	_enemy = _INITIAL.duplicate(true)
+	_supply_used = {}
+	_supply_cap = {}
 	for type: StringName in _resources:
 		resource_changed.emit(type, _resources[type])
+	supply_changed.emit(0, 0, 0)
+
+# ── Supply (per faction) ───────────────────────────────────
+func get_supply_used(faction_id: int) -> int:
+	return int(_supply_used.get(faction_id, 0))
+
+func get_supply_cap(faction_id: int) -> int:
+	return int(_supply_cap.get(faction_id, 0))
+
+func has_supply(faction_id: int) -> bool:
+	return get_supply_used(faction_id) < get_supply_cap(faction_id)
+
+## Buildings grant cap while they stand; negative amount on destruction. Units
+## alive over a dropped cap survive — they only block further training.
+func add_supply_cap(faction_id: int, amount: int) -> void:
+	_supply_cap[faction_id] = maxi(get_supply_cap(faction_id) + amount, 0)
+	supply_changed.emit(faction_id, get_supply_used(faction_id), get_supply_cap(faction_id))
+
+func use_supply(faction_id: int) -> void:
+	_supply_used[faction_id] = get_supply_used(faction_id) + 1
+	supply_changed.emit(faction_id, get_supply_used(faction_id), get_supply_cap(faction_id))
+
+func free_supply(faction_id: int) -> void:
+	_supply_used[faction_id] = maxi(get_supply_used(faction_id) - 1, 0)
+	supply_changed.emit(faction_id, get_supply_used(faction_id), get_supply_cap(faction_id))
 
 func _normalize(type) -> StringName:
 	var key: StringName = StringName(type)

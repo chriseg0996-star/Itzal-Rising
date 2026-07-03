@@ -44,6 +44,11 @@ const BUILDING_DATA: Dictionary = {
 		"cost": {"madera": 50},
 		"build_time": 8.0,
 	},
+	"pylon": {
+		"size": Vector2(44, 44),
+		"cost": {"madera": 75, "oro": 25},
+		"build_time": 10.0,
+	},
 }
 
 ## Faction-routed building scenes. The one acceptable hardcoded-path location:
@@ -58,6 +63,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"farm": "res://scenes/buildings/Farm.tscn",
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 		&"house": "res://scenes/buildings/House.tscn",
+		&"pylon": "res://scenes/buildings/ObsidianPylon.tscn",
 	},
 	1: {
 		&"tc": "res://scenes/buildings/EnemyTownCenter.tscn",
@@ -67,6 +73,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"farm": "res://scenes/buildings/Farm.tscn",
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 		&"house": "res://scenes/buildings/House.tscn",
+		&"pylon": "res://scenes/buildings/ObsidianPylon.tscn",
 	},
 	2: {
 		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
@@ -76,6 +83,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"farm": "res://scenes/buildings/Farm.tscn",
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 		&"house": "res://scenes/buildings/House.tscn",
+		&"pylon": "res://scenes/buildings/ObsidianPylon.tscn",
 	},
 }
 
@@ -163,6 +171,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).keycode == KEY_U:
 		start_placement("house")
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).keycode == KEY_P:
+		start_placement("pylon")
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed(ACTION_BARRACKS):

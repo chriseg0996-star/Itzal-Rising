@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://d6ixbrk2n8j4r"]
+[gd_scene load_steps=8 format=3 uid="uid://d6ixbrk2n8j4r"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxLatticeGuard.tscn" id="2_ixg"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxRaider.tscn" id="3_ixrdr"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxSiege.tscn" id="5_ixsg"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ix_barracks_sheet.png" id="bld_tex"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_IXBRK"]
 size = Vector2(161, 151)
@@ -61,3 +62,5 @@ shape = SubResource("RectShape_IXBRK")
 texture = ExtResource("bld_tex")
 scale = Vector2(0.08, 0.08)
 offset = Vector2(0, -1024)
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]

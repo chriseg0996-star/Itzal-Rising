@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="Texture2D" path="res://assets/buildings/house.png" id="2_house_tex"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_HOUSE"]
 size = Vector2(56, 48)
@@ -12,7 +13,7 @@ building_name = "House"
 max_hp = 200
 sprite_asset = ""
 faction_id = 0
-population_supply = 10
+population_supply = 4
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]
 position = Vector2(0, -12)
@@ -34,3 +35,5 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectShape_HOUSE")
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]

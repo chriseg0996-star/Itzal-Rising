@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="ParticleProcessMaterial" id="SmokeMat"]
+direction = Vector3(0, -1, 0)
+spread = 12.0
+initial_velocity_min = 14.0
+initial_velocity_max = 26.0
+gravity = Vector3(0, -22, 0)
+scale_min = 3.0
+scale_max = 7.0
+color = Color(0.42, 0.42, 0.45, 0.5)
+
+[sub_resource type="ParticleProcessMaterial" id="FlameMat"]
+direction = Vector3(0, -1, 0)
+spread = 20.0
+initial_velocity_min = 20.0
+initial_velocity_max = 42.0
+gravity = Vector3(0, -46, 0)
+scale_min = 2.0
+scale_max = 4.5
+color = Color(1.0, 0.55, 0.12, 0.9)
+
+[node name="DamageFX" type="Node2D"]
+z_index = 5
+
+[node name="SmokeFX" type="GPUParticles2D" parent="."]
+position = Vector2(0, -14)
+emitting = false
+amount = 14
+lifetime = 1.7
+randomness = 0.4
+process_material = SubResource("SmokeMat")
+
+[node name="FlameFX" type="GPUParticles2D" parent="."]
+position = Vector2(0, -8)
+emitting = false
+amount = 18
+lifetime = 0.55
+randomness = 0.5
+process_material = SubResource("FlameMat")

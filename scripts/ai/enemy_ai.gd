@@ -16,6 +16,7 @@ const ENEMY_BASE_POS: Vector2 = Vector2(1600, 1600)
 const BARRACKS_OFFSET_RANGE: float = 220.0
 const ATTACK_FORCE_MIN: int = 5
 const BARRACKS_COST: Dictionary = {"madera": 75}
+const PYLON_COST: Dictionary = {"madera": 75, "oro": 25}
 const TOWER_COST: Dictionary = {"madera": 150}
 ## Fixed tower slots around the enemy TC, facing the player's approach.
 const TOWER_OFFSETS: Array[Vector2] = [
@@ -182,10 +183,25 @@ func _phase_recolectar() -> void:
 			v.harvest(nearest)
 
 func _phase_construir() -> void:
+	# Supply first: with <2 headroom the next waves stall, so a pylon outranks
+	# everything else in the build order.
+	if ResourceManager.get_supply_cap(ai_faction_id) - ResourceManager.get_supply_used(ai_faction_id) < 2:
+		_try_build_pylon()
+		return
 	if not _has_enemy_barracks():
 		_try_build_barracks()
 		return
 	_try_build_tower()
+
+func _try_build_pylon() -> void:
+	if not ResourceManager.can_afford(PYLON_COST, ai_faction_id):
+		return
+	ResourceManager.spend(PYLON_COST, ai_faction_id)
+	var pos: Vector2 = base_pos + Vector2(
+		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE),
+		randf_range(-BARRACKS_OFFSET_RANGE, BARRACKS_OFFSET_RANGE)
+	)
+	_place_enemy_building(BuildingPlacer.get_building_scene(ai_faction_id, &"pylon"), pos)
 
 func _try_build_barracks() -> void:
 	if not ResourceManager.can_afford(BARRACKS_COST, ai_faction_id):

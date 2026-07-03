@@ -1,7 +1,8 @@
-[gd_scene format=3 uid="uid://d0yyl858yxpfk"]
+[gd_scene load_steps=2 format=3 uid="uid://d0yyl858yxpfk"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="Texture2D" path="res://assets/sprites/tower_sheet.png" id="bld_tex"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_TWR"]
 size = Vector2(222, 120)
@@ -49,3 +50,5 @@ shape = SubResource("RectShape_TWR")
 texture = ExtResource("bld_tex")
 scale = Vector2(0.08, 0.08)
 offset = Vector2(0, -768)
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]

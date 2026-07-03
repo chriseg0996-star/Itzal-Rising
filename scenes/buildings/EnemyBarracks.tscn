@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://gec501u31res"]
+[gd_scene load_steps=9 format=3 uid="uid://gec501u31res"]
 
 [ext_resource type="Script" path="res://scripts/buildings/building.gd" id="1_bldg_script"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemySoldier.tscn" id="2_esol"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/units/EnemyRaider.tscn" id="4_erdr"]
 [ext_resource type="PackedScene" path="res://scenes/units/DecaySiege.tscn" id="6_dsg"]
 [ext_resource type="Texture2D" path="res://assets/sprites/enemy_barracks_sheet.png" id="bld_tex"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_EBR"]
 size = Vector2(164, 161)
@@ -66,3 +67,5 @@ shape = SubResource("RectShape_EBR")
 texture = ExtResource("bld_tex")
 scale = Vector2(0.08, 0.08)
 offset = Vector2(0, -1024)
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]
