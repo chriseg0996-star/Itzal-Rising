@@ -49,6 +49,11 @@ const BUILDING_DATA: Dictionary = {
 		"cost": {"madera": 75, "oro": 25},
 		"build_time": 10.0,
 	},
+	"beacon": {
+		"size": Vector2(80, 64),
+		"cost": {"madera": 400, "oro": 300},
+		"build_time": 30.0,
+	},
 }
 
 ## Faction-routed building scenes. The one acceptable hardcoded-path location:
@@ -64,6 +69,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 		&"house": "res://scenes/buildings/House.tscn",
 		&"pylon": "res://scenes/buildings/ObsidianPylon.tscn",
+		&"beacon": "res://scenes/buildings/AscensionBeacon.tscn",
 	},
 	1: {
 		&"tc": "res://scenes/buildings/EnemyTownCenter.tscn",
@@ -74,6 +80,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 		&"house": "res://scenes/buildings/House.tscn",
 		&"pylon": "res://scenes/buildings/ObsidianPylon.tscn",
+		&"beacon": "res://scenes/buildings/AscensionBeacon.tscn",
 	},
 	2: {
 		&"tc": "res://scenes/buildings/IxTownCenter.tscn",
@@ -84,6 +91,7 @@ const FACTION_BUILDING_SCENES: Dictionary = {
 		&"storehouse": "res://scenes/buildings/Storehouse.tscn",
 		&"house": "res://scenes/buildings/House.tscn",
 		&"pylon": "res://scenes/buildings/ObsidianPylon.tscn",
+		&"beacon": "res://scenes/buildings/AscensionBeacon.tscn",
 	},
 }
 
@@ -124,6 +132,12 @@ func cost_text(type: String) -> String:
 func is_placing() -> bool:
 	return current_type != ""
 
+func _player_has_barracks() -> bool:
+	for b in get_tree().get_nodes_in_group("player_buildings"):
+		if is_instance_valid(b) and String(b.get("building_name")) == "Barracks" and not bool(b.get("under_construction")):
+			return true
+	return false
+
 func get_building_scene(faction_id: int, key: StringName) -> PackedScene:
 	var by_faction: Dictionary = FACTION_BUILDING_SCENES.get(faction_id, {})
 	var path: String = String(by_faction.get(key, ""))
@@ -135,6 +149,10 @@ func get_building_scene(faction_id: int, key: StringName) -> PackedScene:
 
 func start_placement(type: StringName) -> void:
 	if not BUILDING_DATA.has(type):
+		return
+	# The Ascension Beacon is late-game tech: it requires a standing Barracks.
+	if type == &"beacon" and not _player_has_barracks():
+		AlertManager.push("Ascension Beacon requires a Barracks", "warning")
 		return
 	current_type = type
 	var size: Vector2 = BUILDING_DATA[type].size

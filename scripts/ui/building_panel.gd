@@ -26,6 +26,7 @@ const SIGNATURE_NAME: Dictionary = {0: "Jaguar Fury", 1: "Blight Surge", 2: "Lat
 @onready var _storehouse_btn: Button = $BottomBar/Margin/HBox/StorehouseBtn
 @onready var _house_btn: Button = $BottomBar/Margin/HBox/HouseBtn
 @onready var _pylon_btn: Button = $BottomBar/Margin/HBox/PylonBtn
+@onready var _beacon_btn: Button = $BottomBar/Margin/HBox/BeaconBtn
 
 var _selected_building: Node = null
 
@@ -38,6 +39,7 @@ func _ready() -> void:
 	_storehouse_btn.pressed.connect(func(): BuildingPlacer.start_placement("storehouse"))
 	_house_btn.pressed.connect(func(): BuildingPlacer.start_placement("house"))
 	_pylon_btn.pressed.connect(func(): BuildingPlacer.start_placement("pylon"))
+	_beacon_btn.pressed.connect(func(): BuildingPlacer.start_placement("beacon"))
 	_cancel_btn.pressed.connect(_on_cancel)
 	_train_btn.pressed.connect(func(): _try_train(0))
 	_train2_btn.pressed.connect(func(): _try_train(1))
@@ -54,7 +56,7 @@ func _ready() -> void:
 	_set_btn_icon(_monument_btn, "bld_monument")
 	_set_btn_icon(_farm_btn, "bld_farm")
 	# Cost on hover (the placement ghost also shows it while placing).
-	for pair in [[_barracks_btn, "barracks"], [_tc_btn, "tc"], [_tower_btn, "tower"], [_monument_btn, "monument"], [_farm_btn, "farm"], [_storehouse_btn, "storehouse"], [_house_btn, "house"], [_pylon_btn, "pylon"]]:
+	for pair in [[_barracks_btn, "barracks"], [_tc_btn, "tc"], [_tower_btn, "tower"], [_monument_btn, "monument"], [_farm_btn, "farm"], [_storehouse_btn, "storehouse"], [_house_btn, "house"], [_pylon_btn, "pylon"], [_beacon_btn, "beacon"]]:
 		(pair[0] as Button).tooltip_text = "%s  (%s)" % [(pair[0] as Button).text, BuildingPlacer.cost_text(pair[1])]
 	for b in [_train_btn, _train2_btn, _train3_btn, _train4_btn]:
 		b.add_theme_constant_override("icon_max_width", 18)

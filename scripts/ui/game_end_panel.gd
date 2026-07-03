@@ -83,6 +83,16 @@ func _check_conditions() -> void:
 		monument_countdown_active = false
 		_monument_label.visible = false
 		AlertManager.push("Monument destroyed!", "error")
+	# Ascension Beacons: a fully-charged beacon wins for its faction.
+	for beacon in get_tree().get_nodes_in_group("beacons"):
+		if not is_instance_valid(beacon) or bool(beacon.get("dying")):
+			continue
+		if bool(beacon.is_fully_charged()):
+			if FactionManager.is_player_faction(int(beacon.get("faction_id"))):
+				_show("ASCENSION VICTORY")
+			else:
+				_show("DEFEAT — ENEMY ASCENDED")
+			return
 	if get_tree().get_nodes_in_group("enemy_buildings").is_empty():
 		_show("VICTORY")
 
@@ -112,7 +122,7 @@ func _find_player_tc() -> Node:
 func _show(text: String) -> void:
 	get_tree().paused = true
 	title.text = text
-	var won: bool = text.begins_with("VICTORY") or text.begins_with("MONUMENT")
+	var won: bool = text.begins_with("VICTORY") or text.begins_with("MONUMENT") or text.begins_with("ASCENSION")
 	if not _recorded:
 		_recorded = true
 		_match_deltas = ProfileManager.record_match(won, GameSettings.player_faction_id,

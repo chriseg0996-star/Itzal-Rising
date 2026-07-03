@@ -21,16 +21,30 @@ var _dots: Array[Dictionary] = []
 var _camera_rect: Rect2 = Rect2()
 var _poll_timer: float = 0.0
 
+## Expanding-ring pings (e.g. an enemy beacon starting to charge).
+const PING_TTL: float = 4.0
+const PING_COLOR: Color = Color(0.0, 0.92, 0.80, 1.0)
+var _pings: Array[Dictionary] = []   # {world: Vector2, ttl: float}
+
 func _ready() -> void:
+	add_to_group("minimap")
 	gui_input.connect(_on_gui_input)
 	_rebuild_dots()
 	queue_redraw()
+
+func ping(world_pos: Vector2) -> void:
+	_pings.append({"world": world_pos, "ttl": PING_TTL})
 
 func _process(delta: float) -> void:
 	_poll_timer += delta
 	if _poll_timer >= POLL_INTERVAL:
 		_poll_timer = 0.0
 		_rebuild_dots()
+		queue_redraw()
+	if not _pings.is_empty():
+		for p in _pings:
+			p["ttl"] = float(p["ttl"]) - delta
+		_pings = _pings.filter(func(p: Dictionary) -> bool: return float(p["ttl"]) > 0.0)
 		queue_redraw()
 
 func _draw() -> void:
@@ -42,6 +56,12 @@ func _draw() -> void:
 		draw_rect(Rect2(p - Vector2(s, s) * 0.5, Vector2(s, s)), d["color"], true)
 	if _camera_rect.size != Vector2.ZERO:
 		draw_rect(_camera_rect, CAMERA_RECT_COLOR, false, 1.0)
+	for p in _pings:
+		var t: float = 1.0 - float(p["ttl"]) / PING_TTL      # 0 -> 1 over the ping's life
+		var pos: Vector2 = (p["world"] as Vector2) / WORLD_SIZE * ms
+		var phase: float = fmod(t * 3.0, 1.0)                # three expanding rings
+		draw_arc(pos, 2.0 + phase * 10.0, 0.0, TAU, 20,
+			Color(PING_COLOR.r, PING_COLOR.g, PING_COLOR.b, 1.0 - phase), 1.5, true)
 	draw_rect(Rect2(Vector2.ZERO, ms), BORDER_COLOR, false, 1.0)
 
 func _rebuild_dots() -> void:

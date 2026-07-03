@@ -27,6 +27,7 @@ func _ready() -> void:
 	ResourceManager.supply_changed.connect(func(_fid: int, _u: int, _c: int) -> void: _update_population())
 	_build_ticker()
 	_build_deal_modal()
+	_build_beacon_panel()
 	AlertManager.ticker_updated.connect(_on_ticker)
 	AlertManager.alert_pushed.connect(func(text: String, _lvl: String) -> void: _on_ticker(text))
 	AlertManager.deal_offered.connect(_on_deal_offered)
@@ -47,6 +48,7 @@ func _process(delta: float) -> void:
 		_poll_timer = 0.0
 		_update_population()
 		_update_era()
+		_update_beacon_panel()
 	if _pulse_cooldown > 0.0:
 		_pulse_cooldown -= delta
 	_tick_ticker(delta)
@@ -245,3 +247,71 @@ func _tick_ticker(delta: float) -> void:
 			(_ticker_label.get_parent() as Control).visible = false
 	if _deal_modal != null and _deal_modal.visible:
 		_deal_countdown.text = "Expires in %ds" % int(ceil(AlertManager.get_deal_time_left()))
+
+# ── Ascension Beacon charge panel (right side; hidden until a beacon exists) ──
+var _beacon_panel: PanelContainer = null
+var _beacon_box: VBoxContainer = null
+
+func _build_beacon_panel() -> void:
+	_beacon_panel = PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.106, 0.129, 0.188, 0.92)
+	sb.set_corner_radius_all(4)
+	sb.set_content_margin_all(10)
+	_beacon_panel.add_theme_stylebox_override("panel", sb)
+	_beacon_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_beacon_panel)
+	_beacon_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+	_beacon_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_beacon_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_beacon_panel.offset_right = -10.0
+	_beacon_panel.custom_minimum_size = Vector2(190, 0)
+	_beacon_box = VBoxContainer.new()
+	_beacon_box.add_theme_constant_override("separation", 6)
+	_beacon_panel.add_child(_beacon_box)
+	_beacon_panel.visible = false
+
+## Rebuilt each tick from the "beacons" group — one bar per beacon, tinted with
+## its faction colour; label notes PAUSED while damage is stalling the charge.
+func _update_beacon_panel() -> void:
+	if _beacon_panel == null:
+		return
+	var beacons: Array = get_tree().get_nodes_in_group("beacons")
+	beacons = beacons.filter(func(b) -> bool:
+		return is_instance_valid(b) and not bool(b.get("dying")) and not bool(b.get("under_construction")))
+	_beacon_panel.visible = not beacons.is_empty()
+	if beacons.is_empty():
+		return
+	for c in _beacon_box.get_children():
+		c.queue_free()
+	var title := Label.new()
+	title.text = "ASCENSION"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_color_override("font_color", Color(0.0, 0.85, 0.85, 1.0))
+	title.add_theme_font_size_override("font_size", 13)
+	_beacon_box.add_child(title)
+	for b in beacons:
+		var fac: FactionData = FactionManager.get_faction(int(b.get("faction_id")))
+		var col: Color = fac.primary_color if fac != null else Color.WHITE
+		var row := Label.new()
+		var paused: bool = bool(b.is_charge_paused())
+		row.text = "%s %d%%%s" % [fac.display_name if fac != null else "?",
+			int(b.get_charge_ratio() * 100.0), "  (PAUSED)" if paused else ""]
+		row.add_theme_color_override("font_color", col)
+		row.add_theme_font_size_override("font_size", 12)
+		_beacon_box.add_child(row)
+		var bar := ProgressBar.new()
+		bar.min_value = 0.0
+		bar.max_value = 1.0
+		bar.value = b.get_charge_ratio()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 10)
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = col
+		fill.set_corner_radius_all(2)
+		var track := StyleBoxFlat.new()
+		track.bg_color = Color(0.05, 0.07, 0.10, 1.0)
+		track.set_corner_radius_all(2)
+		bar.add_theme_stylebox_override("fill", fill)
+		bar.add_theme_stylebox_override("background", track)
+		_beacon_box.add_child(bar)

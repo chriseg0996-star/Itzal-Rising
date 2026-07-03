@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/ascension_beacon.gd" id="1_beacon_script"]
+[ext_resource type="Texture2D" path="res://assets/buildings/beacon.png" id="2_beacon_tex"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/DamageFX.tscn" id="90_dmgfx"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_BEACON"]
+size = Vector2(78, 56)
+
+[node name="AscensionBeacon" type="Node2D"]
+script = ExtResource("1_beacon_script")
+building_name = "Ascension Beacon"
+max_hp = 1000
+sprite_asset = ""
+faction_id = 0
+
+[node name="BuildingSprite" type="Sprite2D" parent="."]
+position = Vector2(0, -28)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("2_beacon_tex")
+
+[node name="Sprite" type="ColorRect" parent="."]
+visible = false
+offset_left = -34.0
+offset_top = -34.0
+offset_right = 34.0
+offset_bottom = 34.0
+mouse_filter = 2
+color = Color(0.14, 0.15, 0.2, 1)
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectShape_BEACON")
+
+[node name="DamageFX" parent="." instance=ExtResource("90_dmgfx")]

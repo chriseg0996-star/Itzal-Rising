@@ -17,6 +17,8 @@ const BARRACKS_OFFSET_RANGE: float = 220.0
 const ATTACK_FORCE_MIN: int = 5
 const BARRACKS_COST: Dictionary = {"madera": 75}
 const PYLON_COST: Dictionary = {"madera": 75, "oro": 25}
+const BEACON_COST: Dictionary = {"madera": 400, "oro": 300}
+const BEACON_TIME: float = 480.0   # hard only: start its own Ascension at ~8 min
 const TOWER_COST: Dictionary = {"madera": 150}
 ## Fixed tower slots around the enemy TC, facing the player's approach.
 const TOWER_OFFSETS: Array[Vector2] = [
@@ -191,7 +193,40 @@ func _phase_construir() -> void:
 	if not _has_enemy_barracks():
 		_try_build_barracks()
 		return
+	# Hard only: press the win-condition button too — an own Ascension Beacon
+	# once the late game arrives.
+	if GameSettings.difficulty == "hard" and game_time >= BEACON_TIME and not _has_enemy_beacon():
+		_try_build_beacon()
+		return
 	_try_build_tower()
+
+func _has_enemy_beacon() -> bool:
+	for b in get_tree().get_nodes_in_group("beacons"):
+		if is_instance_valid(b) and int(b.get("faction_id")) == ai_faction_id and not bool(b.get("dying")):
+			return true
+	return false
+
+func _try_build_beacon() -> void:
+	if not ResourceManager.can_afford(BEACON_COST, ai_faction_id):
+		return
+	ResourceManager.spend(BEACON_COST, ai_faction_id)
+	var packed: PackedScene = BuildingPlacer.get_building_scene(ai_faction_id, &"beacon")
+	if packed == null:
+		return
+	# The shared beacon scene defaults to faction 0 — set the owner BEFORE
+	# adding to the tree so _ready joins the right groups.
+	var beacon: Node = packed.instantiate()
+	beacon.set("faction_id", ai_faction_id)
+	var pos: Vector2 = base_pos + Vector2(randf_range(-160.0, 160.0), randf_range(-160.0, 160.0))
+	pos.x = clamp(pos.x, MAP_MIN, MAP_MAX)
+	pos.y = clamp(pos.y, MAP_MIN, MAP_MAX)
+	var scene_root: Node = get_tree().current_scene
+	if scene_root == null:
+		beacon.queue_free()
+		return
+	scene_root.add_child(beacon)
+	if beacon is Node2D:
+		(beacon as Node2D).global_position = pos
 
 func _try_build_pylon() -> void:
 	if not ResourceManager.can_afford(PYLON_COST, ai_faction_id):
