@@ -10,7 +10,8 @@ const PULSE_COLOR: Color = Color(0.85, 0.2, 0.15, 1.0)
 @onready var gold_label: Label = $TopBar/Margin/HBox/Gold/Label
 @onready var pop_label: Label = $TopBar/Margin/HBox/Pop/Label
 @onready var era_label: Label = $TopBar/Margin/HBox/Era/Label
-@onready var clock_label: Label = $TopBar/Margin/HBox/Clock
+@onready var clock_label: Label = $Clock
+@onready var idle_btn: Button = $TopBar/Margin/HBox/IdleBtn
 @onready var _alert_box: VBoxContainer = $AlertPanel/VBox
 
 const ERA_ROMAN: Array[String] = ["I", "II", "III"]
@@ -26,6 +27,7 @@ func _ready() -> void:
 	AlertManager.alert_pushed.connect(_on_alert_pushed)
 	AlertManager.alert_cleared.connect(_on_alert_cleared)
 	ResourceManager.supply_changed.connect(func(_fid: int, _u: int, _c: int) -> void: _update_population())
+	idle_btn.pressed.connect(func() -> void: SelectionManager.cycle_idle_villager())
 	_build_ticker()
 	_build_deal_modal()
 	_build_beacon_panel()

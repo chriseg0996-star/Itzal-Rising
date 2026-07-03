@@ -253,6 +253,10 @@ func _recall_group(n: int) -> void:
 		_center_camera_on(alive)
 	_last_recall[n] = now
 
+## Public hook for the HUD's idle-worker button (same behavior as the "." key).
+func cycle_idle_villager() -> void:
+	_cycle_idle_villager()
+
 ## Selects the next idle (not gathering/building/farming) player worker and
 ## snaps the camera to it; repeated presses cycle through them.
 func _cycle_idle_villager() -> void:

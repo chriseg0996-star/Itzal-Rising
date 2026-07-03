@@ -6,13 +6,13 @@
 layer = 5
 
 [node name="Frame" type="Control" parent="."]
-anchor_left = 1.0
+anchor_left = 0.0
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.0
 anchor_bottom = 1.0
-offset_left = -216.0
-offset_top = -276.0
-offset_right = -16.0
-offset_bottom = -76.0
+offset_left = 16.0
+offset_top = -216.0
+offset_right = 216.0
+offset_bottom = -16.0
 mouse_filter = 0
 script = ExtResource("1_mm_script")
