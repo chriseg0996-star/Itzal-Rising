@@ -248,7 +248,7 @@ func _fill_stance_grid() -> void:
 
 ## Halt every selected unit (movement, harvest, combat chase).
 func _stop_cell() -> Button:
-	return _cell("STOP", "", "", "Stop — halt current orders",
+	return _cell("STOP", "cmd_stop", "", "Stop — halt current orders",
 		func() -> void:
 			for u in SelectionManager.selected:
 				if is_instance_valid(u) and u.has_method("stop"):
