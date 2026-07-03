@@ -16,7 +16,7 @@ const PANEL_BG: Color = Color(0.07, 0.09, 0.12, 0.94)
 const PANEL_BORDER: Color = Color(0.0, 0.85, 0.85, 0.35)
 const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
 const MUTED: Color = Color(0.55, 0.62, 0.68, 1.0)
-const CELL: float = 52.0   # ~20% smaller cells → a clean 4x4 grid fits the card
+const CELL: float = 54.0   # compact cells, near-full-bleed icons — 4-wide grid
 const COLS: int = 4
 
 ## Build-tab data: key = BuildingPlacer type, icon = assets/ui/icons/<icon>.png
@@ -66,7 +66,7 @@ func _ready() -> void:
 # ── Card scaffold ──────────────────────────────────────────
 func _build_card() -> void:
 	_card = PanelContainer.new()
-	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(11.0))
+	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(7.0, 0.13, true))
 	add_child(_card)
 	_card.anchor_left = 1.0
 	_card.anchor_top = 1.0
@@ -76,8 +76,8 @@ func _build_card() -> void:
 	# share edges and read as one continuous bottom console.
 	_card.offset_left = -560.0   # 8px grid: card spans -560..-312, flush both sides
 	_card.offset_right = -312.0
-	_card.offset_top = -164.0   # minimum; the card grows upward to hug its content
-	_card.offset_bottom = -8.0   # docked to the screen edge (console feel)
+	_card.offset_top = -156.0   # minimum; the card grows upward to hug its content
+	_card.offset_bottom = 0.0    # seated on the screen edge (console hardware feel)
 	_card.grow_horizontal = 0
 	_card.grow_vertical = 0
 
@@ -381,7 +381,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.10, 0.13, 0.17, 1.0)
 	sb.set_border_width_all(1)
-	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.15)
+	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.12)
 	sb.set_corner_radius_all(4)
 	var hb: StyleBoxFlat = sb.duplicate()
 	hb.bg_color = Color(0.0, 0.55, 0.50, 0.35)
@@ -398,7 +398,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		btn.add_theme_constant_override("icon_max_width", 44)
+		btn.add_theme_constant_override("icon_max_width", 46)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)

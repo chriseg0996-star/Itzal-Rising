@@ -30,7 +30,7 @@ var _status_label: Label = null
 var _queue_row: HBoxContainer = null
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", MenuKit.flat_box(8.0))
+	add_theme_stylebox_override("panel", MenuKit.flat_box(8.0, 0.13, true))
 	# Small entity icon (mockup: circular icon, never a big portrait), floating
 	# at the name row's left edge.
 	_icon = TextureRect.new()
@@ -143,7 +143,7 @@ func _relayout() -> void:
 ## The plate hugs its content: tall for the full single-entity readout, short
 ## for the multi-select count + chips (a fixed height leaves a huge empty plate).
 func _set_height(h: float) -> void:
-	offset_top = -(h + 8.0)
+	offset_top = -h
 
 func _show_single(node: Node) -> void:
 	_multi_label.hide()
@@ -156,18 +156,22 @@ func _show_single(node: Node) -> void:
 	var d: Dictionary = SelectionHUDData.build(node)
 	var dname: String = String(d["name"])
 	var role: String = String(d["subtitle"])
-	_name_label.text = dname if role == "" else "%s — %s" % [dname, role]
+	# Compact 224px panel: name alone on the title row; role + stats share the
+	# small line under it.
+	_name_label.text = dname
 	# Small entity icon (never a big portrait).
 	var icon_path: String = String(d["icon"])
 	_icon.visible = icon_path != ""
 	if icon_path != "":
 		_icon.texture = load(icon_path)
 	_set_owner(node)
-	var stats_parts: PackedStringArray = PackedStringArray()
+	var parts: PackedStringArray = PackedStringArray()
+	if role != "":
+		parts.append(role)
 	for s in (d["stats"] as Array):
-		stats_parts.append("%s %s" % [String(s["label"]), str(s["value"])])
-	if not stats_parts.is_empty():
-		_owner_label.text += "   ·   %s" % " · ".join(stats_parts)
+		parts.append("%s %s" % [String(s["label"]), str(s["value"])])
+	if not parts.is_empty():
+		_owner_label.text += " · %s" % " · ".join(parts)
 	_set_status(String(d["status"]))
 	_set_queue(d["queue"] as Array)
 	_fit_single()

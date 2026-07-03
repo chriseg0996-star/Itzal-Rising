@@ -4,7 +4,7 @@ const WORLD_SIZE: Vector2 = Vector2(MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 const POLL_INTERVAL: float = 0.1
 
 const BG_COLOR: Color = Color(0.04, 0.07, 0.10, 0.92)
-const BORDER_COLOR: Color = Color(0.0, 0.85, 0.85, 0.20)   # hairline teal frame
+const BORDER_COLOR: Color = Color(0.0, 0.85, 0.85, 0.16)   # hairline teal frame
 const PLAYER_UNIT_COLOR: Color = Color(0.0, 0.90, 0.78, 1.0)
 const ENEMY_UNIT_COLOR: Color = Color(0.93, 0.20, 0.20, 1.0)
 const PLAYER_BUILDING_COLOR: Color = Color(0.0, 0.67, 1.0, 0.9)
@@ -53,7 +53,7 @@ func _draw() -> void:
 	var ms: Vector2 = size
 	# Flat dock section (hairline frame) — matches the rest of the bottom console.
 	if _plate == null:
-		_plate = MenuKit.flat_box(0.0)
+		_plate = MenuKit.flat_box(0.0, 0.13, true)
 	draw_style_box(_plate, Rect2(Vector2.ZERO, ms))
 	draw_rect(Rect2(Vector2(3, 3), ms - Vector2(6, 6)), BG_COLOR, true)
 	for d in _dots:
