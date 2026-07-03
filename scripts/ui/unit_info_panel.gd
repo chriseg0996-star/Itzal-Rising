@@ -101,6 +101,7 @@ func _process(delta: float) -> void:
 		var d: Dictionary = SelectionHUDData.build(_focus)
 		_set_status(String(d["status"]))
 		_set_queue(d["queue"] as Array)
+		_fit_single()
 
 func _on_selection_changed(units: Array) -> void:
 	_units = units
@@ -139,6 +140,11 @@ func _relayout() -> void:
 		_focus = null
 		hide()
 
+## The plate hugs its content: tall for the full single-entity readout, short
+## for the multi-select count + chips (a fixed height leaves a huge empty plate).
+func _set_height(h: float) -> void:
+	offset_top = -(h + 8.0)
+
 func _show_single(node: Node) -> void:
 	_multi_label.hide()
 	if _type_row != null:
@@ -164,8 +170,17 @@ func _show_single(node: Node) -> void:
 		_owner_label.text += "   ·   %s" % " · ".join(stats_parts)
 	_set_status(String(d["status"]))
 	_set_queue(d["queue"] as Array)
+	_fit_single()
 	_refresh_hp(node)
 	show()
+
+func _fit_single() -> void:
+	var h: float = 118.0
+	if _status_label.visible:
+		h += 20.0
+	if _queue_row.visible:
+		h += 28.0
+	_set_height(h)
 
 func _set_status(text: String) -> void:
 	_status_label.visible = text != ""
@@ -198,6 +213,7 @@ func _set_queue(queue: Array) -> void:
 		_queue_row.add_child(lbl)
 
 func _show_multi(units: Array) -> void:
+	_set_height(92.0)
 	if _emblem != null:
 		_emblem.visible = false
 	_icon.visible = false
