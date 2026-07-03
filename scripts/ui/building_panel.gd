@@ -454,7 +454,7 @@ func _unit_icon(label: String) -> String:
 	if l.contains("villager") or l.contains("weaver"):
 		return "unit_villager"
 	if l.contains("catapult") or l.contains("cannon") or l.contains("engine") or l.contains("siege"):
-		return "unit_soldier"
+		return "unit_siege"
 	return "unit_soldier"
 
 # ── Poll: keep the live views fresh ────────────────────────

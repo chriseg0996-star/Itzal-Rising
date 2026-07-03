@@ -29,6 +29,15 @@ func _ready() -> void:
 	($ResBlock/VBox as VBoxContainer).add_theme_constant_override("separation", 2)
 	for l: Label in [pop_label, food_label, wood_label, gold_label]:
 		l.add_theme_font_size_override("font_size", 14)
+	# Painted resource icons (art pack 2).
+	for pair in [["PopRow", "res_pop"], ["Food", "res_food"], ["Wood", "res_wood"], ["Gold", "res_gold"]]:
+		var tr: TextureRect = get_node_or_null("ResBlock/VBox/%s/Icon" % pair[0]) as TextureRect
+		var p: String = "res://assets/ui/icons/%s.png" % pair[1]
+		if tr != null and ResourceLoader.exists(p):
+			tr.texture = load(p)
+			tr.custom_minimum_size = Vector2(24, 24)
+	# Hug the ledger's content — no dead plate under the gold row.
+	($ResBlock as Control).offset_top = -136.0
 	# Right-align the numbers so the column reads as a ledger; hairline
 	# separator between population and the resource rows.
 	for l: Label in [pop_label, food_label, wood_label, gold_label]:

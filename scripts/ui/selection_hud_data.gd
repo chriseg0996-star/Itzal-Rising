@@ -19,7 +19,7 @@ const UNIT_ROLES: Dictionary = {
 const UNIT_ICONS: Dictionary = {
 	"Villager": "unit_villager", "Weaver": "unit_villager",
 	"Soldier": "unit_soldier", "Archer": "unit_archer",
-	"Raider": "unit_raider", "Lattice Guard": "unit_soldier",
+	"Raider": "unit_raider", "Lattice Guard": "unit_guard",
 }
 const BUILDING_ICONS: Dictionary = {
 	"Town Center": "bld_tc", "Farm": "bld_farm", "Storehouse": "bld_storehouse",

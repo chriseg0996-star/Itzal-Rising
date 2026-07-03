@@ -80,6 +80,7 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 var _plate: StyleBoxFlat = null
+var _bg_tex: Texture2D = null
 
 func _draw() -> void:
 	var ms: Vector2 = size
@@ -87,7 +88,13 @@ func _draw() -> void:
 	if _plate == null:
 		_plate = MenuKit.flat_box(0.0, 0.11, true)
 	draw_style_box(_plate, Rect2(Vector2.ZERO, ms))
-	draw_rect(Rect2(Vector2(3, 3), ms - Vector2(6, 6)), BG_COLOR, true)
+	# Painted obsidian backdrop (engraved greca, gold corners) under the dots.
+	if _bg_tex == null:
+		_bg_tex = load("res://assets/ui/minimap_bg.png")
+	if _bg_tex != null:
+		draw_texture_rect(_bg_tex, Rect2(Vector2(3, 3), ms - Vector2(6, 6)), false)
+	else:
+		draw_rect(Rect2(Vector2(3, 3), ms - Vector2(6, 6)), BG_COLOR, true)
 	for d in _dots:
 		var s: float = float(d["size"])
 		var p: Vector2 = d["pos"]
