@@ -27,6 +27,25 @@ static func chip_box(pad: float = 10.0) -> StyleBoxTexture:
 static func family_box(pad: float = 10.0) -> StyleBoxTexture:
 	return _tex_box("res://assets/ui/plate_frame.png", 12.0, pad)
 
+## Premium progress-bar pair: dark track with a thin gold border + beveled
+## (rounded) ends; fill in the given colour. Shared by HP, queue and
+## objective bars so every bar in the HUD is the same object.
+const GOLD: Color = Color(0.784, 0.663, 0.29, 1.0)
+
+static func bar_track() -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.03, 0.04, 0.055, 1.0)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(GOLD.r, GOLD.g, GOLD.b, 0.30)
+	sb.set_corner_radius_all(2)
+	return sb
+
+static func bar_fill(color: Color) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = color
+	sb.set_corner_radius_all(2)
+	return sb
+
 ## Bottom-dock section style: obsidian fill + hairline separator instead of the
 ## heavy neon plate. Sections placed flush read as one continuous console.
 static func flat_box(pad: float = 10.0, border_alpha: float = 0.11, sep_only: bool = false) -> StyleBoxFlat:

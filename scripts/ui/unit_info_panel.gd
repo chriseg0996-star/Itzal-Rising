@@ -76,12 +76,11 @@ func _ready() -> void:
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	if SelectionManager.has_signal("inspect_changed"):
 		SelectionManager.inspect_changed.connect(_on_inspect_changed)
-	# Own copy of the fill stylebox so we can recolour it by HP without touching
-	# the shared resource.
-	var fill: StyleBox = _hp_bar.get_theme_stylebox("fill")
-	if fill != null:
-		_hp_fill = fill.duplicate() as StyleBoxFlat
-		_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
+	# Premium bar pair (gold-bordered track); own fill copy so HP recolouring
+	# never touches a shared resource.
+	_hp_bar.add_theme_stylebox_override("background", MenuKit.bar_track())
+	_hp_fill = MenuKit.bar_fill(HP_GOOD)
+	_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
 	_show_empty()
 
 func _process(delta: float) -> void:

@@ -70,12 +70,15 @@ func _build_card() -> void:
 	add_theme_stylebox_override("panel", MenuKit.flat_box(10.0, 0.11, true))
 
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
+	v.add_theme_constant_override("separation", 6)
 	_card.add_child(v)
 
 	_header = Label.new()
 	_header.add_theme_color_override("font_color", WHITE)
-	_header.add_theme_font_size_override("font_size", 15)
+	_header.add_theme_font_size_override("font_size", 13)
+	var fv := FontVariation.new()
+	fv.spacing_glyph = 1
+	_header.add_theme_font_override("font", fv)
 	v.add_child(_header)
 
 	_queue_row = HBoxContainer.new()
@@ -87,12 +90,8 @@ func _build_card() -> void:
 	_queue_bar.max_value = 1.0
 	_queue_bar.show_percentage = false
 	_queue_bar.custom_minimum_size = Vector2(0, 6)
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = ACCENT
-	var track := StyleBoxFlat.new()
-	track.bg_color = Color(0.05, 0.07, 0.10, 1.0)
-	_queue_bar.add_theme_stylebox_override("fill", fill)
-	_queue_bar.add_theme_stylebox_override("background", track)
+	_queue_bar.add_theme_stylebox_override("fill", MenuKit.bar_fill(ACCENT))
+	_queue_bar.add_theme_stylebox_override("background", MenuKit.bar_track())
 	v.add_child(_queue_bar)
 
 	_tabs = HBoxContainer.new()
@@ -279,7 +278,7 @@ func _refresh_building() -> void:
 		_apply_mode("none")
 		return
 	var b: Node = _building
-	_header.text = "%s   %d/%d HP" % [String(b.get("building_name")), int(b.get("hp")), int(b.get("max_hp"))]
+	_header.text = "%s   %d/%d HP" % [String(b.get("building_name")).to_upper(), int(b.get("hp")), int(b.get("max_hp"))]
 	_refresh_queue(b)
 	_clear(_grid)
 	# Train slots.
@@ -391,10 +390,15 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 	var hb: StyleBoxFlat = sb.duplicate()
 	hb.bg_color = Color(0.0, 0.55, 0.50, 0.35)
 	hb.border_color = ACCENT
+	hb.expand_margin_top = 2.0   # hover lift
+	var db: StyleBoxFlat = sb.duplicate()
+	db.bg_color = Color(0.05, 0.06, 0.08, 1.0)   # disabled: darker, no accent
+	db.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.06)
 	btn.add_theme_stylebox_override("normal", sb)
 	btn.add_theme_stylebox_override("hover", hb)
 	btn.add_theme_stylebox_override("pressed", hb)
 	btn.add_theme_stylebox_override("focus", sb)
+	btn.add_theme_stylebox_override("disabled", db)
 	# AoE4-style: icon-only cells (name + cost live in the tooltip); text is the
 	# fallback when no icon exists. Keeps every cell exactly CELL-sized.
 	var icon_path: String = "res://assets/ui/icons/%s.png" % icon_key
@@ -403,7 +407,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		btn.add_theme_constant_override("icon_max_width", 42)
+		btn.add_theme_constant_override("icon_max_width", 44)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)

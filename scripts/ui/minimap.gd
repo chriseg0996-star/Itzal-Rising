@@ -29,8 +29,40 @@ var _pings: Array[Dictionary] = []   # {world: Vector2, ttl: float}
 func _ready() -> void:
 	add_to_group("minimap")
 	gui_input.connect(_on_gui_input)
+	_build_zoom_buttons()
 	_rebuild_dots()
 	queue_redraw()
+
+## Integrated zoom controls, bottom-left corner of the map area.
+func _build_zoom_buttons() -> void:
+	var x: float = 4.0
+	for def in [["+", 1.0 / 1.2], ["−", 1.2]]:
+		var btn := Button.new()
+		btn.text = String(def[0])
+		btn.custom_minimum_size = Vector2(18, 18)
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.add_theme_color_override("font_color", Color(0.0, 0.85, 0.85, 0.8))
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.05, 0.065, 0.09, 0.9)
+		sb.set_border_width_all(1)
+		sb.border_color = Color(0.0, 0.85, 0.85, 0.2)
+		btn.add_theme_stylebox_override("normal", sb)
+		btn.add_theme_stylebox_override("hover", sb)
+		btn.add_theme_stylebox_override("pressed", sb)
+		add_child(btn)
+		btn.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+		btn.offset_left = x
+		btn.offset_right = x + 18.0
+		btn.offset_top = -22.0
+		btn.offset_bottom = -4.0
+		var factor: float = float(def[1])
+		btn.pressed.connect(func() -> void:
+			var cam: Node = get_tree().get_first_node_in_group("rts_camera")
+			if cam != null and cam.get("_target_zoom") != null:
+				var z: float = clampf(float(cam.get("_target_zoom")) / factor,
+					float(cam.get("min_zoom")), float(cam.get("max_zoom")))
+				cam.set("_target_zoom", z))
+		x += 22.0
 
 func ping(world_pos: Vector2) -> void:
 	_pings.append({"world": world_pos, "ttl": PING_TTL})
@@ -69,6 +101,12 @@ func _draw() -> void:
 		draw_arc(pos, 2.0 + phase * 10.0, 0.0, TAU, 20,
 			Color(PING_COLOR.r, PING_COLOR.g, PING_COLOR.b, 1.0 - phase), 1.5, true)
 	draw_rect(Rect2(Vector2.ZERO, ms), BORDER_COLOR, false, 1.0)
+	# Compass glyph: small gold diamond, top-right (north marker).
+	var c: Vector2 = Vector2(ms.x - 12.0, 12.0)
+	var gold := Color(0.784, 0.663, 0.29, 0.55)
+	draw_colored_polygon(PackedVector2Array([
+		c + Vector2(0, -5), c + Vector2(4, 0), c + Vector2(0, 5), c + Vector2(-4, 0)]), gold)
+	draw_line(c + Vector2(0, -5), c + Vector2(0, -9), gold, 1.0)
 
 func _rebuild_dots() -> void:
 	_dots.clear()

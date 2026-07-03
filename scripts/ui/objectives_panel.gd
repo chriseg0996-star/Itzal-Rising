@@ -70,7 +70,9 @@ func _build_rows() -> void:
 		bar.max_value = 100.0
 		bar.value = 0.0
 		bar.show_percentage = false
-		bar.custom_minimum_size = Vector2(0, 3)
+		bar.custom_minimum_size = Vector2(0, 5)
+		bar.add_theme_stylebox_override("background", MenuKit.bar_track())
+		bar.add_theme_stylebox_override("fill", MenuKit.bar_fill(Color(0, 0.85, 0.85, 1)))
 		bar.modulate = BAR_TODO
 
 		row.add_child(line)

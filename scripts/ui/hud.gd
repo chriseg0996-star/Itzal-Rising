@@ -26,6 +26,16 @@ var _pulse_cooldown: float = 0.0
 
 func _ready() -> void:
 	($ResBlock as PanelContainer).add_theme_stylebox_override("panel", MenuKit.family_box(10.0))
+	# Right-align the numbers so the column reads as a ledger; hairline
+	# separator between population and the resource rows.
+	for l: Label in [pop_label, food_label, wood_label, gold_label]:
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var vbox: VBoxContainer = $ResBlock/VBox
+	var sepline := ColorRect.new()
+	sepline.color = Color(0.0, 0.85, 0.85, 0.12)
+	sepline.custom_minimum_size = Vector2(0, 1)
+	vbox.add_child(sepline)
+	vbox.move_child(sepline, 1)
 	ResourceManager.resource_changed.connect(_on_resource_changed)
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	AlertManager.alert_pushed.connect(_on_alert_pushed)
