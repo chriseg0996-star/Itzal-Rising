@@ -24,6 +24,10 @@ var _selection_color: Color = SELECTION_COLOR
 
 @onready var _nav_agent:          NavigationAgent2D = $NavigationAgent2D
 @onready var _harvest_component:  HarvestComponent  = $HarvestComponent
+
+## HUD hook: what this worker is gathering right now ("" = idle).
+func current_resource_type() -> StringName:
+	return _harvest_component.current_type() if _harvest_component != null else &""
 @onready var _hitbox:             Area2D            = $Area2D
 @onready var _hp_bar_fg:          ColorRect         = $HPBarFG
 @onready var _anim_sprite:        AnimatedSprite2D  = $AnimatedSprite2D

@@ -75,9 +75,9 @@ func _build() -> void:
 	add_child(panel)
 	# Docked flush above the command card (same right edge), AoE4-style.
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	panel.offset_left = -362.0
+	panel.offset_left = -586.0
 	panel.offset_top = -356.0
-	panel.offset_right = -16.0
+	panel.offset_right = -240.0
 	panel.offset_bottom = -308.0
 
 	var hbox := HBoxContainer.new()

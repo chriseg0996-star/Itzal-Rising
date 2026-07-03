@@ -10,6 +10,12 @@ const UNIT_NAMES: Dictionary = {
 	"soldier": "Soldier", "archer": "Archer", "raider": "Raider",
 	"villager": "Villager", "ix_lattice_guard": "Lattice Guard", "ix_weaver": "Weaver",
 }
+## AoE4-style class line under the name.
+const UNIT_ROLES: Dictionary = {
+	"Villager": "Gatherer, Builder", "Weaver": "Gatherer, Builder",
+	"Soldier": "Melee Infantry", "Archer": "Ranged", "Raider": "Cavalry",
+	"Lattice Guard": "Heavy Infantry",
+}
 const HP_GOOD: Color = Color(0.27, 0.86, 0.50)
 const HP_LOW: Color = Color(0.85, 0.2, 0.15)
 const MUTED: Color = Color(0.55, 0.65, 0.7)
@@ -81,10 +87,30 @@ func _show_single(node: Node) -> void:
 	_owner_label.show()
 	_hp_bar.show()
 	_hp_label.show()
-	_name_label.text = _display_name(node)
+	var dname: String = _display_name(node)
+	_name_label.text = dname
+	var role: String = String(UNIT_ROLES.get(dname, ""))
+	var stats: String = _stats_line(node)
+	if role != "" or stats != "":
+		_name_label.text = dname if role == "" else "%s — %s" % [dname, role]
 	_set_owner(node)
+	if stats != "":
+		_owner_label.text += "   ·   %s" % stats
 	_refresh_hp(node)
 	show()
+
+## "ATK 10 · ARM 2" pulled from the unit's export + StatComponent.
+func _stats_line(node: Node) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	var atk: Variant = node.get("attack_damage")
+	if atk != null and float(atk) > 0.0:
+		parts.append("ATK %d" % int(float(atk)))
+	var stat: Node = node.get_node_or_null("StatComponent")
+	if stat != null:
+		var arm: Variant = stat.get("armor")
+		if arm != null:
+			parts.append("ARM %d" % int(float(arm)))
+	return " · ".join(parts)
 
 func _show_multi(units: Array) -> void:
 	_name_label.hide()

@@ -5,13 +5,16 @@ const ALERT_SLOTS: int = 5
 const PULSE_COOLDOWN: float = 2.0
 const PULSE_COLOR: Color = Color(0.85, 0.2, 0.15, 1.0)
 
-@onready var wood_label: Label = $TopBar/Margin/HBox/Wood/Label
-@onready var food_label: Label = $TopBar/Margin/HBox/Food/Label
-@onready var gold_label: Label = $TopBar/Margin/HBox/Gold/Label
-@onready var pop_label: Label = $TopBar/Margin/HBox/Pop/Label
-@onready var era_label: Label = $TopBar/Margin/HBox/Era/Label
+@onready var wood_label: Label = $ResBlock/VBox/Wood/Label
+@onready var food_label: Label = $ResBlock/VBox/Food/Label
+@onready var gold_label: Label = $ResBlock/VBox/Gold/Label
+@onready var wood_workers: Label = $ResBlock/VBox/Wood/Workers
+@onready var food_workers: Label = $ResBlock/VBox/Food/Workers
+@onready var gold_workers: Label = $ResBlock/VBox/Gold/Workers
+@onready var pop_label: Label = $ResBlock/VBox/PopRow/Label
+@onready var era_label: Label = $EraCenter
 @onready var clock_label: Label = $Clock
-@onready var idle_btn: Button = $TopBar/Margin/HBox/IdleBtn
+@onready var idle_btn: Button = $ResBlock/VBox/PopRow/IdleBtn
 @onready var _alert_box: VBoxContainer = $AlertPanel/VBox
 
 const ERA_ROMAN: Array[String] = ["I", "II", "III"]
@@ -51,6 +54,7 @@ func _process(delta: float) -> void:
 		_poll_timer = 0.0
 		_update_population()
 		_update_era()
+		_update_workers()
 		_update_beacon_panel()
 		if clock_label != null:
 			clock_label.text = GameStats.format_time()
@@ -92,7 +96,27 @@ func _update_era() -> void:
 	if era_label == null:
 		return
 	var e: int = clampi(GameStats.era, 1, ERA_ROMAN.size())
-	era_label.text = "Era %s" % ERA_ROMAN[e - 1]
+	era_label.text = ERA_ROMAN[e - 1]   # AoE4-style big numeral, top-centre
+
+## AoE4-signature economy readout: workers currently gathering each resource
+## plus the idle-worker count on the cycle button.
+func _update_workers() -> void:
+	var counts: Dictionary = {&"wood": 0, &"food": 0, &"gold": 0}
+	var idle: int = 0
+	for u in get_tree().get_nodes_in_group("villagers"):
+		if not (is_instance_valid(u) and u.is_in_group("player_units")):
+			continue
+		var t: StringName = &""
+		if u.has_method("current_resource_type"):
+			t = u.current_resource_type()
+		if t == &"":
+			idle += 1
+		elif counts.has(t):
+			counts[t] = int(counts[t]) + 1
+	wood_workers.text = str(counts[&"wood"]) if int(counts[&"wood"]) > 0 else ""
+	food_workers.text = str(counts[&"food"]) if int(counts[&"food"]) > 0 else ""
+	gold_workers.text = str(counts[&"gold"]) if int(counts[&"gold"]) > 0 else ""
+	idle_btn.text = "◉ %d" % idle
 
 func _update_population() -> void:
 	var fid: int = GameSettings.player_faction_id
@@ -158,12 +182,12 @@ func _build_ticker() -> void:
 	panel.add_theme_stylebox_override("panel", sb)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
-	# Sits in the free bottom-centre lane between the minimap and command card.
-	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	panel.offset_left = 232.0
-	panel.offset_right = -740.0
-	panel.offset_top = -46.0
-	panel.offset_bottom = -22.0
+	# Top-centre, under the era numeral (AoE4 events position).
+	panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	panel.offset_left = 560.0
+	panel.offset_right = -560.0
+	panel.offset_top = 44.0
+	panel.offset_bottom = 68.0
 	_ticker_label = Label.new()
 	_ticker_label.add_theme_color_override("font_color", TICKER_TEXT)
 	_ticker_label.add_theme_font_size_override("font_size", 13)

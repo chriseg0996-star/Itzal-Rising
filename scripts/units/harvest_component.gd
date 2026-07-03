@@ -23,6 +23,17 @@ var _carrying:     int               = 0
 var _carry_type:   StringName        = &""
 var _dropoff:      Node2D            = null  ## chosen drop-off for the current trip
 
+## The resource type this worker is currently working (target node's type, or
+## what it's carrying home). Empty when idle — feeds the HUD economy readout.
+func current_type() -> StringName:
+	if _state == State.IDLE:
+		return &""
+	if _target_node != null and is_instance_valid(_target_node):
+		return ResourceManager._normalize(_target_node.resource_type)
+	if _carrying > 0:
+		return ResourceManager._normalize(_carry_type)
+	return &""
+
 func setup(nav_agent: NavigationAgent2D, home: Node2D, faction_id: int = 0) -> void:
 	_nav_agent = nav_agent
 	_home      = home

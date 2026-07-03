@@ -77,8 +77,9 @@ func _build_card() -> void:
 	_card.anchor_top = 1.0
 	_card.anchor_right = 1.0
 	_card.anchor_bottom = 1.0
-	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 20.0 + 16.0)
-	_card.offset_right = -16.0
+	# Bottom-centre, flush left of the minimap (AoE4 command-card position).
+	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 20.0 + 240.0)
+	_card.offset_right = -240.0
 	_card.offset_top = -300.0   # fixed height — the card never jumps between contexts
 	_card.offset_bottom = -16.0
 	_card.grow_horizontal = 0
@@ -208,13 +209,40 @@ func _build_tabs() -> void:
 		_tabs.add_child(btn)
 
 func _fill_build_grid() -> void:
+	var owned: Dictionary = _count_owned()
 	for def in BUILDS[_tab]:
 		var key: StringName = def["key"]
 		var cost: String = BuildingPlacer.cost_text(key)
 		var cell := _cell(String(def["short"]), String(def["icon"]), String(def["hot"]),
 			"%s\n%s" % [def["label"], cost],
 			func() -> void: BuildingPlacer.start_placement(key))
+		var n: int = int(owned.get(String(def["label"]), 0))
+		if n > 0:
+			cell.add_child(_count_badge(n))
 		_grid.add_child(cell)
+
+## AoE4-style owned-count badge (bottom-left corner of the cell).
+func _count_badge(n: int) -> Label:
+	var lbl := Label.new()
+	lbl.text = str(n)
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", WHITE)
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	lbl.offset_left = 5.0
+	lbl.offset_top = -16.0
+	lbl.offset_right = 20.0
+	lbl.offset_bottom = -3.0
+	return lbl
+
+func _count_owned() -> Dictionary:
+	var out: Dictionary = {}
+	for b in get_tree().get_nodes_in_group("player_buildings"):
+		if not is_instance_valid(b) or bool(b.get("dying")):
+			continue
+		var name_str: String = String(b.get("building_name"))
+		out[name_str] = int(out.get(name_str, 0)) + 1
+	return out
 
 # ── Military: stances ──────────────────────────────────────
 func _fill_stance_grid() -> void:
@@ -388,12 +416,16 @@ func _unit_icon(label: String) -> String:
 		return "unit_soldier"
 	return "unit_soldier"
 
-# ── Poll: keep the building view live ──────────────────────
+# ── Poll: keep the live views fresh ────────────────────────
 func _process(delta: float) -> void:
-	if _mode != "building":
-		return
 	_poll += delta
-	if _poll < 0.25:
-		return
-	_poll = 0.0
-	_refresh_building()
+	if _mode == "building":
+		if _poll >= 0.25:
+			_poll = 0.0
+			_refresh_building()
+	elif _mode == "villager":
+		# Refresh owned-count badges once a second.
+		if _poll >= 1.0:
+			_poll = 0.0
+			_clear(_grid)
+			_fill_build_grid()
