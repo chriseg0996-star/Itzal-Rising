@@ -344,21 +344,24 @@ func try_queue_research(research_id: String) -> bool:
 	_enqueue({"scene": null, "duration": float(tier["duration"]), "research_id": research_id, "cost": costs})
 	return true
 
-## Cancels the most-recently queued item (training or research) and refunds its
-## full cost. Cancelling the only item stops production; the active front item is
-## otherwise left running. Called from the building panel's Cancel button.
-func cancel_last() -> bool:
-	if dying or queue.is_empty():
+## Cancels the queue entry at `index` (training or research) and refunds its
+## full cost. Cancelling the front item restarts the timer on the next one.
+## Command-card queue slots call this directly.
+func cancel_at(index: int) -> bool:
+	if dying or index < 0 or index >= queue.size():
 		return false
-	var idx: int = queue.size() - 1
-	var entry: Dictionary = queue[idx]
+	var entry: Dictionary = queue[index]
 	var cost: Dictionary = entry.get("cost", {})
 	for type in cost:
 		ResourceManager.add_resource(String(type), int(cost[type]), faction_id)
-	queue.remove_at(idx)
-	if queue.is_empty():
-		production_timer = 0.0
+	queue.remove_at(index)
+	if index == 0:
+		production_timer = float(queue[0].get("duration", train_duration)) if not queue.is_empty() else 0.0
 	return true
+
+## Cancels the most-recently queued item.
+func cancel_last() -> bool:
+	return cancel_at(queue.size() - 1)
 
 ## Persistent rally point: units finishing training walk here. The marker is a
 ## child Node2D so it moves/dies with the building.

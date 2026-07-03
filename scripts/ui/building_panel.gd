@@ -1,78 +1,377 @@
 extends CanvasLayer
 
-@onready var _side_panel: PanelContainer = $SidePanel
-@onready var _name_label: Label = $SidePanel/Margin/VBox/NameLabel
-@onready var _hp_label: Label = $SidePanel/Margin/VBox/HPLabel
-@onready var _queue_label: Label = $SidePanel/Margin/VBox/QueueLabel
-@onready var _timer_label: Label = $SidePanel/Margin/VBox/TimerLabel
-@onready var _cancel_btn: Button = $SidePanel/Margin/VBox/CancelBtn
-@onready var _train_btn: Button = $SidePanel/Margin/VBox/TrainBtn
-@onready var _train2_btn: Button = $SidePanel/Margin/VBox/Train2Btn
-@onready var _train3_btn: Button = $SidePanel/Margin/VBox/Train3Btn
-@onready var _train4_btn: Button = $SidePanel/Margin/VBox/Train4Btn
-@onready var _research_label: Label = $SidePanel/Margin/VBox/ResearchLabel
-@onready var _research_atk_btn: Button = $SidePanel/Margin/VBox/ResearchAtkBtn
-@onready var _research_armor_btn: Button = $SidePanel/Margin/VBox/ResearchArmorBtn
-@onready var _research_cav_btn: Button = $SidePanel/Margin/VBox/ResearchCavalryBtn
-@onready var _research_era_btn: Button = $SidePanel/Margin/VBox/ResearchEraBtn
+## AoE4-style contextual COMMAND CARD (bottom-right). The grid's content is
+## driven by the current selection:
+##   villager selected  -> build tabs [ECONOMIC | MILITARY] of placeable buildings
+##   own building       -> train slots + research (TC) + header with name/HP,
+##                         plus a clickable production QUEUE strip (click = cancel)
+##   military selection -> stance cells (Aggressive / Defensive / Hold)
+##   nothing            -> hidden
+## Existing global hotkeys (B/T/Y/... , Z/X/C) keep working; cells show them as
+## chips. Built fully in code on the shared Basalt & Neon language.
 
-## Faction-flavoured name for the signature cavalry-charge tech.
-const SIGNATURE_NAME: Dictionary = {0: "Jaguar Fury", 1: "Blight Surge", 2: "Lattice Charge"}
-@onready var _barracks_btn: Button = $BottomBar/Margin/HBox/BarracksBtn
-@onready var _tc_btn: Button = $BottomBar/Margin/HBox/TCBtn
-@onready var _tower_btn: Button = $BottomBar/Margin/HBox/TowerBtn
-@onready var _monument_btn: Button = $BottomBar/Margin/HBox/MonumentBtn
-@onready var _farm_btn: Button = $BottomBar/Margin/HBox/FarmBtn
-@onready var _storehouse_btn: Button = $BottomBar/Margin/HBox/StorehouseBtn
-@onready var _house_btn: Button = $BottomBar/Margin/HBox/HouseBtn
-@onready var _pylon_btn: Button = $BottomBar/Margin/HBox/PylonBtn
-@onready var _beacon_btn: Button = $BottomBar/Margin/HBox/BeaconBtn
+const ACCENT: Color = Color(0.0, 0.90, 0.78, 1.0)
+const PANEL_BG: Color = Color(0.07, 0.09, 0.12, 0.94)
+const PANEL_BORDER: Color = Color(0.0, 0.85, 0.85, 0.35)
+const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
+const MUTED: Color = Color(0.55, 0.62, 0.68, 1.0)
+const CELL: float = 64.0
+const COLS: int = 4
 
-var _selected_building: Node = null
+## Build-tab data: key = BuildingPlacer type, icon = assets/ui/icons/<icon>.png
+## (text fallback when missing), hot = existing global hotkey.
+const BUILDS: Dictionary = {
+	"eco": [
+		{"key": &"tc", "label": "Town Center", "short": "TC", "icon": "bld_tc", "hot": "T"},
+		{"key": &"farm", "label": "Farm", "short": "Farm", "icon": "bld_farm", "hot": "F"},
+		{"key": &"storehouse", "label": "Storehouse", "short": "Store", "icon": "", "hot": "H"},
+		{"key": &"house", "label": "House", "short": "House", "icon": "", "hot": "U"},
+		{"key": &"pylon", "label": "Obsidian Pylon", "short": "Pylon", "icon": "", "hot": "P"},
+	],
+	"mil": [
+		{"key": &"barracks", "label": "Barracks", "short": "Barrack", "icon": "bld_barracks", "hot": "B"},
+		{"key": &"tower", "label": "Tower", "short": "Tower", "icon": "bld_tower", "hot": "Y"},
+		{"key": &"monument", "label": "Monument", "short": "Monum.", "icon": "bld_monument", "hot": "M"},
+		{"key": &"beacon", "label": "Ascension Beacon", "short": "Beacon", "icon": "", "hot": ""},
+	],
+}
+
+const STANCES: Array[Dictionary] = [
+	{"stance": CombatComponent.Stance.AGGRESSIVE, "label": "Aggressive", "short": "AGG", "hot": "Z"},
+	{"stance": CombatComponent.Stance.DEFENSIVE, "label": "Defensive", "short": "DEF", "hot": "X"},
+	{"stance": CombatComponent.Stance.HOLD, "label": "Hold Ground", "short": "HOLD", "hot": "C"},
+]
+
+var _card: PanelContainer = null
+var _header: Label = null
+var _queue_row: HBoxContainer = null
+var _queue_bar: ProgressBar = null
+var _tabs: HBoxContainer = null
+var _grid: GridContainer = null
+
+var _mode: String = "none"        # none | villager | military | building
+var _tab: String = "eco"
+var _building: Node = null
+var _last_units: Array = []
+var _poll: float = 0.0
 
 func _ready() -> void:
-	_barracks_btn.pressed.connect(func(): BuildingPlacer.start_placement("barracks"))
-	_tc_btn.pressed.connect(func(): BuildingPlacer.start_placement("tc"))
-	_tower_btn.pressed.connect(func(): BuildingPlacer.start_placement("tower"))
-	_monument_btn.pressed.connect(func(): BuildingPlacer.start_placement("monument"))
-	_farm_btn.pressed.connect(func(): BuildingPlacer.start_placement("farm"))
-	_storehouse_btn.pressed.connect(func(): BuildingPlacer.start_placement("storehouse"))
-	_house_btn.pressed.connect(func(): BuildingPlacer.start_placement("house"))
-	_pylon_btn.pressed.connect(func(): BuildingPlacer.start_placement("pylon"))
-	_beacon_btn.pressed.connect(func(): BuildingPlacer.start_placement("beacon"))
-	_cancel_btn.pressed.connect(_on_cancel)
-	_train_btn.pressed.connect(func(): _try_train(0))
-	_train2_btn.pressed.connect(func(): _try_train(1))
-	_train3_btn.pressed.connect(func(): _try_train(2))
-	_train4_btn.pressed.connect(func(): _try_train(3))
-	_research_atk_btn.pressed.connect(func(): _try_research("atk"))
-	_research_cav_btn.pressed.connect(func(): _try_research("cavalry"))
-	_research_armor_btn.pressed.connect(func(): _try_research("armor"))
-	_research_era_btn.pressed.connect(func(): _try_research("era"))
-	# Build-button icons (graceful: skip any that aren't present yet).
-	_set_btn_icon(_barracks_btn, "bld_barracks")
-	_set_btn_icon(_tc_btn, "bld_tc")
-	_set_btn_icon(_tower_btn, "bld_tower")
-	_set_btn_icon(_monument_btn, "bld_monument")
-	_set_btn_icon(_farm_btn, "bld_farm")
-	# Cost on hover (the placement ghost also shows it while placing).
-	for pair in [[_barracks_btn, "barracks"], [_tc_btn, "tc"], [_tower_btn, "tower"], [_monument_btn, "monument"], [_farm_btn, "farm"], [_storehouse_btn, "storehouse"], [_house_btn, "house"], [_pylon_btn, "pylon"], [_beacon_btn, "beacon"]]:
-		(pair[0] as Button).tooltip_text = "%s  (%s)" % [(pair[0] as Button).text, BuildingPlacer.cost_text(pair[1])]
-	for b in [_train_btn, _train2_btn, _train3_btn, _train4_btn]:
-		b.add_theme_constant_override("icon_max_width", 18)
-	SelectionManager.building_selected.connect(show_building)
-	SelectionManager.building_deselected.connect(hide_building)
-	_side_panel.visible = false
+	_build_card()
+	SelectionManager.selection_changed.connect(_on_units_changed)
+	SelectionManager.building_selected.connect(_on_building_selected)
+	SelectionManager.building_deselected.connect(_on_building_deselected)
+	_apply_mode("none")
 
-## Sets a button's left icon from assets/ui/icons/<key>.png if it exists.
-func _set_btn_icon(btn: Button, key: String) -> void:
-	var path: String = "res://assets/ui/icons/%s.png" % key
-	if ResourceLoader.exists(path):
-		btn.icon = load(path)
-		btn.add_theme_constant_override("icon_max_width", 20)
+# ── Card scaffold ──────────────────────────────────────────
+func _build_card() -> void:
+	_card = PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = PANEL_BG
+	sb.set_border_width_all(1)
+	sb.border_color = PANEL_BORDER
+	sb.set_corner_radius_all(6)
+	sb.set_content_margin_all(10)
+	_card.add_theme_stylebox_override("panel", sb)
+	add_child(_card)
+	_card.anchor_left = 1.0
+	_card.anchor_top = 1.0
+	_card.anchor_right = 1.0
+	_card.anchor_bottom = 1.0
+	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 20.0 + 16.0)
+	_card.offset_right = -16.0
+	_card.offset_bottom = -16.0
+	_card.grow_horizontal = 0
+	_card.grow_vertical = 0
 
-## Maps a unit's train label to its archetype icon key.
-func _unit_icon_key(label: String) -> String:
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	_card.add_child(v)
+
+	_header = Label.new()
+	_header.add_theme_color_override("font_color", WHITE)
+	_header.add_theme_font_size_override("font_size", 15)
+	v.add_child(_header)
+
+	_queue_row = HBoxContainer.new()
+	_queue_row.add_theme_constant_override("separation", 4)
+	v.add_child(_queue_row)
+
+	_queue_bar = ProgressBar.new()
+	_queue_bar.min_value = 0.0
+	_queue_bar.max_value = 1.0
+	_queue_bar.show_percentage = false
+	_queue_bar.custom_minimum_size = Vector2(0, 6)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = ACCENT
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color(0.05, 0.07, 0.10, 1.0)
+	_queue_bar.add_theme_stylebox_override("fill", fill)
+	_queue_bar.add_theme_stylebox_override("background", track)
+	v.add_child(_queue_bar)
+
+	_tabs = HBoxContainer.new()
+	_tabs.add_theme_constant_override("separation", 6)
+	v.add_child(_tabs)
+
+	_grid = GridContainer.new()
+	_grid.columns = COLS
+	_grid.add_theme_constant_override("h_separation", 6)
+	_grid.add_theme_constant_override("v_separation", 6)
+	v.add_child(_grid)
+
+# ── Selection routing ──────────────────────────────────────
+func _on_units_changed(units: Array) -> void:
+	_last_units = units
+	if _building != null:
+		return  # building context owns the card until deselected
+	var has_villager: bool = false
+	var has_military: bool = false
+	for u in units:
+		if not is_instance_valid(u):
+			continue
+		if u.is_in_group("villagers"):
+			has_villager = true
+		elif u.is_in_group("combat_units"):
+			has_military = true
+	if has_villager:
+		_apply_mode("villager")
+	elif has_military:
+		_apply_mode("military")
+	else:
+		_apply_mode("none")
+
+func _on_building_selected(b: Node) -> void:
+	_building = b
+	_apply_mode("building")
+
+func _on_building_deselected() -> void:
+	_building = null
+	_on_units_changed(_last_units)
+
+# ── Mode rendering ─────────────────────────────────────────
+func _apply_mode(mode: String) -> void:
+	_mode = mode
+	_card.visible = mode != "none"
+	_clear(_grid)
+	_clear(_tabs)
+	_clear(_queue_row)
+	_queue_bar.visible = false
+	_queue_row.visible = false
+	_tabs.visible = false
+	_header.visible = false
+	match mode:
+		"villager":
+			_tabs.visible = true
+			_build_tabs()
+			_fill_build_grid()
+		"military":
+			_header.visible = true
+			_header.text = "STANCE"
+			_fill_stance_grid()
+		"building":
+			_header.visible = true
+			_queue_row.visible = true
+			_queue_bar.visible = true
+			_refresh_building()
+
+func _clear(node: Node) -> void:
+	for c in node.get_children():
+		c.queue_free()
+
+# ── Villager: build tabs ───────────────────────────────────
+func _build_tabs() -> void:
+	for t in [["eco", "ECONOMIC"], ["mil", "MILITARY"]]:
+		var key: String = t[0]
+		var btn := Button.new()
+		btn.text = t[1]
+		btn.custom_minimum_size = Vector2(0, 26)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.add_theme_font_size_override("font_size", 12)
+		var active: bool = _tab == key
+		btn.add_theme_color_override("font_color", ACCENT if active else MUTED)
+		btn.add_theme_color_override("font_hover_color", ACCENT)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.10, 0.13, 0.17, 1.0) if active else Color(0.05, 0.07, 0.10, 1.0)
+		sb.set_corner_radius_all(3)
+		if active:
+			sb.border_width_bottom = 2
+			sb.border_color = ACCENT
+		btn.add_theme_stylebox_override("normal", sb)
+		btn.add_theme_stylebox_override("hover", sb)
+		btn.add_theme_stylebox_override("pressed", sb)
+		btn.pressed.connect(func() -> void:
+			_tab = key
+			_apply_mode("villager"))
+		_tabs.add_child(btn)
+
+func _fill_build_grid() -> void:
+	for def in BUILDS[_tab]:
+		var key: StringName = def["key"]
+		var cost: String = BuildingPlacer.cost_text(key)
+		var cell := _cell(String(def["short"]), String(def["icon"]), String(def["hot"]),
+			"%s\n%s" % [def["label"], cost],
+			func() -> void: BuildingPlacer.start_placement(key))
+		_grid.add_child(cell)
+
+# ── Military: stances ──────────────────────────────────────
+func _fill_stance_grid() -> void:
+	for s in STANCES:
+		var stance: int = int(s["stance"])
+		var lab: String = String(s["label"])
+		var cell := _cell(String(s["short"]), "", String(s["hot"]), lab,
+			func() -> void: SelectionManager.apply_stance(stance, lab))
+		_grid.add_child(cell)
+
+# ── Building: header + queue + train/research ──────────────
+func _refresh_building() -> void:
+	if _building == null or not is_instance_valid(_building):
+		_building = null
+		_apply_mode("none")
+		return
+	var b: Node = _building
+	_header.text = "%s   %d/%d HP" % [String(b.get("building_name")), int(b.get("hp")), int(b.get("max_hp"))]
+	_refresh_queue(b)
+	_clear(_grid)
+	# Train slots.
+	for slot in 4:
+		if b.has_method("has_train_slot") and b.has_train_slot(slot):
+			var label: String = b.get_train_label(slot)
+			var cost: String = b.get_train_cost_label(slot)
+			var s: int = slot
+			_grid.add_child(_cell(label, _unit_icon(label), "",
+				"Train %s\n%s" % [label, cost],
+				func() -> void: b.try_queue_training(s)))
+	# Research (player TC only).
+	if _is_player_tc(b):
+		_grid.add_child(_research_cell(b, "atk", "ATK"))
+		_grid.add_child(_research_cell(b, "armor", "ARM"))
+		_grid.add_child(_research_cell(b, "cavalry", "CAV"))
+		_grid.add_child(_era_cell(b))
+
+func _refresh_queue(b: Node) -> void:
+	_clear(_queue_row)
+	var q: Array = b.get("queue") if b.get("queue") is Array else []
+	for i in q.size():
+		var entry: Dictionary = q[i]
+		var name_str: String = String(entry.get("label", entry.get("research_id", "?")))
+		var slot := Button.new()
+		slot.custom_minimum_size = Vector2(42, 30)
+		slot.text = name_str.left(3).to_upper()
+		slot.tooltip_text = "%s — click to cancel" % name_str
+		slot.add_theme_font_size_override("font_size", 10)
+		slot.add_theme_color_override("font_color", ACCENT if i == 0 else MUTED)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.05, 0.07, 0.10, 1.0)
+		sb.set_border_width_all(1)
+		sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.5 if i == 0 else 0.2)
+		sb.set_corner_radius_all(3)
+		slot.add_theme_stylebox_override("normal", sb)
+		slot.add_theme_stylebox_override("hover", sb)
+		var idx: int = i
+		slot.pressed.connect(func() -> void:
+			if _building != null and is_instance_valid(_building):
+				_building.cancel_at(idx))
+		_queue_row.add_child(slot)
+	# Front-item progress.
+	if q.is_empty():
+		_queue_bar.value = 0.0
+	else:
+		var dur: float = float((q[0] as Dictionary).get("duration", 1.0))
+		var left: float = float(b.get("production_timer"))
+		_queue_bar.value = clampf(1.0 - left / maxf(dur, 0.01), 0.0, 1.0)
+
+func _is_player_tc(b: Node) -> bool:
+	return String(b.get("building_name")) == "Town Center" \
+		and b.get("faction_id") != null \
+		and FactionManager.is_player_faction(int(b.get("faction_id")))
+
+func _research_cell(b: Node, id: String, tag: String) -> Button:
+	var levels: Array = b.RESEARCH[id]["levels"]
+	var lvl: int = GameStats.get_research_level(id)
+	var maxed: bool = lvl >= levels.size()
+	var tip: String = "%s research" % tag
+	if not maxed:
+		var tier: Dictionary = levels[lvl]
+		tip = "%s %s\n%s" % [tag, "II" if lvl == 1 else "I", _cost_str(tier["cost"])]
+	var cell := _cell("%s%s" % [tag, " MAX" if maxed else " %s" % ("II" if lvl == 1 else "I")], "", "", tip,
+		func() -> void: b.try_queue_research(id))
+	if maxed:
+		cell.disabled = true
+	return cell
+
+func _era_cell(b: Node) -> Button:
+	var levels: Array = b.RESEARCH["era"]["levels"]
+	var lvl: int = GameStats.get_research_level("era")
+	var maxed: bool = lvl >= levels.size()
+	var tip: String = "Era maxed"
+	if not maxed:
+		tip = "Advance to Era %d\n%s" % [GameStats.era + 1, _cost_str(levels[lvl]["cost"])]
+	var cell := _cell("ERA %s" % ("MAX" if maxed else str(GameStats.era + 1)), "", "", tip,
+		func() -> void: b.try_queue_research("era"))
+	if maxed:
+		cell.disabled = true
+	return cell
+
+func _cost_str(cost: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for type in cost:
+		parts.append("%d%s" % [int(cost[type]), "W" if String(type) == "madera" else "G"])
+	return ", ".join(parts)
+
+# ── Cell factory ───────────────────────────────────────────
+func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_press: Callable) -> Button:
+	var btn := Button.new()
+	btn.custom_minimum_size = Vector2(CELL, CELL)
+	btn.tooltip_text = tooltip
+	btn.clip_text = true
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.10, 0.13, 0.17, 1.0)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.30)
+	sb.set_corner_radius_all(4)
+	var hb: StyleBoxFlat = sb.duplicate()
+	hb.bg_color = Color(0.0, 0.55, 0.50, 0.35)
+	hb.border_color = ACCENT
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("hover", hb)
+	btn.add_theme_stylebox_override("pressed", hb)
+	btn.add_theme_stylebox_override("focus", sb)
+	var icon_path: String = "res://assets/ui/icons/%s.png" % icon_key
+	if icon_key != "" and ResourceLoader.exists(icon_path):
+		btn.icon = load(icon_path)
+		btn.expand_icon = true
+		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		btn.add_theme_constant_override("icon_max_width", 34)
+		btn.text = _short(label)
+		btn.add_theme_font_size_override("font_size", 9)
+	else:
+		btn.text = _short(label)
+		btn.add_theme_font_size_override("font_size", 10)
+	btn.add_theme_color_override("font_color", WHITE)
+	btn.add_theme_color_override("font_hover_color", WHITE)
+	btn.pressed.connect(on_press)
+	if hotkey != "":
+		btn.add_child(_chip(hotkey))
+	return btn
+
+func _short(label: String) -> String:
+	return label if label.length() <= 10 else label.split(" ")[0]
+
+func _chip(key: String) -> Label:
+	var lbl := Label.new()
+	lbl.text = key
+	lbl.add_theme_font_size_override("font_size", 9)
+	lbl.add_theme_color_override("font_color", Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.9))
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	lbl.offset_left = -14.0
+	lbl.offset_top = 2.0
+	lbl.offset_right = -4.0
+	lbl.offset_bottom = 14.0
+	return lbl
+
+func _unit_icon(label: String) -> String:
 	var l: String = label.to_lower()
 	if l.contains("archer"):
 		return "unit_archer"
@@ -83,121 +382,15 @@ func _unit_icon_key(label: String) -> String:
 	if l.contains("villager") or l.contains("weaver"):
 		return "unit_villager"
 	if l.contains("catapult") or l.contains("cannon") or l.contains("engine") or l.contains("siege"):
-		return "unit_siege"  # no icon ships yet → button shows text only
+		return "unit_soldier"
 	return "unit_soldier"
 
-func _apply_train_icon(btn: Button, label: String) -> void:
-	var path: String = "res://assets/ui/icons/%s.png" % _unit_icon_key(label)
-	if not ResourceLoader.exists(path):
+# ── Poll: keep the building view live ──────────────────────
+func _process(delta: float) -> void:
+	if _mode != "building":
 		return
-	var tex: Texture2D = load(path)
-	if btn.icon != tex:
-		btn.icon = tex
-
-func show_building(building: Node) -> void:
-	_selected_building = building
-	_side_panel.visible = true
-	_refresh()
-
-func hide_building() -> void:
-	_selected_building = null
-	_side_panel.visible = false
-
-func _try_train(slot: int) -> void:
-	if _selected_building == null:
+	_poll += delta
+	if _poll < 0.25:
 		return
-	if _selected_building.has_method("try_queue_training"):
-		_selected_building.try_queue_training(slot)
-
-func _try_research(research_id: String) -> void:
-	if _selected_building == null:
-		return
-	if _selected_building.has_method("try_queue_research"):
-		_selected_building.try_queue_research(research_id)
-
-func _on_cancel() -> void:
-	if _selected_building != null and _selected_building.has_method("cancel_last"):
-		_selected_building.cancel_last()
-
-func _process(_delta: float) -> void:
-	if _selected_building == null or not is_instance_valid(_selected_building):
-		hide_building()
-		return
-	_refresh()
-
-func _refresh() -> void:
-	var b: Node = _selected_building
-	_name_label.text = b.get("building_name") if b.get("building_name") else "Building"
-	var hp: int = b.get("hp") if b.get("hp") != null else 0
-	var max_hp: int = b.get("max_hp") if b.get("max_hp") != null else 0
-	_hp_label.text = "HP: %d/%d" % [hp, max_hp]
-	var q: Array = b.get("queue") if b.get("queue") != null else []
-	_queue_label.text = "Queue: %d/5" % q.size()
-	var timer: float = b.get("production_timer") if b.get("production_timer") != null else 0.0
-	_timer_label.text = "Idle" if q.is_empty() else "%.1fs" % timer
-	_cancel_btn.visible = not q.is_empty()
-	_train_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(0)
-	_train2_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(1)
-	_train3_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(2)
-	_train4_btn.visible = b.has_method("has_train_slot") and b.has_train_slot(3)
-	if _train_btn.visible:
-		_train_btn.text = "%s (%s)" % [b.get_train_label(0), b.get_train_cost_label(0)]
-		_apply_train_icon(_train_btn, b.get_train_label(0))
-	if _train2_btn.visible:
-		_train2_btn.text = "%s (%s)" % [b.get_train_label(1), b.get_train_cost_label(1)]
-		_apply_train_icon(_train2_btn, b.get_train_label(1))
-	if _train3_btn.visible:
-		_train3_btn.text = "%s (%s)" % [b.get_train_label(2), b.get_train_cost_label(2)]
-		_apply_train_icon(_train3_btn, b.get_train_label(2))
-	if _train4_btn.visible:
-		_train4_btn.text = "%s (%s)" % [b.get_train_label(3), b.get_train_cost_label(3)]
-		_apply_train_icon(_train4_btn, b.get_train_label(3))
-	_refresh_research(b)
-
-## Research is offered on the player's Town Center only. Buttons are static
-## scene nodes (this runs every frame — never build controls here).
-func _refresh_research(b: Node) -> void:
-	var is_player_tc: bool = String(b.get("building_name")) == "Town Center" \
-		and b.get("faction_id") != null \
-		and FactionManager.is_player_faction(int(b.get("faction_id")))
-	_research_label.visible = is_player_tc
-	_research_atk_btn.visible = is_player_tc
-	_research_armor_btn.visible = is_player_tc
-	_research_cav_btn.visible = is_player_tc
-	_research_era_btn.visible = is_player_tc
-	if not is_player_tc:
-		return
-	_research_label.text = "Era %d  ·  ATK %d / ARM %d" % [GameStats.era, GameStats.atk_level, GameStats.armor_level]
-	_set_era_button(_research_era_btn, b)
-	_set_research_button(_research_atk_btn, "atk", "ATK", GameStats.atk_level, b)
-	_set_research_button(_research_armor_btn, "armor", "ARM", GameStats.armor_level, b)
-	var sig_name: String = SIGNATURE_NAME.get(GameSettings.player_faction_id, "Cavalry Charge")
-	_set_research_button(_research_cav_btn, "cavalry", sig_name, GameStats.cavalry_level, b)
-
-## The era button shows the era you'd advance TO (its cost), or maxed.
-func _set_era_button(btn: Button, b: Node) -> void:
-	var levels: Array = b.RESEARCH["era"]["levels"]
-	var lvl: int = GameStats.get_research_level("era")
-	if lvl >= levels.size():
-		btn.text = "Era %d (max)" % GameStats.era
-		btn.disabled = true
-		return
-	btn.disabled = false
-	var tier: Dictionary = levels[lvl]
-	var parts: PackedStringArray = PackedStringArray()
-	for type in tier["cost"]:
-		parts.append("%d%s" % [int(tier["cost"][type]), "W" if type == "madera" else "G"])
-	btn.text = "Advance to Era %d (%s)" % [GameStats.era + 1, ", ".join(parts)]
-
-func _set_research_button(btn: Button, research_id: String, tag: String, level: int, b: Node) -> void:
-	var levels: Array = b.RESEARCH[research_id]["levels"]
-	if level >= levels.size():
-		btn.text = "%s MAX" % tag
-		btn.disabled = true
-		return
-	btn.disabled = false
-	var tier: Dictionary = levels[level]
-	var parts: PackedStringArray = PackedStringArray()
-	for type in tier["cost"]:
-		parts.append("%d%s" % [int(tier["cost"][type]), "W" if type == "madera" else "G"])
-	btn.text = "%s %s (%s)" % [tag, "II" if level == 1 else "I", ", ".join(parts)]
+	_poll = 0.0
+	_refresh_building()

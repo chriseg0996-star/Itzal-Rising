@@ -257,6 +257,10 @@ func _recall_group(n: int) -> void:
 func cycle_idle_villager() -> void:
 	_cycle_idle_villager()
 
+## Public hook for command-card stance buttons (same as the Z/X/C keys).
+func apply_stance(stance: int, label: String) -> void:
+	_set_stance_selected(stance, label)
+
 ## Selects the next idle (not gathering/building/farming) player worker and
 ## snaps the camera to it; repeated presses cycle through them.
 func _cycle_idle_villager() -> void:
