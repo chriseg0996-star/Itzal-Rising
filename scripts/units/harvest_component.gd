@@ -38,6 +38,10 @@ func current_type() -> StringName:
 func carry_info() -> Dictionary:
 	return {"amount": _carrying, "cap": carry_capacity, "type": current_type()}
 
+## True while this worker is harvesting the given node (HUD worker counts).
+func is_targeting(node: Node) -> bool:
+	return _target_node == node and _state != State.IDLE
+
 func setup(nav_agent: NavigationAgent2D, home: Node2D, faction_id: int = 0) -> void:
 	_nav_agent = nav_agent
 	_home      = home

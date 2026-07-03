@@ -204,6 +204,7 @@ func _fill_build_grid() -> void:
 		if n > 0:
 			cell.add_child(_count_badge(n))
 		_grid.add_child(cell)
+	_grid.add_child(_stop_cell())
 
 ## AoE4-style owned-count badge (bottom-left corner of the cell).
 func _count_badge(n: int) -> Label:
@@ -241,6 +242,15 @@ func _fill_stance_grid() -> void:
 		if stance == current:
 			_mark_active(cell)
 		_grid.add_child(cell)
+	_grid.add_child(_stop_cell())
+
+## Halt every selected unit (movement, harvest, combat chase).
+func _stop_cell() -> Button:
+	return _cell("STOP", "", "", "Stop — halt current orders",
+		func() -> void:
+			for u in SelectionManager.selected:
+				if is_instance_valid(u) and u.has_method("stop"):
+					u.stop())
 
 ## Stance of the first selected combat unit (drives the gold active outline).
 func _current_stance() -> int:
@@ -287,6 +297,13 @@ func _refresh_building() -> void:
 		_grid.add_child(_research_cell(b, "armor", "ARM"))
 		_grid.add_child(_research_cell(b, "cavalry", "CAV"))
 		_grid.add_child(_era_cell(b))
+	# Rally point (any building that trains units).
+	if b.has_method("set_rally_point") and b.has_method("has_train_slot") and b.has_train_slot(0):
+		var rally := _cell("RALLY", "", "", "Rally point — right-click on the map to place it",
+			func() -> void: AlertManager.push("Right-click on the map to set the rally point", "info"))
+		if bool(b.get("has_rally_point")):
+			_mark_active(rally)
+		_grid.add_child(rally)
 
 func _refresh_queue(b: Node) -> void:
 	_clear(_queue_row)

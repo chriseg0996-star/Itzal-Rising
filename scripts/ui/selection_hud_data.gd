@@ -27,6 +27,7 @@ const BUILDING_ICONS: Dictionary = {
 	"Tower": "bld_tower", "Monument": "bld_monument", "Ascension Beacon": "bld_beacon",
 }
 const RES_LABEL: Dictionary = {&"wood": "Wood", &"food": "Food", &"gold": "Gold"}
+const RES_NODE_NAMES: Dictionary = {&"wood": "Forest", &"food": "Berry Bush", &"gold": "Gold Mine"}
 
 static func build(node: Node) -> Dictionary:
 	var d: Dictionary = {
@@ -47,6 +48,9 @@ static func build(node: Node) -> Dictionary:
 	return d
 
 static func display_name(node: Node) -> String:
+	if node.is_in_group("resources"):
+		var t: StringName = ResourceManager._normalize(node.get("resource_type"))
+		return String(RES_NODE_NAMES.get(t, String(t).capitalize()))
 	var bn: Variant = node.get("building_name")
 	if bn != null and String(bn) != "":
 		return String(bn)
@@ -75,9 +79,27 @@ static func _fill_stats(node: Node, d: Dictionary) -> void:
 		var arm: Variant = stat.get("armor")
 		if arm != null:
 			stats.append({"label": "ARM", "value": int(float(arm))})
+	# Speed only matters for combat units (workers show their task instead).
+	if node.is_in_group("combat_units") and not node.is_in_group("villagers"):
+		var mv: Node = node.get_node_or_null("MovementComponent")
+		if mv != null and mv.get("speed") != null:
+			stats.append({"label": "SPD", "value": int(float(mv.get("speed")))})
 
 ## Live activity line: gather progress, construction, or training head.
 static func _fill_status(node: Node, d: Dictionary) -> void:
+	# Resource node: remaining amount + how many workers are on it.
+	if node.is_in_group("resources"):
+		var amt: Variant = node.get("amount")
+		if amt != null:
+			var workers: int = 0
+			for u in node.get_tree().get_nodes_in_group("villagers"):
+				if not is_instance_valid(u):
+					continue
+				var whc := u.get_node_or_null("HarvestComponent") as HarvestComponent
+				if whc != null and whc.is_targeting(node):
+					workers += 1
+			d["status"] = "%d remaining · %d gathering" % [int(amt), workers]
+		return
 	var hc := node.get_node_or_null("HarvestComponent") as HarvestComponent
 	if hc != null:
 		var info: Dictionary = hc.carry_info()

@@ -86,6 +86,16 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _focus == null:
+		# Multi-selection: keep the per-unit HP strips live.
+		if _units.size() > 1:
+			_refresh_timer += delta
+			if _refresh_timer >= 0.5:
+				_refresh_timer = 0.0
+				_units = _units.filter(func(u) -> bool: return is_instance_valid(u))
+				if _units.size() > 1:
+					_build_type_chips(_units)
+				else:
+					_relayout()
 		return
 	if not is_instance_valid(_focus):
 		_focus = null
@@ -246,97 +256,81 @@ func _show_multi(units: Array) -> void:
 	_build_type_chips(units)
 	show()
 
-var _type_row: HBoxContainer = null
+var _type_row: Container = null
 
-## AoE4-style type breakdown: one compact unit card per type (icon, count and
-## an aggregate HP strip); clicking a card narrows the selection to that type.
+const MAX_UNIT_CARDS: int = 17
+
+## AoE4-style: one small card per selected unit (icon + live HP strip);
+## clicking a card selects just that unit. Overflow shows a "+N" tile.
 func _build_type_chips(units: Array) -> void:
 	if _type_row == null:
-		_type_row = HBoxContainer.new()
-		_type_row.alignment = BoxContainer.ALIGNMENT_CENTER
-		_type_row.add_theme_constant_override("separation", 4)
-		$VBox.add_child(_type_row)
+		var grid := GridContainer.new()
+		grid.columns = 6
+		grid.add_theme_constant_override("h_separation", 2)
+		grid.add_theme_constant_override("v_separation", 2)
+		$VBox.add_child(grid)
+		_type_row = grid
 	for c in _type_row.get_children():
 		c.queue_free()
-	var groups: Dictionary = {}
-	for u in units:
-		if not is_instance_valid(u):
-			continue
-		var key: String = _display_name(u)
-		if not groups.has(key):
-			groups[key] = []
-		(groups[key] as Array).append(u)
-	for key in groups:
-		_type_row.add_child(_unit_card(String(key), groups[key]))
+	var live: Array = units.filter(func(u) -> bool: return is_instance_valid(u))
+	for i in mini(live.size(), MAX_UNIT_CARDS):
+		_type_row.add_child(_unit_card(live[i]))
+	if live.size() > MAX_UNIT_CARDS:
+		var more := Label.new()
+		more.text = "+%d" % (live.size() - MAX_UNIT_CARDS)
+		more.custom_minimum_size = Vector2(25, 28)
+		more.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		more.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		more.add_theme_font_size_override("font_size", 10)
+		more.add_theme_color_override("font_color", MUTED)
+		_type_row.add_child(more)
 	_type_row.show()
 
-func _unit_card(key: String, members: Array) -> Button:
+func _unit_card(u: Node) -> Button:
 	var card := Button.new()
-	card.custom_minimum_size = Vector2(52, 56)
-	card.tooltip_text = "%d× %s — click to select only these" % [members.size(), key]
+	card.custom_minimum_size = Vector2(25, 28)
+	card.tooltip_text = "%s — click to select only this unit" % _display_name(u)
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.07, 0.09, 0.12, 1.0)
 	sb.set_border_width_all(1)
-	sb.border_color = Color(0.0, 0.85, 0.85, 0.18)
+	sb.border_color = Color(0.0, 0.85, 0.85, 0.15)
 	var hb: StyleBoxFlat = sb.duplicate()
 	hb.border_color = Color(0.0, 0.90, 0.78, 0.8)
 	card.add_theme_stylebox_override("normal", sb)
 	card.add_theme_stylebox_override("hover", hb)
 	card.add_theme_stylebox_override("pressed", hb)
 	card.add_theme_stylebox_override("focus", sb)
-	var icon_path: String = String(SelectionHUDData.build(members[0])["icon"])
+	var icon_path: String = String(SelectionHUDData.build(u)["icon"])
 	if icon_path != "":
 		card.icon = load(icon_path)
 		card.expand_icon = true
 		card.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		card.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		card.add_theme_constant_override("icon_max_width", 34)
-	else:
-		card.text = key.left(3).to_upper()
-		card.add_theme_font_size_override("font_size", 10)
-	# Count badge, top-right.
-	var n := Label.new()
-	n.text = str(members.size())
-	n.add_theme_font_size_override("font_size", 11)
-	n.add_theme_color_override("font_color", Color(0.92, 0.95, 0.98, 1))
-	n.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(n)
-	n.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	n.offset_left = -18.0
-	n.offset_top = 1.0
-	n.offset_right = -4.0
-	n.offset_bottom = 14.0
-	# Aggregate HP strip along the bottom edge.
-	var ratio: float = _avg_hp_ratio(members)
+		card.add_theme_constant_override("icon_max_width", 18)
+	# Live HP strip along the bottom edge.
+	var ratio: float = 1.0
+	var stat := u.get_node_or_null("StatComponent") as StatComponent
+	if stat != null:
+		ratio = stat.get_health_ratio()
 	var track := ColorRect.new()
 	track.color = Color(0.05, 0.07, 0.10, 1.0)
 	track.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(track)
 	track.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	track.offset_left = 3.0
-	track.offset_right = -3.0
-	track.offset_top = -6.0
-	track.offset_bottom = -3.0
+	track.offset_left = 2.0
+	track.offset_right = -2.0
+	track.offset_top = -4.0
+	track.offset_bottom = -2.0
 	var fill := ColorRect.new()
 	fill.color = HP_LOW.lerp(HP_GOOD, ratio)
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	track.add_child(fill)
 	fill.anchor_right = clampf(ratio, 0.0, 1.0)
 	fill.anchor_bottom = 1.0
-	card.pressed.connect(func() -> void: SelectionManager.select_multiple(members))
+	card.pressed.connect(func() -> void:
+		if is_instance_valid(u):
+			SelectionManager.select_only(u))
 	return card
-
-func _avg_hp_ratio(members: Array) -> float:
-	var total: float = 0.0
-	var n: int = 0
-	for u in members:
-		if not is_instance_valid(u):
-			continue
-		var stat := u.get_node_or_null("StatComponent") as StatComponent
-		if stat != null:
-			total += stat.get_health_ratio()
-			n += 1
-	return total / float(n) if n > 0 else 1.0
 
 func _display_name(node: Node) -> String:
 	return SelectionHUDData.display_name(node)

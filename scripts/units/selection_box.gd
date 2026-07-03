@@ -49,6 +49,15 @@ func _handle_left(mb: InputEventMouseButton) -> void:
 			dragging_box = false
 			get_viewport().set_input_as_handled()
 			return
+		# Resource node under the cursor: read-only inspect (remaining amount +
+		# workers) — only when nothing is selected, same rule as hostiles below.
+		var res := _resource_at(world_pos)
+		if res != null:
+			if SelectionManager.selected.is_empty():
+				SelectionManager.inspect(res)
+			dragging_box = false
+			get_viewport().set_input_as_handled()
+			return
 		# Nothing of ours here: if a hostile unit/structure is under the cursor,
 		# inspect it — but ONLY when nothing is selected, so a left-click on an
 		# enemy never wipes a live command group (attack it with right-click).
