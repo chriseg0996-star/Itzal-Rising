@@ -30,7 +30,7 @@ var _status_label: Label = null
 var _queue_row: HBoxContainer = null
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", MenuKit.flat_box(8.0, 0.13, true))
+	add_theme_stylebox_override("panel", MenuKit.flat_box(8.0, 0.11, true))
 	# Small entity icon (mockup: circular icon, never a big portrait), floating
 	# at the name row's left edge.
 	_icon = TextureRect.new()
@@ -179,11 +179,11 @@ func _show_single(node: Node) -> void:
 	show()
 
 func _fit_single() -> void:
-	var h: float = 104.0
+	var h: float = 96.0
 	if _status_label.visible:
-		h += 18.0
+		h += 16.0
 	if _queue_row.visible:
-		h += 26.0
+		h += 24.0
 	_set_height(h)
 
 func _set_status(text: String) -> void:
@@ -217,7 +217,8 @@ func _set_queue(queue: Array) -> void:
 		_queue_row.add_child(lbl)
 
 func _show_multi(units: Array) -> void:
-	_set_height(104.0)
+	# Compact: just the per-type unit cards (each carries its own count).
+	_set_height(80.0)
 	if _emblem != null:
 		_emblem.visible = false
 	_icon.visible = false
@@ -227,8 +228,7 @@ func _show_multi(units: Array) -> void:
 	_owner_label.hide()
 	_hp_bar.hide()
 	_hp_label.hide()
-	_multi_label.show()
-	_multi_label.text = "%d units selected" % units.size()
+	_multi_label.hide()
 	_build_type_chips(units)
 	show()
 

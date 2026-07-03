@@ -23,7 +23,7 @@ static func chip_box(pad: float = 10.0) -> StyleBoxTexture:
 
 ## Bottom-dock section style: obsidian fill + hairline separator instead of the
 ## heavy neon plate. Sections placed flush read as one continuous console.
-static func flat_box(pad: float = 10.0, border_alpha: float = 0.13, sep_only: bool = false) -> StyleBoxFlat:
+static func flat_box(pad: float = 10.0, border_alpha: float = 0.11, sep_only: bool = false) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.035, 0.045, 0.06, 0.97)
 	if sep_only:

@@ -66,7 +66,7 @@ func _ready() -> void:
 # ── Card scaffold ──────────────────────────────────────────
 func _build_card() -> void:
 	_card = PanelContainer.new()
-	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(7.0, 0.13, true))
+	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(10.0, 0.11, true))
 	add_child(_card)
 	_card.anchor_left = 1.0
 	_card.anchor_top = 1.0
@@ -74,9 +74,9 @@ func _build_card() -> void:
 	_card.anchor_bottom = 1.0
 	# Flush between the selection panel and the minimap — the three sections
 	# share edges and read as one continuous bottom console.
-	_card.offset_left = -560.0   # 8px grid: card spans -560..-312, flush both sides
-	_card.offset_right = -312.0
-	_card.offset_top = -156.0   # minimum; the card grows upward to hug its content
+	_card.offset_left = -568.0   # 8px grid: card spans -568..-320, flush both sides
+	_card.offset_right = -320.0
+	_card.offset_top = -132.0   # minimum; the card grows upward to hug its content
 	_card.offset_bottom = 0.0    # seated on the screen edge (console hardware feel)
 	_card.grow_horizontal = 0
 	_card.grow_vertical = 0
@@ -113,10 +113,10 @@ func _build_card() -> void:
 
 	_grid = GridContainer.new()
 	_grid.columns = COLS
-	_grid.add_theme_constant_override("h_separation", 6)
-	_grid.add_theme_constant_override("v_separation", 6)
+	_grid.add_theme_constant_override("h_separation", 4)
+	_grid.add_theme_constant_override("v_separation", 4)
 	# Reserve two rows so the card doesn't jump height between contexts/tabs.
-	_grid.custom_minimum_size = Vector2(0, CELL * 2.0 + 6.0)
+	_grid.custom_minimum_size = Vector2(0, CELL * 2.0 + 4.0)
 	v.add_child(_grid)
 
 # ── Selection routing ──────────────────────────────────────
