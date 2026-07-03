@@ -19,6 +19,8 @@ const BARRACKS_COST: Dictionary = {"madera": 75}
 const PYLON_COST: Dictionary = {"madera": 75, "oro": 25}
 const BEACON_COST: Dictionary = {"madera": 400, "oro": 300}
 const BEACON_TIME: float = 480.0   # hard only: start its own Ascension at ~8 min
+const EARLY_RAID_SIZE: int = 2     # 3:00 contact is a survivable probe...
+const EARLY_RAID_UNTIL: float = 300.0  # ...full waves from ~5:00
 const TOWER_COST: Dictionary = {"madera": 150}
 ## Fixed tower slots around the enemy TC, facing the player's approach.
 const TOWER_OFFSETS: Array[Vector2] = [
@@ -277,9 +279,18 @@ func _phase_atacar() -> void:
 	if game_time < FIRST_ATTACK_TIME:
 		return
 	var soldiers: Array = _get_enemy_soldiers()
+	# Balance rule: the 3:00 contact is a 2-unit probing raid a single tower or
+	# soldier(+villagers) can survive; full waves start at ~5:00.
+	if game_time < EARLY_RAID_UNTIL:
+		if soldiers.size() >= EARLY_RAID_SIZE:
+			_march(soldiers.slice(0, EARLY_RAID_SIZE))
+		return
 	var threshold: int = ATTACK_FORCE_MIN if game_time < ESCALATION_TIME else ATTACK_FORCE_LATE
 	if soldiers.size() < threshold:
 		return
+	_march(soldiers)
+
+func _march(soldiers: Array) -> void:
 	var target: Node = _get_attack_target()
 	if target == null:
 		return

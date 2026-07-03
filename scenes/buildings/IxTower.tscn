@@ -13,7 +13,7 @@ building_name = "Tower"
 max_hp = 800
 sprite_asset = ""
 faction_id = 2
-attack_damage = 18
+attack_damage = 24
 attack_range = 150.0
 attack_interval = 2.0
 

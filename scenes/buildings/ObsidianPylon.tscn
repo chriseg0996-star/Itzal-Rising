@@ -13,7 +13,7 @@ building_name = "Obsidian Pylon"
 max_hp = 250
 sprite_asset = ""
 faction_id = 0
-population_supply = 4
+population_supply = 6
 
 [node name="BuildingSprite" type="Sprite2D" parent="."]
 position = Vector2(0, -26)
