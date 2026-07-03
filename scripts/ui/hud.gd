@@ -25,6 +25,12 @@ func _ready() -> void:
 	AlertManager.alert_pushed.connect(_on_alert_pushed)
 	AlertManager.alert_cleared.connect(_on_alert_cleared)
 	ResourceManager.supply_changed.connect(func(_fid: int, _u: int, _c: int) -> void: _update_population())
+	_build_ticker()
+	_build_deal_modal()
+	AlertManager.ticker_updated.connect(_on_ticker)
+	AlertManager.alert_pushed.connect(func(text: String, _lvl: String) -> void: _on_ticker(text))
+	AlertManager.deal_offered.connect(_on_deal_offered)
+	AlertManager.deal_resolved.connect(func(_id: StringName, _ok: bool) -> void: _deal_modal.visible = false)
 	_build_pulse_overlay()
 	for i in range(ALERT_SLOTS):
 		var lbl: Label = _alert_box.get_node_or_null("Alert%d" % i) as Label
@@ -43,6 +49,7 @@ func _process(delta: float) -> void:
 		_update_era()
 	if _pulse_cooldown > 0.0:
 		_pulse_cooldown -= delta
+	_tick_ticker(delta)
 
 ## Full-screen red tint that blinks when the base is threatened. Sits behind
 ## the rest of the HUD and ignores mouse input.
@@ -118,3 +125,123 @@ func _alert_color(level: String) -> Color:
 			return Color(0.94, 0.75, 0.1, 1)
 		_:
 			return Color(0.7, 0.9, 0.7, 1)
+
+# ── Event ticker + Deals UI (data from AlertManager) ───────
+const TICKER_BG: Color = Color(0.106, 0.129, 0.188, 0.92)   # panel basalt
+const TICKER_TEXT: Color = Color(0.0, 0.85, 0.85, 1.0)      # accent cyan
+const TICKER_LIFETIME: float = 8.0
+
+var _ticker_label: Label = null
+var _ticker_left: float = 0.0
+var _deal_modal: PanelContainer = null
+var _deal_text: Label = null
+var _deal_countdown: Label = null
+
+## Slim strip across the bottom, just above the build bar.
+func _build_ticker() -> void:
+	var panel := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = TICKER_BG
+	sb.set_corner_radius_all(3)
+	sb.content_margin_left = 12.0
+	sb.content_margin_right = 12.0
+	sb.content_margin_top = 3.0
+	sb.content_margin_bottom = 3.0
+	panel.add_theme_stylebox_override("panel", sb)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	panel.offset_left = 240.0
+	panel.offset_right = -240.0
+	panel.offset_top = -78.0
+	panel.offset_bottom = -56.0
+	_ticker_label = Label.new()
+	_ticker_label.add_theme_color_override("font_color", TICKER_TEXT)
+	_ticker_label.add_theme_font_size_override("font_size", 13)
+	_ticker_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_ticker_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	panel.add_child(_ticker_label)
+	panel.visible = false
+
+func _on_ticker(text: String) -> void:
+	if _ticker_label == null:
+		return
+	_ticker_label.text = text
+	_ticker_left = TICKER_LIFETIME
+	(_ticker_label.get_parent() as Control).visible = true
+
+## Centered offer card with Accept / Decline and a live countdown.
+func _build_deal_modal() -> void:
+	_deal_modal = PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.06, 0.08, 0.12, 0.97)
+	sb.set_corner_radius_all(6)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(0.0, 0.85, 0.85, 0.55)
+	sb.set_content_margin_all(18)
+	_deal_modal.add_theme_stylebox_override("panel", sb)
+	add_child(_deal_modal)
+	_deal_modal.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_deal_modal.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_deal_modal.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_deal_modal.custom_minimum_size = Vector2(420, 0)
+	_deal_modal.visible = false
+
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	_deal_modal.add_child(v)
+
+	var title := Label.new()
+	title.text = "INCOMING DEAL"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_color_override("font_color", TICKER_TEXT)
+	title.add_theme_font_size_override("font_size", 16)
+	v.add_child(title)
+
+	_deal_text = Label.new()
+	_deal_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_deal_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_deal_text.add_theme_color_override("font_color", Color(0.92, 0.95, 0.98, 1))
+	_deal_text.add_theme_font_size_override("font_size", 14)
+	v.add_child(_deal_text)
+
+	_deal_countdown = Label.new()
+	_deal_countdown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_deal_countdown.add_theme_color_override("font_color", Color(0.55, 0.62, 0.68, 1))
+	_deal_countdown.add_theme_font_size_override("font_size", 12)
+	v.add_child(_deal_countdown)
+
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 16)
+	v.add_child(row)
+	row.add_child(_deal_button("Accept", Color(0.2, 0.85, 0.5), func() -> void: AlertManager.resolve_deal(true)))
+	row.add_child(_deal_button("Decline", Color(0.9, 0.35, 0.3), func() -> void: AlertManager.resolve_deal(false)))
+
+func _deal_button(text: String, color: Color, on_press: Callable) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.custom_minimum_size = Vector2(120, 34)
+	btn.add_theme_color_override("font_color", color)
+	btn.add_theme_color_override("font_hover_color", Color(0.95, 0.97, 0.98, 1))
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.10, 0.13, 0.17, 0.95)
+	sb.set_corner_radius_all(4)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(color.r, color.g, color.b, 0.6)
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("hover", sb)
+	btn.pressed.connect(on_press)
+	return btn
+
+func _on_deal_offered(deal: Dictionary) -> void:
+	_deal_text.text = String(deal.get("text", ""))
+	_deal_modal.visible = true
+
+func _tick_ticker(delta: float) -> void:
+	if _ticker_left > 0.0:
+		_ticker_left -= delta
+		if _ticker_left <= 0.0 and _ticker_label != null:
+			(_ticker_label.get_parent() as Control).visible = false
+	if _deal_modal != null and _deal_modal.visible:
+		_deal_countdown.text = "Expires in %ds" % int(ceil(AlertManager.get_deal_time_left()))

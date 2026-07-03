@@ -31,7 +31,12 @@ var cavalry_level: int = 0
 var era: int = 1
 var ai_era: int = 1
 
+## Player training-speed multiplier (Deals buff). AlertManager owns the timer
+## and resets it to 1.0 when the buff expires.
+var train_speed_mult: float = 1.0
+
 func reset() -> void:
+	train_speed_mult = 1.0
 	game_time = 0.0
 	units_trained = 0
 	resources_gathered = 0

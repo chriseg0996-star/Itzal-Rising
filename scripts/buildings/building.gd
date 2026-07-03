@@ -585,7 +585,9 @@ func _process(delta: float) -> void:
 		_attack_step(delta)
 	if queue.is_empty():
 		return
-	production_timer -= delta
+	# Deals buff: player production runs faster while train_speed_mult > 1.
+	var speed: float = GameStats.train_speed_mult if FactionManager.is_player_faction(faction_id) else 1.0
+	production_timer -= delta * speed
 	if production_timer <= 0.0:
 		var entry: Dictionary = queue[0]
 		if entry.has("research_id"):
