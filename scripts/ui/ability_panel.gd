@@ -87,7 +87,8 @@ func _build() -> void:
 		var def: Dictionary = _defs[i]
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(126, 34)
-		btn.text = "%s (%s)" % [def["name"], KEY_LABELS[i]]
+		btn.text = "  %s" % String(def["name"])
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.tooltip_text = String(def["desc"])
 		btn.flat = true
 		btn.add_theme_color_override("font_color", WHITE)
@@ -97,6 +98,7 @@ func _build() -> void:
 		btn.pressed.connect(func() -> void: try_cast(idx))
 		hbox.add_child(btn)
 		_buttons.append(btn)
+		btn.add_child(_hotkey_chip(KEY_LABELS[i], accent))
 
 		var sweep := ColorRect.new()
 		sweep.color = Color(0.04, 0.05, 0.08, 0.7)
@@ -105,6 +107,33 @@ func _build() -> void:
 		sweep.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
 		sweep.visible = false
 		_sweeps.append(sweep)
+
+## Small bordered hotkey chip (AoE4-style) docked at the button's right edge.
+func _hotkey_chip(key: String, accent: Color) -> PanelContainer:
+	var chip := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.06, 0.09, 0.95)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(accent.r, accent.g, accent.b, 0.5)
+	sb.set_corner_radius_all(3)
+	sb.content_margin_left = 5.0
+	sb.content_margin_right = 5.0
+	sb.content_margin_top = 1.0
+	sb.content_margin_bottom = 1.0
+	chip.add_theme_stylebox_override("panel", sb)
+	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var lbl := Label.new()
+	lbl.text = key
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", Color(accent.r, accent.g, accent.b, 0.95))
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chip.add_child(lbl)
+	chip.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+	chip.offset_left = -24.0
+	chip.offset_right = -6.0
+	chip.offset_top = -9.0
+	chip.offset_bottom = 9.0
+	return chip
 
 func _process(delta: float) -> void:
 	for i in _cooldowns.size():

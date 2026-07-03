@@ -76,38 +76,8 @@ theme_override_constants/margin_bottom = 8
 alignment = 1
 theme_override_constants/separation = 12
 
-[node name="BarracksBtn" type="Button" parent="BottomBar/Margin/HBox"]
-text = "Barracks (B)"
-theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
-theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
-theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
-theme_override_styles/normal = SubResource("BtnNormal")
-theme_override_styles/hover = SubResource("BtnHover")
-theme_override_styles/pressed = SubResource("BtnHover")
-theme_override_styles/focus = SubResource("BtnHover")
-
 [node name="TCBtn" type="Button" parent="BottomBar/Margin/HBox"]
 text = "Town Center (T)"
-theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
-theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
-theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
-theme_override_styles/normal = SubResource("BtnNormal")
-theme_override_styles/hover = SubResource("BtnHover")
-theme_override_styles/pressed = SubResource("BtnHover")
-theme_override_styles/focus = SubResource("BtnHover")
-
-[node name="TowerBtn" type="Button" parent="BottomBar/Margin/HBox"]
-text = "Tower (Y)"
-theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
-theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
-theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
-theme_override_styles/normal = SubResource("BtnNormal")
-theme_override_styles/hover = SubResource("BtnHover")
-theme_override_styles/pressed = SubResource("BtnHover")
-theme_override_styles/focus = SubResource("BtnHover")
-
-[node name="MonumentBtn" type="Button" parent="BottomBar/Margin/HBox"]
-text = "Monument (M)"
 theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
@@ -136,9 +106,9 @@ theme_override_styles/hover = SubResource("BtnHover")
 theme_override_styles/pressed = SubResource("BtnHover")
 theme_override_styles/focus = SubResource("BtnHover")
 
-[node name="BeaconBtn" type="Button" parent="BottomBar/Margin/HBox"]
-text = "Beacon"
-theme_override_colors/font_color = Color(0, 0.92, 0.8, 1)
+[node name="HouseBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "House (U)"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_styles/normal = SubResource("BtnNormal")
@@ -156,9 +126,49 @@ theme_override_styles/hover = SubResource("BtnHover")
 theme_override_styles/pressed = SubResource("BtnHover")
 theme_override_styles/focus = SubResource("BtnHover")
 
-[node name="HouseBtn" type="Button" parent="BottomBar/Margin/HBox"]
-text = "House (U)"
+[node name="Sep1" type="ColorRect" parent="BottomBar/Margin/HBox"]
+custom_minimum_size = Vector2(2, 30)
+mouse_filter = 2
+color = Color(0, 0.85, 0.85, 0.25)
+
+[node name="BarracksBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "Barracks (B)"
 theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
+
+[node name="TowerBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "Tower (Y)"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
+
+[node name="Sep2" type="ColorRect" parent="BottomBar/Margin/HBox"]
+custom_minimum_size = Vector2(2, 30)
+mouse_filter = 2
+color = Color(0, 0.85, 0.85, 0.25)
+
+[node name="MonumentBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "Monument (M)"
+theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
+theme_override_styles/normal = SubResource("BtnNormal")
+theme_override_styles/hover = SubResource("BtnHover")
+theme_override_styles/pressed = SubResource("BtnHover")
+theme_override_styles/focus = SubResource("BtnHover")
+
+[node name="BeaconBtn" type="Button" parent="BottomBar/Margin/HBox"]
+text = "Beacon"
+theme_override_colors/font_color = Color(0, 0.92, 0.8, 1)
 theme_override_colors/font_hover_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_colors/font_pressed_color = Color(0, 0.85, 0.85, 1)
 theme_override_styles/normal = SubResource("BtnNormal")

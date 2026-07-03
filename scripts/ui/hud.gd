@@ -10,6 +10,7 @@ const PULSE_COLOR: Color = Color(0.85, 0.2, 0.15, 1.0)
 @onready var gold_label: Label = $TopBar/Margin/HBox/Gold/Label
 @onready var pop_label: Label = $TopBar/Margin/HBox/Pop/Label
 @onready var era_label: Label = $TopBar/Margin/HBox/Era/Label
+@onready var clock_label: Label = $TopBar/Margin/HBox/Clock
 @onready var _alert_box: VBoxContainer = $AlertPanel/VBox
 
 const ERA_ROMAN: Array[String] = ["I", "II", "III"]
@@ -49,6 +50,8 @@ func _process(delta: float) -> void:
 		_update_population()
 		_update_era()
 		_update_beacon_panel()
+		if clock_label != null:
+			clock_label.text = GameStats.format_time()
 	if _pulse_cooldown > 0.0:
 		_pulse_cooldown -= delta
 	_tick_ticker(delta)
@@ -93,7 +96,8 @@ func _update_population() -> void:
 	var fid: int = GameSettings.player_faction_id
 	var used: int = ResourceManager.get_supply_used(fid)
 	var cap: int = ResourceManager.get_supply_cap(fid)
-	pop_label.text = "⚡ %d/%d" % [used, cap]
+	# The Pop icon already carries the meaning — no emoji duplication.
+	pop_label.text = "%d/%d" % [used, cap]
 	var col: Color = Color(1, 1, 1, 1)
 	if used >= cap:
 		col = Color(1.0, 0.33, 0.22, 1)  # capped — build an Obsidian Pylon
