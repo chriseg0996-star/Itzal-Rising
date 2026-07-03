@@ -8,13 +8,3 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_campmenu")
-
-[node name="BGImage" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-modulate = Color(1, 1, 1, 0.55)
-expand_mode = 1
-stretch_mode = 6
