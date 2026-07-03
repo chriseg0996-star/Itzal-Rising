@@ -65,15 +65,15 @@ func _build() -> void:
 		accent = fac.primary_color
 
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", MenuKit.flat_box(6.0))
+	panel.add_theme_stylebox_override("panel", MenuKit.flat_box(4.0))
 	add_child(panel)
 	# Integrated into the bottom console's right column: flush on the minimap's
 	# top edge, same width — always visible, never overlaps the growing card.
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	panel.offset_left = -258.0
-	panel.offset_top = -296.0
-	panel.offset_right = -8.0
-	panel.offset_bottom = -258.0
+	panel.offset_left = -312.0
+	panel.offset_top = -348.0
+	panel.offset_right = 0.0
+	panel.offset_bottom = -312.0
 
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)

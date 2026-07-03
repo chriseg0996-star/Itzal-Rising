@@ -4,7 +4,7 @@ const WORLD_SIZE: Vector2 = Vector2(MapConfig.WORLD_SIZE, MapConfig.WORLD_SIZE)
 const POLL_INTERVAL: float = 0.1
 
 const BG_COLOR: Color = Color(0.04, 0.07, 0.10, 0.92)
-const BORDER_COLOR: Color = Color(0.0, 0.85, 0.85, 0.28)   # hairline teal frame
+const BORDER_COLOR: Color = Color(0.0, 0.85, 0.85, 0.20)   # hairline teal frame
 const PLAYER_UNIT_COLOR: Color = Color(0.0, 0.90, 0.78, 1.0)
 const ENEMY_UNIT_COLOR: Color = Color(0.93, 0.20, 0.20, 1.0)
 const PLAYER_BUILDING_COLOR: Color = Color(0.0, 0.67, 1.0, 0.9)

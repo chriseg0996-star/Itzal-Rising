@@ -30,7 +30,7 @@ var _status_label: Label = null
 var _queue_row: HBoxContainer = null
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", MenuKit.flat_box(10.0))
+	add_theme_stylebox_override("panel", MenuKit.flat_box(8.0))
 	# Small entity icon (mockup: circular icon, never a big portrait), floating
 	# at the name row's left edge.
 	_icon = TextureRect.new()
@@ -175,11 +175,11 @@ func _show_single(node: Node) -> void:
 	show()
 
 func _fit_single() -> void:
-	var h: float = 118.0
+	var h: float = 104.0
 	if _status_label.visible:
-		h += 20.0
+		h += 18.0
 	if _queue_row.visible:
-		h += 28.0
+		h += 26.0
 	_set_height(h)
 
 func _set_status(text: String) -> void:
@@ -213,7 +213,7 @@ func _set_queue(queue: Array) -> void:
 		_queue_row.add_child(lbl)
 
 func _show_multi(units: Array) -> void:
-	_set_height(92.0)
+	_set_height(104.0)
 	if _emblem != null:
 		_emblem.visible = false
 	_icon.visible = false
@@ -230,11 +230,12 @@ func _show_multi(units: Array) -> void:
 
 var _type_row: HBoxContainer = null
 
-## AoE4-style type breakdown: one chip per unit type ("3× Soldier"); clicking a
-## chip narrows the selection to just that type.
+## AoE4-style type breakdown: one compact unit card per type (icon, count and
+## an aggregate HP strip); clicking a card narrows the selection to that type.
 func _build_type_chips(units: Array) -> void:
 	if _type_row == null:
 		_type_row = HBoxContainer.new()
+		_type_row.alignment = BoxContainer.ALIGNMENT_CENTER
 		_type_row.add_theme_constant_override("separation", 4)
 		$VBox.add_child(_type_row)
 	for c in _type_row.get_children():
@@ -248,25 +249,76 @@ func _build_type_chips(units: Array) -> void:
 			groups[key] = []
 		(groups[key] as Array).append(u)
 	for key in groups:
-		var members: Array = groups[key]
-		var chip := Button.new()
-		chip.text = "%d× %s" % [members.size(), key]
-		chip.tooltip_text = "Select only %s" % key
-		chip.add_theme_font_size_override("font_size", 11)
-		chip.add_theme_color_override("font_color", Color(0.92, 0.95, 0.98, 1))
-		chip.add_theme_color_override("font_hover_color", Color(0.0, 0.90, 0.78, 1))
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0.10, 0.13, 0.17, 1.0)
-		sb.set_border_width_all(1)
-		sb.border_color = Color(0.0, 0.85, 0.85, 0.3)
-		sb.set_corner_radius_all(3)
-		sb.content_margin_left = 6.0
-		sb.content_margin_right = 6.0
-		chip.add_theme_stylebox_override("normal", sb)
-		chip.add_theme_stylebox_override("hover", sb)
-		chip.pressed.connect(func() -> void: SelectionManager.select_multiple(members))
-		_type_row.add_child(chip)
+		_type_row.add_child(_unit_card(String(key), groups[key]))
 	_type_row.show()
+
+func _unit_card(key: String, members: Array) -> Button:
+	var card := Button.new()
+	card.custom_minimum_size = Vector2(52, 56)
+	card.tooltip_text = "%d× %s — click to select only these" % [members.size(), key]
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.07, 0.09, 0.12, 1.0)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(0.0, 0.85, 0.85, 0.18)
+	var hb: StyleBoxFlat = sb.duplicate()
+	hb.border_color = Color(0.0, 0.90, 0.78, 0.8)
+	card.add_theme_stylebox_override("normal", sb)
+	card.add_theme_stylebox_override("hover", hb)
+	card.add_theme_stylebox_override("pressed", hb)
+	card.add_theme_stylebox_override("focus", sb)
+	var icon_path: String = String(SelectionHUDData.build(members[0])["icon"])
+	if icon_path != "":
+		card.icon = load(icon_path)
+		card.expand_icon = true
+		card.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		card.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+		card.add_theme_constant_override("icon_max_width", 34)
+	else:
+		card.text = key.left(3).to_upper()
+		card.add_theme_font_size_override("font_size", 10)
+	# Count badge, top-right.
+	var n := Label.new()
+	n.text = str(members.size())
+	n.add_theme_font_size_override("font_size", 11)
+	n.add_theme_color_override("font_color", Color(0.92, 0.95, 0.98, 1))
+	n.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(n)
+	n.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	n.offset_left = -18.0
+	n.offset_top = 1.0
+	n.offset_right = -4.0
+	n.offset_bottom = 14.0
+	# Aggregate HP strip along the bottom edge.
+	var ratio: float = _avg_hp_ratio(members)
+	var track := ColorRect.new()
+	track.color = Color(0.05, 0.07, 0.10, 1.0)
+	track.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(track)
+	track.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	track.offset_left = 3.0
+	track.offset_right = -3.0
+	track.offset_top = -6.0
+	track.offset_bottom = -3.0
+	var fill := ColorRect.new()
+	fill.color = HP_LOW.lerp(HP_GOOD, ratio)
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	track.add_child(fill)
+	fill.anchor_right = clampf(ratio, 0.0, 1.0)
+	fill.anchor_bottom = 1.0
+	card.pressed.connect(func() -> void: SelectionManager.select_multiple(members))
+	return card
+
+func _avg_hp_ratio(members: Array) -> float:
+	var total: float = 0.0
+	var n: int = 0
+	for u in members:
+		if not is_instance_valid(u):
+			continue
+		var stat := u.get_node_or_null("StatComponent") as StatComponent
+		if stat != null:
+			total += stat.get_health_ratio()
+			n += 1
+	return total / float(n) if n > 0 else 1.0
 
 func _display_name(node: Node) -> String:
 	return SelectionHUDData.display_name(node)

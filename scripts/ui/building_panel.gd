@@ -66,7 +66,7 @@ func _ready() -> void:
 # ── Card scaffold ──────────────────────────────────────────
 func _build_card() -> void:
 	_card = PanelContainer.new()
-	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(12.0))
+	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(11.0))
 	add_child(_card)
 	_card.anchor_left = 1.0
 	_card.anchor_top = 1.0
@@ -74,9 +74,9 @@ func _build_card() -> void:
 	_card.anchor_bottom = 1.0
 	# Flush between the selection panel and the minimap — the three sections
 	# share edges and read as one continuous bottom console.
-	_card.offset_left = -(CELL * COLS + 6.0 * (COLS - 1) + 24.0 + 258.0)
-	_card.offset_right = -258.0
-	_card.offset_top = -180.0   # minimum; the card grows upward to hug its content
+	_card.offset_left = -560.0   # 8px grid: card spans -560..-312, flush both sides
+	_card.offset_right = -312.0
+	_card.offset_top = -164.0   # minimum; the card grows upward to hug its content
 	_card.offset_bottom = -8.0   # docked to the screen edge (console feel)
 	_card.grow_horizontal = 0
 	_card.grow_vertical = 0
@@ -381,7 +381,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.10, 0.13, 0.17, 1.0)
 	sb.set_border_width_all(1)
-	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.20)
+	sb.border_color = Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.15)
 	sb.set_corner_radius_all(4)
 	var hb: StyleBoxFlat = sb.duplicate()
 	hb.bg_color = Color(0.0, 0.55, 0.50, 0.35)
@@ -398,7 +398,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		btn.add_theme_constant_override("icon_max_width", 38)
+		btn.add_theme_constant_override("icon_max_width", 44)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)
