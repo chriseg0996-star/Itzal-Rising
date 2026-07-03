@@ -50,7 +50,9 @@ static func bar_fill(color: Color) -> StyleBoxFlat:
 ## heavy neon plate. Sections placed flush read as one continuous console.
 static func flat_box(pad: float = 10.0, border_alpha: float = 0.11, sep_only: bool = false) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.035, 0.045, 0.06, 0.97)
+	# Sections are translucent so the console Frame's textured obsidian plate
+	# shows through — one continuous material across the whole band.
+	sb.bg_color = Color(0.02, 0.03, 0.04, 0.35 if sep_only else 0.97)
 	if sep_only:
 		# Console sections: hairline only on top and left — adjacent flush
 		# sections share a single separator, no boxed-in look.

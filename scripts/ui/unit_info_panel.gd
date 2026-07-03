@@ -40,10 +40,10 @@ func _ready() -> void:
 	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_name_label.add_child(_icon)
 	_icon.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-	_icon.offset_left = 2.0
-	_icon.offset_right = 40.0
-	_icon.offset_top = -18.0
-	_icon.offset_bottom = 20.0
+	_icon.offset_left = 0.0
+	_icon.offset_right = 44.0
+	_icon.offset_top = -22.0
+	_icon.offset_bottom = 22.0
 	_icon.visible = false
 	# Live activity line ("Gathering Wood 12 / 20", "Under construction").
 	_status_label = Label.new()
@@ -61,7 +61,14 @@ func _ready() -> void:
 	SelectionManager.building_selected.connect(_on_building_selected)
 	SelectionManager.building_deselected.connect(_on_building_deselected)
 	# Visual focus: bigger title + a short turquoise energy channel under it.
-	_name_label.add_theme_font_size_override("font_size", 17)
+	_name_label.add_theme_font_size_override("font_size", 15)
+	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_name_label.clip_text = true
+	# Reserve room for the floating portrait (left) and emblem (right).
+	var nsb := StyleBoxEmpty.new()
+	nsb.content_margin_left = 48.0
+	nsb.content_margin_right = 30.0
+	_name_label.add_theme_stylebox_override("normal", nsb)
 	_channel = ColorRect.new()
 	_channel.color = Color(0.0, 0.90, 0.78, 0.35)
 	_channel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -279,7 +286,7 @@ const MAX_UNIT_CARDS: int = 17
 func _build_type_chips(units: Array) -> void:
 	if _type_row == null:
 		var grid := GridContainer.new()
-		grid.columns = 6
+		grid.columns = 4
 		grid.add_theme_constant_override("h_separation", 2)
 		grid.add_theme_constant_override("v_separation", 2)
 		$VBox.add_child(grid)
@@ -302,7 +309,7 @@ func _build_type_chips(units: Array) -> void:
 
 func _unit_card(u: Node) -> Button:
 	var card := Button.new()
-	card.custom_minimum_size = Vector2(25, 28)
+	card.custom_minimum_size = Vector2(34, 38)
 	card.tooltip_text = "%s — click to select only this unit" % _display_name(u)
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.07, 0.09, 0.12, 1.0)
@@ -320,7 +327,7 @@ func _unit_card(u: Node) -> Button:
 		card.expand_icon = true
 		card.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		card.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		card.add_theme_constant_override("icon_max_width", 18)
+		card.add_theme_constant_override("icon_max_width", 26)
 	# Live HP strip along the bottom edge.
 	var ratio: float = 1.0
 	var stat := u.get_node_or_null("StatComponent") as StatComponent

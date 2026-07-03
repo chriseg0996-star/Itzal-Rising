@@ -35,9 +35,12 @@ func _ready() -> void:
 		var p: String = "res://assets/ui/icons/%s.png" % pair[1]
 		if tr != null and ResourceLoader.exists(p):
 			tr.texture = load(p)
-			tr.custom_minimum_size = Vector2(24, 24)
-	# Hug the ledger's content — no dead plate under the gold row.
-	($ResBlock as Control).offset_top = -136.0
+			tr.custom_minimum_size = Vector2(32, 32)
+	# Same height as the bottom console (200px), content vertically centered —
+	# the ledger reads as the console's left sibling.
+	($ResBlock as Control).offset_top = -200.0
+	($ResBlock/VBox as BoxContainer).alignment = BoxContainer.ALIGNMENT_CENTER
+	($ResBlock/VBox as VBoxContainer).add_theme_constant_override("separation", 6)
 	# Right-align the numbers so the column reads as a ledger; hairline
 	# separator between population and the resource rows.
 	for l: Label in [pop_label, food_label, wood_label, gold_label]:

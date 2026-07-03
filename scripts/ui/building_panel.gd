@@ -17,7 +17,7 @@ const PANEL_BG: Color = Color(0.07, 0.09, 0.12, 0.94)
 const PANEL_BORDER: Color = Color(0.0, 0.85, 0.85, 0.35)
 const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
 const MUTED: Color = Color(0.55, 0.62, 0.68, 1.0)
-const CELL: float = 60.0   # +25% cells — 3-wide grid inside the 224px section
+const CELL: float = 64.0   # near-full-bleed cells — 3-wide grid, 224px section
 const COLS: int = 3
 
 ## Build-tab data: key = BuildingPlacer type, icon = assets/ui/icons/<icon>.png
@@ -67,7 +67,7 @@ func _ready() -> void:
 # ── Card scaffold ──────────────────────────────────────────
 func _build_card() -> void:
 	_card = self
-	add_theme_stylebox_override("panel", MenuKit.flat_box(10.0, 0.11, true))
+	add_theme_stylebox_override("panel", MenuKit.flat_box(8.0, 0.11, true))
 
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 6)
@@ -410,7 +410,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		btn.add_theme_constant_override("icon_max_width", 54)
+		btn.add_theme_constant_override("icon_max_width", 58)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)

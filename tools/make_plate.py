@@ -39,3 +39,19 @@ for _ in range(10):
     d.point((x,y),fill=(0,0,0,50))
 img.save("assets/ui/plate_frame.png")
 print("plate v2 ok")
+
+# v3: bake the engraved-obsidian material into the plate fill (8% overlay)
+base=Image.open("assets/ui/plate_frame.png").convert("RGBA")
+tex=Image.open("assets/ui/minimap_bg.png").convert("RGBA").resize((S,S))
+tex.putalpha(tex.split()[0].point(lambda v: 22))  # ~8% opacity, luminance-keyed
+mat=Image.alpha_composite(base, tex)
+# re-stamp the border details on top so they stay crisp
+mat=Image.alpha_composite(mat, Image.new("RGBA",(S,S),(0,0,0,0)))
+d2=ImageDraw.Draw(mat)
+d2.rectangle([0,0,S-1,S-1],outline=(1,2,4,255),width=2)
+d2.rectangle([2,2,S-3,S-3],outline=(0,217,199,40),width=1)
+for (cx,cy,dx,dy) in [(1,1,1,1),(S-2,1,-1,1),(1,S-2,1,-1),(S-2,S-2,-1,-1)]:
+    d2.line([(cx,cy),(cx+dx*L,cy)],fill=gold,width=1)
+    d2.line([(cx,cy),(cx,cy+dy*L)],fill=gold,width=1)
+mat.save("assets/ui/plate_frame.png")
+print("plate v3 ok")
