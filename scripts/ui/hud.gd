@@ -158,11 +158,12 @@ func _build_ticker() -> void:
 	panel.add_theme_stylebox_override("panel", sb)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
+	# Sits in the free bottom-centre lane between the minimap and command card.
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	panel.offset_left = 240.0
-	panel.offset_right = -240.0
-	panel.offset_top = -78.0
-	panel.offset_bottom = -56.0
+	panel.offset_left = 232.0
+	panel.offset_right = -740.0
+	panel.offset_top = -46.0
+	panel.offset_bottom = -22.0
 	_ticker_label = Label.new()
 	_ticker_label.add_theme_color_override("font_color", TICKER_TEXT)
 	_ticker_label.add_theme_font_size_override("font_size", 13)

@@ -73,11 +73,12 @@ func _build() -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", sb)
 	add_child(panel)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	panel.offset_left = -660.0
-	panel.offset_top = 52.0
-	panel.offset_right = -260.0
-	panel.offset_bottom = 100.0
+	# Docked just above the command card (bottom-right), AoE4-style.
+	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	panel.offset_left = -426.0
+	panel.offset_top = -344.0
+	panel.offset_right = -16.0
+	panel.offset_bottom = -296.0
 
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)

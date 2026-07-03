@@ -24,15 +24,15 @@ const BUILDS: Dictionary = {
 	"eco": [
 		{"key": &"tc", "label": "Town Center", "short": "TC", "icon": "bld_tc", "hot": "T"},
 		{"key": &"farm", "label": "Farm", "short": "Farm", "icon": "bld_farm", "hot": "F"},
-		{"key": &"storehouse", "label": "Storehouse", "short": "Store", "icon": "", "hot": "H"},
-		{"key": &"house", "label": "House", "short": "House", "icon": "", "hot": "U"},
-		{"key": &"pylon", "label": "Obsidian Pylon", "short": "Pylon", "icon": "", "hot": "P"},
+		{"key": &"storehouse", "label": "Storehouse", "short": "Store", "icon": "bld_storehouse", "hot": "H"},
+		{"key": &"house", "label": "House", "short": "House", "icon": "bld_house", "hot": "U"},
+		{"key": &"pylon", "label": "Obsidian Pylon", "short": "Pylon", "icon": "bld_pylon", "hot": "P"},
 	],
 	"mil": [
 		{"key": &"barracks", "label": "Barracks", "short": "Barrack", "icon": "bld_barracks", "hot": "B"},
 		{"key": &"tower", "label": "Tower", "short": "Tower", "icon": "bld_tower", "hot": "Y"},
 		{"key": &"monument", "label": "Monument", "short": "Monum.", "icon": "bld_monument", "hot": "M"},
-		{"key": &"beacon", "label": "Ascension Beacon", "short": "Beacon", "icon": "", "hot": ""},
+		{"key": &"beacon", "label": "Ascension Beacon", "short": "Beacon", "icon": "bld_beacon", "hot": ""},
 	],
 }
 

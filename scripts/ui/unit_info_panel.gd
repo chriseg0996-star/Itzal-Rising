@@ -75,6 +75,8 @@ func _relayout() -> void:
 
 func _show_single(node: Node) -> void:
 	_multi_label.hide()
+	if _type_row != null:
+		_type_row.hide()
 	_name_label.show()
 	_owner_label.show()
 	_hp_bar.show()
@@ -91,7 +93,48 @@ func _show_multi(units: Array) -> void:
 	_hp_label.hide()
 	_multi_label.show()
 	_multi_label.text = "%d units selected" % units.size()
+	_build_type_chips(units)
 	show()
+
+var _type_row: HBoxContainer = null
+
+## AoE4-style type breakdown: one chip per unit type ("3× Soldier"); clicking a
+## chip narrows the selection to just that type.
+func _build_type_chips(units: Array) -> void:
+	if _type_row == null:
+		_type_row = HBoxContainer.new()
+		_type_row.add_theme_constant_override("separation", 4)
+		$VBox.add_child(_type_row)
+	for c in _type_row.get_children():
+		c.queue_free()
+	var groups: Dictionary = {}
+	for u in units:
+		if not is_instance_valid(u):
+			continue
+		var key: String = _display_name(u)
+		if not groups.has(key):
+			groups[key] = []
+		(groups[key] as Array).append(u)
+	for key in groups:
+		var members: Array = groups[key]
+		var chip := Button.new()
+		chip.text = "%d× %s" % [members.size(), key]
+		chip.tooltip_text = "Select only %s" % key
+		chip.add_theme_font_size_override("font_size", 11)
+		chip.add_theme_color_override("font_color", Color(0.92, 0.95, 0.98, 1))
+		chip.add_theme_color_override("font_hover_color", Color(0.0, 0.90, 0.78, 1))
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.10, 0.13, 0.17, 1.0)
+		sb.set_border_width_all(1)
+		sb.border_color = Color(0.0, 0.85, 0.85, 0.3)
+		sb.set_corner_radius_all(3)
+		sb.content_margin_left = 6.0
+		sb.content_margin_right = 6.0
+		chip.add_theme_stylebox_override("normal", sb)
+		chip.add_theme_stylebox_override("hover", sb)
+		chip.pressed.connect(func() -> void: SelectionManager.select_multiple(members))
+		_type_row.add_child(chip)
+	_type_row.show()
 
 func _display_name(node: Node) -> String:
 	var bn: Variant = node.get("building_name")
