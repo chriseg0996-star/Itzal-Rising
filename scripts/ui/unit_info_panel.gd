@@ -25,6 +25,7 @@ var _hp_fill: StyleBoxFlat = null
 var _refresh_timer: float = 0.0
 
 var _emblem: TextureRect = null
+var _channel: ColorRect = null
 var _icon: TextureRect = null
 var _status_label: Label = null
 var _queue_row: HBoxContainer = null
@@ -59,6 +60,18 @@ func _ready() -> void:
 	_queue_row.hide()
 	SelectionManager.building_selected.connect(_on_building_selected)
 	SelectionManager.building_deselected.connect(_on_building_deselected)
+	# Visual focus: bigger title + a short turquoise energy channel under it.
+	_name_label.add_theme_font_size_override("font_size", 17)
+	_channel = ColorRect.new()
+	_channel.color = Color(0.0, 0.90, 0.78, 0.35)
+	_channel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_name_label.add_child(_channel)
+	_channel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_channel.anchor_left = 0.2
+	_channel.anchor_right = 0.8
+	_channel.offset_top = -1.0
+	_channel.offset_bottom = 0.0
+	_channel.visible = false
 	# Faction emblem medallion, docked at the panel's right edge.
 	_emblem = TextureRect.new()
 	_emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -182,6 +195,8 @@ func _show_single(node: Node) -> void:
 	# Compact 224px panel: name alone on the title row; role + stats share the
 	# small line under it.
 	_name_label.text = dname
+	if _channel != null:
+		_channel.visible = true
 	# Small entity icon (never a big portrait).
 	var icon_path: String = String(d["icon"])
 	_icon.visible = icon_path != ""

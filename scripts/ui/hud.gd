@@ -25,7 +25,10 @@ var _pulse_overlay: ColorRect = null
 var _pulse_cooldown: float = 0.0
 
 func _ready() -> void:
-	($ResBlock as PanelContainer).add_theme_stylebox_override("panel", MenuKit.family_box(10.0))
+	($ResBlock as PanelContainer).add_theme_stylebox_override("panel", MenuKit.family_box(8.0))
+	($ResBlock/VBox as VBoxContainer).add_theme_constant_override("separation", 2)
+	for l: Label in [pop_label, food_label, wood_label, gold_label]:
+		l.add_theme_font_size_override("font_size", 14)
 	# Right-align the numbers so the column reads as a ledger; hairline
 	# separator between population and the resource rows.
 	for l: Label in [pop_label, food_label, wood_label, gold_label]:
