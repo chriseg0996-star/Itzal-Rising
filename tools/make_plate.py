@@ -1,26 +1,41 @@
-# Master HUD plate: layered obsidian ninepatch shared by every HUD panel.
-# 64x64, ninepatch margin 12. Layers: outer dark bevel, teal hairline,
-# gold corner ticks, faint Mayan step-fret engraving along the border band.
+# Master HUD plate v2 — craftsmanship pass.
+# Layers: vertical obsidian gradient, outer near-black bevel, inner
+# highlight/shadow pair (carved depth), teal hairline, finer engraved greca,
+# gold corner ticks, a few weathering nicks in the border band.
 from PIL import Image, ImageDraw
+import random
 S=64; M=12
 img=Image.new("RGBA",(S,S),(0,0,0,0))
 d=ImageDraw.Draw(img)
-# fill: deep obsidian
-d.rectangle([0,0,S-1,S-1],fill=(9,12,16,247))
-# outer near-black bevel (2px) for depth
-d.rectangle([0,0,S-1,S-1],outline=(2,3,5,255),width=2)
-# teal hairline just inside
-d.rectangle([2,2,S-3,S-3],outline=(0,217,199,45),width=1)
-# faint engraved step-fret in the border band (greca)
-g=(0,217,199,22)
-for x in range(6, S-6, 8):
-    d.line([(x,4),(x+3,4)],fill=g); d.line([(x+3,4),(x+3,6)],fill=g)
-    d.line([(x,S-5),(x+3,S-5)],fill=g); d.line([(x,S-7),(x,S-5)],fill=g)
-# gold corner ticks (L shapes)
-gold=(200,169,74,160)
+# fill: vertical gradient, slightly lighter top (light from above)
+for y in range(S):
+    t=y/(S-1)
+    r=int(11-3*t); g=int(14-3*t); b=int(19-4*t)
+    d.line([(0,y),(S-1,y)],fill=(r,g,b,248))
+# outer near-black bevel (2px)
+d.rectangle([0,0,S-1,S-1],outline=(1,2,4,255),width=2)
+# carved depth: inner top highlight + inner bottom shadow
+d.line([(3,3),(S-4,3)],fill=(120,200,190,18))
+d.line([(3,S-4),(S-4,S-4)],fill=(0,0,0,90))
+# teal hairline
+d.rectangle([2,2,S-3,S-3],outline=(0,217,199,40),width=1)
+# finer engraved greca in the border band
+g=(0,217,199,16); g2=(0,0,0,60)
+for x in range(7, S-9, 6):
+    d.line([(x,5),(x+2,5)],fill=g); d.point((x+2,6),fill=g)
+    d.point((x,4),fill=g2)
+    d.line([(x,S-6),(x+2,S-6)],fill=g); d.point((x,S-7),fill=g)
+# gold corner ticks
+gold=(200,169,74,170); goldd=(140,115,50,120)
 L=7
 for (cx,cy,dx,dy) in [(1,1,1,1),(S-2,1,-1,1),(1,S-2,1,-1),(S-2,S-2,-1,-1)]:
     d.line([(cx,cy),(cx+dx*L,cy)],fill=gold,width=1)
     d.line([(cx,cy),(cx,cy+dy*L)],fill=gold,width=1)
+    d.point((cx+dx*(L+1),cy),fill=goldd); d.point((cx,cy+dy*(L+1)),fill=goldd)
+# subtle weathering nicks in the band
+random.seed(7)
+for _ in range(10):
+    x=random.randint(4,S-5); y=random.choice([4,5,S-6,S-5])
+    d.point((x,y),fill=(0,0,0,50))
 img.save("assets/ui/plate_frame.png")
-print("plate ok")
+print("plate v2 ok")

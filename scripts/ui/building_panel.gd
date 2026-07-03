@@ -173,7 +173,10 @@ func _build_tabs() -> void:
 		btn.text = t[1]
 		btn.custom_minimum_size = Vector2(0, 26)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.add_theme_font_size_override("font_size", 12)
+		btn.add_theme_font_size_override("font_size", 11)
+		var tfv := FontVariation.new()
+		tfv.spacing_glyph = 2
+		btn.add_theme_font_override("font", tfv)
 		var active: bool = _tab == key
 		btn.add_theme_color_override("font_color", ACCENT if active else MUTED)
 		btn.add_theme_color_override("font_hover_color", ACCENT)
@@ -424,8 +427,14 @@ func _short(label: String) -> String:
 func _chip(key: String) -> Label:
 	var lbl := Label.new()
 	lbl.text = key
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size", 9)
 	lbl.add_theme_color_override("font_color", Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.9))
+	# Tiny recessed chip behind the hotkey letter (reads as engraved).
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.02, 0.03, 0.045, 0.9)
+	sb.set_corner_radius_all(2)
+	lbl.add_theme_stylebox_override("normal", sb)
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	lbl.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	lbl.offset_left = -14.0

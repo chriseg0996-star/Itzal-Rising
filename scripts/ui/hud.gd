@@ -36,6 +36,12 @@ func _ready() -> void:
 	sepline.custom_minimum_size = Vector2(0, 1)
 	vbox.add_child(sepline)
 	vbox.move_child(sepline, 1)
+	# Era numeral: gold, spaced — a small ceremonial marker, not a system label.
+	if era_label != null:
+		era_label.add_theme_color_override("font_color", Color(0.784, 0.663, 0.29, 0.95))
+		var efv := FontVariation.new()
+		efv.spacing_glyph = 3
+		era_label.add_theme_font_override("font", efv)
 	ResourceManager.resource_changed.connect(_on_resource_changed)
 	SelectionManager.selection_changed.connect(_on_selection_changed)
 	AlertManager.alert_pushed.connect(_on_alert_pushed)
