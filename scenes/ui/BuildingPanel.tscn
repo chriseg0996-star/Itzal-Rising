@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bp4n7rax2m5k8"]
-
-[ext_resource type="Script" path="res://scripts/ui/building_panel.gd" id="1_bp_script"]
-
-[node name="BuildingPanel" type="CanvasLayer"]
-script = ExtResource("1_bp_script")

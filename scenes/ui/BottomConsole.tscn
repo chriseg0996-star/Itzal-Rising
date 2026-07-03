@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3 uid="uid://c0nsole1itzal8"]
+
+[ext_resource type="Script" path="res://scripts/ui/bottom_console.gd" id="1_bc"]
+[ext_resource type="PackedScene" path="res://scenes/ui/UnitInfoPanel.tscn" id="2_sel"]
+[ext_resource type="Script" path="res://scripts/ui/building_panel.gd" id="3_cmd"]
+[ext_resource type="Script" path="res://scripts/ui/ability_panel.gd" id="4_abl"]
+[ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="5_map"]
+
+[node name="BottomConsole" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_bc")
+
+[node name="Frame" type="PanelContainer" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -616.0
+offset_top = -200.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="HBox" type="HBoxContainer" parent="Frame"]
+theme_override_constants/separation = 0
+
+[node name="Selection" parent="Frame/HBox" instance=ExtResource("2_sel")]
+
+[node name="Commands" type="PanelContainer" parent="Frame/HBox"]
+custom_minimum_size = Vector2(200, 0)
+script = ExtResource("3_cmd")
+
+[node name="Right" type="VBoxContainer" parent="Frame/HBox"]
+custom_minimum_size = Vector2(240, 0)
+theme_override_constants/separation = 0
+
+[node name="Abilities" type="PanelContainer" parent="Frame/HBox/Right"]
+custom_minimum_size = Vector2(0, 28)
+script = ExtResource("4_abl")
+
+[node name="Minimap" type="Control" parent="Frame/HBox/Right"]
+size_flags_vertical = 3
+mouse_filter = 0
+script = ExtResource("5_map")

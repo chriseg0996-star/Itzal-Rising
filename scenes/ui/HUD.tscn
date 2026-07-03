@@ -1,7 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://h7d9q3x5n2m8k"]
+[gd_scene load_steps=7 format=3 uid="uid://h7d9q3x5n2m8k"]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud_script"]
-[ext_resource type="PackedScene" path="res://scenes/ui/UnitInfoPanel.tscn" id="2_uip"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/wood.png" id="ic_wood"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/food.png" id="ic_food"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/gold.png" id="ic_gold"]
@@ -148,8 +147,6 @@ tooltip_text = "Match time"
 horizontal_alignment = 2
 theme_override_colors/font_color = Color(0.62, 0.70, 0.76, 1)
 theme_override_font_sizes/font_size = 16
-
-[node name="UnitInfoPanel" parent="." instance=ExtResource("2_uip")]
 
 [node name="AlertPanel" type="Control" parent="."]
 anchor_left = 0.0

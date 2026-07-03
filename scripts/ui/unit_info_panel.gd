@@ -82,7 +82,7 @@ func _ready() -> void:
 	if fill != null:
 		_hp_fill = fill.duplicate() as StyleBoxFlat
 		_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
-	hide()
+	_show_empty()
 
 func _process(delta: float) -> void:
 	if _focus == null:
@@ -138,12 +138,26 @@ func _relayout() -> void:
 		_show_multi(_units)
 	else:
 		_focus = null
-		hide()
+		_show_empty()
 
-## The plate hugs its content: tall for the full single-entity readout, short
-## for the multi-select count + chips (a fixed height leaves a huge empty plate).
-func _set_height(h: float) -> void:
-	offset_top = -h
+## Layout is owned by the BottomConsole's HBox — sections have fixed geometry.
+func _set_height(_h: float) -> void:
+	pass
+
+## Nothing selected: blank the section but keep it in the console frame.
+func _show_empty() -> void:
+	_name_label.hide()
+	_owner_label.hide()
+	_hp_bar.hide()
+	_hp_label.hide()
+	_multi_label.hide()
+	_status_label.hide()
+	_queue_row.hide()
+	if _type_row != null:
+		_type_row.hide()
+	if _emblem != null:
+		_emblem.visible = false
+	_icon.visible = false
 
 func _show_single(node: Node) -> void:
 	_multi_label.hide()

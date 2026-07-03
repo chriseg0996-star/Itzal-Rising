@@ -1,5 +1,6 @@
-extends CanvasLayer
+extends PanelContainer
 
+## Ability row of the BottomConsole (sits on the minimap's top edge).
 ## Three active abilities per faction, cast with E / R / Q or the panel buttons,
 ## each on its own cooldown. Match-scoped (lives in the World tree so a restart
 ## resets it for free). Cooldowns are exposed for SaveManager via the
@@ -64,25 +65,16 @@ func _build() -> void:
 	if fac != null:
 		accent = fac.primary_color
 
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", MenuKit.flat_box(4.0, 0.11, true))
-	add_child(panel)
-	# Integrated into the bottom console's right column: flush on the minimap's
-	# top edge, same width — always visible, never overlaps the growing card.
-	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	panel.offset_left = -320.0
-	panel.offset_top = -352.0
-	panel.offset_right = 0.0
-	panel.offset_bottom = -320.0
+	add_theme_stylebox_override("panel", MenuKit.flat_box(4.0, 0.11, true))
 
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)
-	panel.add_child(hbox)
+	add_child(hbox)
 
 	for i in _defs.size():
 		var def: Dictionary = _defs[i]
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(72, 28)
+		btn.custom_minimum_size = Vector2(56, 20)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.text = _short_name(def)
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT

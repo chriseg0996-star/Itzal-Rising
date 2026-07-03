@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Itzal Rising (game)",
+      "runtimeExecutable": "C:\\Users\\chris\\OneDrive\\Desktop\\Godot_v4.6.3-stable_win64.exe\\Godot_v4.6.3-stable_win64.exe",
+      "runtimeArgs": ["--path", "C:\\Users\\chris\\RTS"]
+    },
+    {
+      "name": "Godot editor",
+      "runtimeExecutable": "C:\\Users\\chris\\OneDrive\\Desktop\\Godot_v4.6.3-stable_win64.exe\\Godot_v4.6.3-stable_win64.exe",
+      "runtimeArgs": ["--editor", "--path", "C:\\Users\\chris\\RTS"]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://d8w3r5y6q1n2v"]
+[gd_scene load_steps=26 format=3 uid="uid://d8w3r5y6q1n2v"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/Ground.tscn" id="1_ground"]
 [ext_resource type="Script" path="res://scripts/world/ground_decor.gd" id="28_gdecor"]
@@ -7,22 +7,20 @@
 [ext_resource type="Script" path="res://scripts/units/selection_box.gd" id="4_sel"]
 [ext_resource type="PackedScene" path="res://scenes/world/ResourceNode.tscn" id="5_res"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6_hud"]
-[ext_resource type="PackedScene" path="res://scenes/ui/BuildingPanel.tscn" id="7_bpanel"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemySoldier.tscn" id="8_enemy"]
 [ext_resource type="PackedScene" path="res://scenes/buildings/TownCenter.tscn" id="9_ptc"]
 [ext_resource type="PackedScene" path="res://scenes/world/EnemyBase.tscn" id="10_ebase"]
 [ext_resource type="PackedScene" path="res://scenes/ui/GameEndPanel.tscn" id="11_endp"]
 [ext_resource type="PackedScene" path="res://scenes/world/GoldMine.tscn" id="12_gold"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PausePanel.tscn" id="13_pause"]
-[ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="14_minim"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ObjectivesPanel.tscn" id="17_objp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BottomConsole.tscn" id="30_console"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxWeaver.tscn" id="18_ixw"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxLatticeGuard.tscn" id="19_ixg"]
 [ext_resource type="Script" path="res://scripts/world/ix_spawner.gd" id="20_ixspawn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ControlsPanel.tscn" id="21_ctrlp"]
 [ext_resource type="Script" path="res://scripts/world/map_loader.gd" id="22_maploader"]
 [ext_resource type="Script" path="res://scripts/world/decay_spawner.gd" id="23_decayspawn"]
-[ext_resource type="PackedScene" path="res://scenes/ui/AbilityPanel.tscn" id="25_abilp"]
 [ext_resource type="Script" path="res://scripts/world/fog_of_war.gd" id="26_fog"]
 [ext_resource type="PackedScene" path="res://scenes/units/EnemyVillager.tscn" id="24_evil"]
 [ext_resource type="PackedScene" path="res://scenes/ui/TutorialController.tscn" id="27_tut"]
@@ -101,15 +99,11 @@ script = ExtResource("26_fog")
 
 [node name="HUD" parent="." instance=ExtResource("6_hud")]
 
-[node name="BuildingPanel" parent="." instance=ExtResource("7_bpanel")]
-
-[node name="Minimap" parent="." instance=ExtResource("14_minim")]
+[node name="BottomConsole" parent="." instance=ExtResource("30_console")]
 
 [node name="PausePanel" parent="." instance=ExtResource("13_pause")]
 
 [node name="GameEndPanel" parent="." instance=ExtResource("11_endp")]
-
-[node name="AbilityPanel" parent="." instance=ExtResource("25_abilp")]
 
 [node name="TutorialController" parent="." instance=ExtResource("27_tut")]
 

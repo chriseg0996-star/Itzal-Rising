@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://scripts/ui/ability_panel.gd" id="1_abilp"]
-
-[node name="AbilityPanel" type="CanvasLayer"]
-script = ExtResource("1_abilp")

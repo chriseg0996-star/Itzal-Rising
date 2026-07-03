@@ -1,6 +1,7 @@
-extends CanvasLayer
+extends PanelContainer
 
-## AoE4-style contextual COMMAND CARD (bottom-right). The grid's content is
+## AoE4-style contextual COMMAND CARD — the middle section of the BottomConsole
+## (laid out by the console's HBox; this node owns only its content). Content is
 ## driven by the current selection:
 ##   villager selected  -> build tabs [ECONOMIC | MILITARY] of placeable buildings
 ##   own building       -> train slots + research (TC) + header with name/HP,
@@ -16,7 +17,7 @@ const PANEL_BG: Color = Color(0.07, 0.09, 0.12, 0.94)
 const PANEL_BORDER: Color = Color(0.0, 0.85, 0.85, 0.35)
 const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
 const MUTED: Color = Color(0.55, 0.62, 0.68, 1.0)
-const CELL: float = 54.0   # compact cells, near-full-bleed icons — 4-wide grid
+const CELL: float = 42.0   # 4-wide grid inside the 200px console section
 const COLS: int = 4
 
 ## Build-tab data: key = BuildingPlacer type, icon = assets/ui/icons/<icon>.png
@@ -65,21 +66,8 @@ func _ready() -> void:
 
 # ── Card scaffold ──────────────────────────────────────────
 func _build_card() -> void:
-	_card = PanelContainer.new()
-	_card.add_theme_stylebox_override("panel", MenuKit.flat_box(10.0, 0.11, true))
-	add_child(_card)
-	_card.anchor_left = 1.0
-	_card.anchor_top = 1.0
-	_card.anchor_right = 1.0
-	_card.anchor_bottom = 1.0
-	# Flush between the selection panel and the minimap — the three sections
-	# share edges and read as one continuous bottom console.
-	_card.offset_left = -568.0   # 8px grid: card spans -568..-320, flush both sides
-	_card.offset_right = -320.0
-	_card.offset_top = -132.0   # minimum; the card grows upward to hug its content
-	_card.offset_bottom = 0.0    # seated on the screen edge (console hardware feel)
-	_card.grow_horizontal = 0
-	_card.grow_vertical = 0
+	_card = self
+	add_theme_stylebox_override("panel", MenuKit.flat_box(10.0, 0.11, true))
 
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 8)
@@ -151,7 +139,7 @@ func _on_building_deselected() -> void:
 # ── Mode rendering ─────────────────────────────────────────
 func _apply_mode(mode: String) -> void:
 	_mode = mode
-	_card.visible = mode != "none"
+	# Section stays in the console frame even when empty (no holes in the band).
 	_clear(_grid)
 	_clear(_tabs)
 	_clear(_queue_row)
@@ -398,7 +386,7 @@ func _cell(label: String, icon_key: String, hotkey: String, tooltip: String, on_
 		btn.expand_icon = true
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		btn.add_theme_constant_override("icon_max_width", 46)
+		btn.add_theme_constant_override("icon_max_width", 36)
 	else:
 		btn.text = _short(label)
 		btn.add_theme_font_size_override("font_size", 10)
