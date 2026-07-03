@@ -34,6 +34,10 @@ func current_type() -> StringName:
 		return ResourceManager._normalize(_carry_type)
 	return &""
 
+## Live carry readout for the selection HUD ("Gathering Wood 12/20").
+func carry_info() -> Dictionary:
+	return {"amount": _carrying, "cap": carry_capacity, "type": current_type()}
+
 func setup(nav_agent: NavigationAgent2D, home: Node2D, faction_id: int = 0) -> void:
 	_nav_agent = nav_agent
 	_home      = home

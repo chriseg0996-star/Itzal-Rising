@@ -15,7 +15,6 @@
 [ext_resource type="PackedScene" path="res://scenes/world/GoldMine.tscn" id="12_gold"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PausePanel.tscn" id="13_pause"]
 [ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="14_minim"]
-[ext_resource type="PackedScene" path="res://scenes/ui/ProductionQueue.tscn" id="16_prodq"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ObjectivesPanel.tscn" id="17_objp"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxWeaver.tscn" id="18_ixw"]
 [ext_resource type="PackedScene" path="res://scenes/units/IxLatticeGuard.tscn" id="19_ixg"]
@@ -113,8 +112,6 @@ script = ExtResource("26_fog")
 [node name="AbilityPanel" parent="." instance=ExtResource("25_abilp")]
 
 [node name="TutorialController" parent="." instance=ExtResource("27_tut")]
-
-[node name="ProductionQueue" parent="." instance=ExtResource("16_prodq")]
 
 [node name="ObjectivesPanel" parent="." instance=ExtResource("17_objp")]
 

@@ -11,6 +11,7 @@ extends CanvasLayer
 ## chips. Built fully in code on the shared Basalt & Neon language.
 
 const ACCENT: Color = Color(0.0, 0.90, 0.78, 1.0)
+const GOLD: Color = Color(0.784, 0.663, 0.29, 1.0)   # active/selected command outline
 const PANEL_BG: Color = Color(0.07, 0.09, 0.12, 0.94)
 const PANEL_BORDER: Color = Color(0.0, 0.85, 0.85, 0.35)
 const WHITE: Color = Color(0.92, 0.95, 0.98, 1.0)
@@ -193,7 +194,7 @@ func _build_tabs() -> void:
 		sb.set_corner_radius_all(3)
 		if active:
 			sb.border_width_bottom = 2
-			sb.border_color = ACCENT
+			sb.border_color = GOLD   # active tab = gold (mockup spec)
 		btn.add_theme_stylebox_override("normal", sb)
 		btn.add_theme_stylebox_override("hover", sb)
 		btn.add_theme_stylebox_override("pressed", sb)
@@ -240,12 +241,37 @@ func _count_owned() -> Dictionary:
 
 # ── Military: stances ──────────────────────────────────────
 func _fill_stance_grid() -> void:
+	var current: int = _current_stance()
 	for s in STANCES:
 		var stance: int = int(s["stance"])
 		var lab: String = String(s["label"])
 		var cell := _cell(String(s["short"]), "", String(s["hot"]), lab,
-			func() -> void: SelectionManager.apply_stance(stance, lab))
+			func() -> void:
+				SelectionManager.apply_stance(stance, lab)
+				_apply_mode("military"))
+		if stance == current:
+			_mark_active(cell)
 		_grid.add_child(cell)
+
+## Stance of the first selected combat unit (drives the gold active outline).
+func _current_stance() -> int:
+	for u in _last_units:
+		if not is_instance_valid(u):
+			continue
+		var cc: Node = u.get_node_or_null("CombatComponent")
+		if cc != null and cc.get("stance") != null:
+			return int(cc.get("stance"))
+	return -1
+
+## Mockup spec: active/selected command = gold outline.
+func _mark_active(btn: Button) -> void:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.13, 0.12, 0.08, 1.0)
+	sb.set_border_width_all(2)
+	sb.border_color = GOLD
+	sb.set_corner_radius_all(4)
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("focus", sb)
 
 # ── Building: header + queue + train/research ──────────────
 func _refresh_building() -> void:
@@ -322,6 +348,7 @@ func _research_cell(b: Node, id: String, tag: String) -> Button:
 		func() -> void: b.try_queue_research(id))
 	if maxed:
 		cell.disabled = true
+		cell.modulate.a = 0.45   # disabled command = dimmed (mockup spec)
 	return cell
 
 func _era_cell(b: Node) -> Button:
@@ -335,6 +362,7 @@ func _era_cell(b: Node) -> Button:
 		func() -> void: b.try_queue_research("era"))
 	if maxed:
 		cell.disabled = true
+		cell.modulate.a = 0.45
 	return cell
 
 func _cost_str(cost: Dictionary) -> String:

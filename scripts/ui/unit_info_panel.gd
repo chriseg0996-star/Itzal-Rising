@@ -6,16 +6,7 @@ extends PanelContainer
 ## Shows a friendly name, the owner faction (in faction colour) and a live HP bar.
 ## Player buildings are shown by the BuildingPanel side panel instead.
 
-const UNIT_NAMES: Dictionary = {
-	"soldier": "Soldier", "archer": "Archer", "raider": "Raider",
-	"villager": "Villager", "ix_lattice_guard": "Lattice Guard", "ix_weaver": "Weaver",
-}
-## AoE4-style class line under the name.
-const UNIT_ROLES: Dictionary = {
-	"Villager": "Gatherer, Builder", "Weaver": "Gatherer, Builder",
-	"Soldier": "Melee Infantry", "Archer": "Ranged", "Raider": "Cavalry",
-	"Lattice Guard": "Heavy Infantry",
-}
+const GOLD: Color = Color(0.784, 0.663, 0.29, 1.0)
 const HP_GOOD: Color = Color(0.27, 0.86, 0.50)
 const HP_LOW: Color = Color(0.85, 0.2, 0.15)
 const MUTED: Color = Color(0.55, 0.65, 0.7)
@@ -28,13 +19,46 @@ const MUTED: Color = Color(0.55, 0.65, 0.7)
 
 var _units: Array = []
 var _inspect: Node = null
+var _building: Node = null
 var _focus: Node = null
 var _hp_fill: StyleBoxFlat = null
+var _refresh_timer: float = 0.0
 
 var _emblem: TextureRect = null
+var _icon: TextureRect = null
+var _status_label: Label = null
+var _queue_row: HBoxContainer = null
 
 func _ready() -> void:
 	add_theme_stylebox_override("panel", MenuKit.chip_box(10.0))
+	# Small entity icon (mockup: circular icon, never a big portrait), floating
+	# at the name row's left edge.
+	_icon = TextureRect.new()
+	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_name_label.add_child(_icon)
+	_icon.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
+	_icon.offset_left = 2.0
+	_icon.offset_right = 40.0
+	_icon.offset_top = -18.0
+	_icon.offset_bottom = 20.0
+	_icon.visible = false
+	# Live activity line ("Gathering Wood 12 / 20", "Under construction").
+	_status_label = Label.new()
+	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_status_label.add_theme_font_size_override("font_size", 11)
+	_status_label.add_theme_color_override("font_color", Color(0.0, 0.90, 0.78, 0.9))
+	$VBox.add_child(_status_label)
+	_status_label.hide()
+	# Production queue chips (head slot shows a progress underline).
+	_queue_row = HBoxContainer.new()
+	_queue_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	_queue_row.add_theme_constant_override("separation", 4)
+	$VBox.add_child(_queue_row)
+	_queue_row.hide()
+	SelectionManager.building_selected.connect(_on_building_selected)
+	SelectionManager.building_deselected.connect(_on_building_deselected)
 	# Faction emblem medallion, docked at the panel's right edge.
 	_emblem = TextureRect.new()
 	_emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -60,15 +84,23 @@ func _ready() -> void:
 		_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
 	hide()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _focus == null:
 		return
 	if not is_instance_valid(_focus):
 		_focus = null
 		_inspect = null
+		_building = null
 		_relayout()
 		return
 	_refresh_hp(_focus)
+	# Status + queue change over time even with a static selection.
+	_refresh_timer += delta
+	if _refresh_timer >= 0.25:
+		_refresh_timer = 0.0
+		var d: Dictionary = SelectionHUDData.build(_focus)
+		_set_status(String(d["status"]))
+		_set_queue(d["queue"] as Array)
 
 func _on_selection_changed(units: Array) -> void:
 	_units = units
@@ -82,8 +114,19 @@ func _on_inspect_changed(node: Node) -> void:
 		_units = []
 	_relayout()
 
+func _on_building_selected(b: Node) -> void:
+	_building = b
+	_relayout()
+
+func _on_building_deselected() -> void:
+	_building = null
+	_relayout()
+
 func _relayout() -> void:
-	if _inspect != null and is_instance_valid(_inspect):
+	if _building != null and is_instance_valid(_building):
+		_focus = _building
+		_show_single(_building)
+	elif _inspect != null and is_instance_valid(_inspect):
 		_focus = _inspect
 		_show_single(_inspect)
 	elif _units.size() == 1:
@@ -104,34 +147,62 @@ func _show_single(node: Node) -> void:
 	_owner_label.show()
 	_hp_bar.show()
 	_hp_label.show()
-	var dname: String = _display_name(node)
-	_name_label.text = dname
-	var role: String = String(UNIT_ROLES.get(dname, ""))
-	var stats: String = _stats_line(node)
-	if role != "" or stats != "":
-		_name_label.text = dname if role == "" else "%s — %s" % [dname, role]
+	var d: Dictionary = SelectionHUDData.build(node)
+	var dname: String = String(d["name"])
+	var role: String = String(d["subtitle"])
+	_name_label.text = dname if role == "" else "%s — %s" % [dname, role]
+	# Small entity icon (never a big portrait).
+	var icon_path: String = String(d["icon"])
+	_icon.visible = icon_path != ""
+	if icon_path != "":
+		_icon.texture = load(icon_path)
 	_set_owner(node)
-	if stats != "":
-		_owner_label.text += "   ·   %s" % stats
+	var stats_parts: PackedStringArray = PackedStringArray()
+	for s in (d["stats"] as Array):
+		stats_parts.append("%s %s" % [String(s["label"]), str(s["value"])])
+	if not stats_parts.is_empty():
+		_owner_label.text += "   ·   %s" % " · ".join(stats_parts)
+	_set_status(String(d["status"]))
+	_set_queue(d["queue"] as Array)
 	_refresh_hp(node)
 	show()
 
-## "ATK 10 · ARM 2" pulled from the unit's export + StatComponent.
-func _stats_line(node: Node) -> String:
-	var parts: PackedStringArray = PackedStringArray()
-	var atk: Variant = node.get("attack_damage")
-	if atk != null and float(atk) > 0.0:
-		parts.append("ATK %d" % int(float(atk)))
-	var stat: Node = node.get_node_or_null("StatComponent")
-	if stat != null:
-		var arm: Variant = stat.get("armor")
-		if arm != null:
-			parts.append("ARM %d" % int(float(arm)))
-	return " · ".join(parts)
+func _set_status(text: String) -> void:
+	_status_label.visible = text != ""
+	_status_label.text = text
+
+## Queue chips: head slot gets a gold border + inline percent; rest are muted.
+func _set_queue(queue: Array) -> void:
+	for c in _queue_row.get_children():
+		c.queue_free()
+	_queue_row.visible = not queue.is_empty()
+	for i in queue.size():
+		var item: Dictionary = queue[i]
+		var lbl := Label.new()
+		var progress: float = float(item.get("progress", -1.0))
+		lbl.text = String(item["label"]) if progress < 0.0 \
+			else "%s %d%%" % [String(item["label"]), int(progress * 100.0)]
+		lbl.add_theme_font_size_override("font_size", 10)
+		lbl.add_theme_color_override("font_color",
+			Color(0.92, 0.95, 0.98, 1) if i == 0 else MUTED)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.05, 0.07, 0.10, 1.0)
+		sb.set_border_width_all(1)
+		sb.border_color = GOLD if i == 0 else Color(0.0, 0.85, 0.85, 0.2)
+		sb.set_corner_radius_all(3)
+		sb.content_margin_left = 6.0
+		sb.content_margin_right = 6.0
+		sb.content_margin_top = 2.0
+		sb.content_margin_bottom = 2.0
+		lbl.add_theme_stylebox_override("normal", sb)
+		_queue_row.add_child(lbl)
 
 func _show_multi(units: Array) -> void:
 	if _emblem != null:
 		_emblem.visible = false
+	_icon.visible = false
+	_status_label.hide()
+	_queue_row.hide()
 	_name_label.hide()
 	_owner_label.hide()
 	_hp_bar.hide()
@@ -182,13 +253,7 @@ func _build_type_chips(units: Array) -> void:
 	_type_row.show()
 
 func _display_name(node: Node) -> String:
-	var bn: Variant = node.get("building_name")
-	if bn != null and String(bn) != "":
-		return String(bn)
-	var sa: Variant = node.get("sprite_asset")
-	if sa != null and UNIT_NAMES.has(String(sa)):
-		return UNIT_NAMES[String(sa)]
-	return node.name
+	return SelectionHUDData.display_name(node)
 
 func _set_owner(node: Node) -> void:
 	var fid_v: Variant = node.get("faction_id")
