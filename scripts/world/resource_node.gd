@@ -79,7 +79,12 @@ func _setup_painted(variants: Array[String], width: float, grp: String, z: int) 
 	_width = width
 	variant = randi() % variants.size()
 	_apply_painted_sprite()
-	TextureGenerator.attach_shadow(self, width * 0.60, width * 0.22, width * 0.05, 0.34)
+	# Contact shadow pooled at the base so the sprite sits IN the ground, not on
+	# it. Forests get a second wide, faint ambient pool (they read as the biggest
+	# floating cutouts otherwise).
+	if is_forest():
+		TextureGenerator.attach_shadow(self, width * 1.05, width * 0.40, width * 0.12, 0.20)
+	TextureGenerator.attach_shadow(self, width * 0.80, width * 0.30, width * 0.09, 0.44)
 	z_index = z
 	_fit_painted_collision()
 

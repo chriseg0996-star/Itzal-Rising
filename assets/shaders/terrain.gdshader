@@ -19,12 +19,12 @@ uniform float tile_px = 512.0;
 
 float n(vec2 p) { return texture(noise_tex, p).r; }
 
-// Anti-tiling WITHOUT blur: blend in a second sample at the SAME scale but
-// rotated, so the axis-aligned repeat is broken while every sample stays at full
-// texel detail (no zoomed-in, blurry octave).
+// Anti-tiling WITHOUT blur: blend a second sample that is rotated AND at a
+// different (irrational) scale, so the axis-aligned 512px repeat is broken while
+// every sample stays at full texel detail (no zoomed-in, blurry octave).
 vec3 detile(sampler2D tex, vec2 t) {
-	vec2 r = vec2(t.x * 0.80 - t.y * 0.60, t.x * 0.60 + t.y * 0.80) + vec2(0.5);
-	return mix(texture(tex, t).rgb, texture(tex, r).rgb, 0.32);
+	vec2 r = mat2(vec2(0.80, 0.60), vec2(-0.60, 0.80)) * (t * 1.37) + vec2(0.37, 0.71);
+	return mix(texture(tex, t).rgb, texture(tex, r).rgb, 0.45);
 }
 
 void fragment() {
@@ -38,16 +38,24 @@ void fragment() {
 	vec3 dg = detile(drygrass, t * 1.1 + vec2(0.2));
 	vec3 d  = detile(dirt, t * 0.9 + vec2(0.7));
 
-	// Large, gentle grass clearings (low frequency, weak).
+	// Large, gentle grass clearings (low frequency).
 	float clearing = n(world / 2700.0);
-	float dryw = smoothstep(0.55, 0.80, clearing) * 0.28;
+	float dryw = smoothstep(0.50, 0.78, clearing) * 0.42;
 	vec3 col = mix(g, dg, dryw);
 
-	// Biome-scale rocky / fertile zones — broad and subtle, so whole regions of
-	// the map read as stonier or richer ground without any clutter.
+	// Biome-scale rocky / fertile zones — broad, so whole regions of the map read
+	// as stonier or richer ground without any clutter.
 	float biome = n(world / 2800.0 + vec2(11.3));
-	col = mix(col, d * vec3(0.86, 0.87, 0.91), smoothstep(0.70, 0.86, biome) * 0.22);
-	col = mix(col, col * vec3(0.82, 1.02, 0.72), smoothstep(0.30, 0.16, biome) * 0.18);
+	col = mix(col, d * vec3(0.86, 0.87, 0.91), smoothstep(0.66, 0.84, biome) * 0.34);
+	col = mix(col, col * vec3(0.82, 1.04, 0.68), smoothstep(0.32, 0.15, biome) * 0.30);
+
+	// MACRO variation: a big, non-tiling field modulates brightness and tint, so
+	// the 512px repeat is overpowered by a larger organic pattern and no two zones
+	// of the map read the same. This is what kills the visible tiling lattice.
+	float macro = n(world / 2350.0 + vec2(4.0));
+	float macro2 = n(world / 1250.0 + vec2(19.0));
+	col *= mix(0.84, 1.14, macro);
+	col = mix(col, col * vec3(0.93, 1.03, 0.80), macro2 * 0.30);
 
 	// Intentional ground from the control splat (resources embedded in terrain).
 	vec4 c = texture(control, UV);
