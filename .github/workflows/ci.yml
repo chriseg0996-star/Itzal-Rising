@@ -67,6 +67,16 @@ jobs:
             check "campaign ${mid}" GATE_CAMPAIGN_OK "$log"
           done
           echo "::endgroup::"
+          # Win/loss: every terminal condition must actually fire, per faction —
+          # guards the "impossible mission / broken win-loss" P0 category.
+          echo "::group::win/loss conditions"
+          for f in 0 1 2; do
+            for c in defeat victory ascension enemy_ascension; do
+              log="$(GATE_FACTION="$f" GATE_WINLOSS="$c" "$GODOT" --headless --path . --script tools/gate_winloss.gd 2>&1)"
+              check "winloss f${f} ${c}" GATE_WINLOSS_OK "$log"
+            done
+          done
+          echo "::endgroup::"
           echo "::group::saveload + audio + unlock"
           check "saveload"     GATE_SAVELOAD_OK "$("$GODOT" --headless --path . --script tools/gate_saveload.gd 2>&1)"
           check "audio"        GATE_AUDIO_OK    "$("$GODOT" --headless --path . --script tools/gate_audio.gd 2>&1)"
