@@ -143,6 +143,7 @@ func move_selected_to(target: Vector2, attack_move: bool = false) -> void:
 			u.attack_move(dest)
 		elif u.has_method("move_to"):
 			u.move_to(dest)
+	CommandMarker.spawn(get_tree(), target, CommandMarker.ATTACK if attack_move else CommandMarker.MOVE)
 	SoundManager.play("unit_move", -6.0)
 
 ## Send selected villagers to build a construction site. Returns how many were
@@ -169,9 +170,13 @@ func harvest_with_selected(resource: Node) -> void:
 		return
 	if resource == null or not is_instance_valid(resource):
 		return
+	var any: bool = false
 	for u in selected:
 		if is_instance_valid(u) and u.has_method("harvest"):
 			u.harvest(resource)
+			any = true
+	if any and resource is Node2D:
+		CommandMarker.spawn(get_tree(), (resource as Node2D).global_position, CommandMarker.GATHER)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if BuildingPlacer.is_placing():
@@ -362,6 +367,7 @@ func _command_move(world_pos: Vector2) -> void:
 		_stamp_throttle(u)
 		dispatched.append(u)
 	if not dispatched.is_empty():
+		CommandMarker.spawn(get_tree(), world_pos, CommandMarker.MOVE)
 		move_commanded.emit(world_pos, dispatched)
 
 func _screen_to_world(screen_pos: Vector2) -> Vector2:
