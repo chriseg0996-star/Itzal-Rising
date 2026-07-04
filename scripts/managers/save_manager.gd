@@ -178,6 +178,8 @@ func _spawn_building(bentry: Dictionary, world: Node) -> void:
 	if bentry.has("rally") and building.has_method("set_rally_point"):
 		var rp: Array = bentry["rally"]
 		building.set_rally_point(Vector2(float(rp[0]), float(rp[1])))
+	if bentry.has("charge") and building.get("charge") != null:
+		building.set("charge", float(bentry["charge"]))
 
 func _spawn_simple(rentry: Dictionary, world: Node) -> void:
 	var packed: PackedScene = load(String(rentry.get("scene", "")))
@@ -301,6 +303,10 @@ func _snapshot() -> Dictionary:
 		if bool(b.get("has_rally_point")):
 			var rp: Vector2 = b.get("rally_point")
 			bentry["rally"] = [rp.x, rp.y]
+		# Ascension Beacon charge — an alternate victory in progress; without this
+		# a save/load mid-charge silently resets the win condition to zero.
+		if b.get("charge") != null:
+			bentry["charge"] = float(b.get("charge"))
 		(data["buildings"] as Array).append(bentry)
 
 	for r in tree.get_nodes_in_group("resources"):

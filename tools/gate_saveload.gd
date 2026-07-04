@@ -11,6 +11,7 @@ var _phase: String = "boot"
 var _saved_units: int = 0
 var _saved_buildings: int = 0
 var _saved_wood: int = 0
+const BEACON_CHARGE: float = 42.0
 
 func _process(_delta: float) -> bool:
 	_frames += 1
@@ -30,7 +31,19 @@ func _process(_delta: float) -> bool:
 				_verify()
 	return false
 
+## Drop a charging Ascension Beacon into the world so the save must persist an
+## alternate-victory-in-progress (regression guard for the reset-to-zero bug).
+func _spawn_beacon() -> void:
+	var pf: int = int(root.get_node("/root/GameSettings").get("player_faction_id"))
+	var b: Node = (load("res://scenes/buildings/AscensionBeacon.tscn") as PackedScene).instantiate()
+	b.set("faction_id", pf)
+	current_scene.add_child(b)
+	if b is Node2D:
+		(b as Node2D).global_position = Vector2(1200, 1200)
+	b.set("charge", BEACON_CHARGE)
+
 func _do_save() -> void:
+	_spawn_beacon()
 	var stats: Node = root.get_node("/root/GameStats")
 	stats.set("atk_level", 1)
 	_saved_units = get_nodes_in_group("combat_units").size()
@@ -42,11 +55,13 @@ func _do_save() -> void:
 		print("GATE_SAVELOAD_FAIL: save_game returned false")
 		quit(1)
 		return
-	# Mutate: kill two units, distort research, then load.
+	# Mutate: kill two units, distort research, zero the beacon charge, then load.
 	var units: Array = get_nodes_in_group("combat_units")
 	for i in mini(2, units.size()):
 		units[i].free()
 	stats.set("atk_level", 0)
+	for bn in get_nodes_in_group("beacons"):
+		bn.set("charge", 0.0)
 	sm.request_load()
 	_frames = 0
 	_phase = "wait_load"
@@ -69,6 +84,16 @@ func _verify() -> void:
 	if int(root.get_node("/root/GameStats").get("atk_level")) != 1:
 		print("GATE_SAVELOAD_FAIL: atk_level did not round-trip")
 		failed = true
+	# Beacon charge must come back (it charges a little post-load, so band-check).
+	var beacons: Array = get_nodes_in_group("beacons")
+	if beacons.is_empty():
+		print("GATE_SAVELOAD_FAIL: beacon missing after load")
+		failed = true
+	else:
+		var ch: float = float(beacons[0].get("charge"))
+		if ch < BEACON_CHARGE - 1.0 or ch > BEACON_CHARGE + 5.0:
+			print("GATE_SAVELOAD_FAIL: beacon charge %.1f != ~%.1f" % [ch, BEACON_CHARGE])
+			failed = true
 	if failed:
 		quit(1)
 	else:

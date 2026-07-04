@@ -19,6 +19,7 @@ Critical issues only: crash, softlock, broken win/lose, corrupt save, impossible
 | P1-002 | P1 | Export templates 4.6.3 | headless export | **Cerrado** (templates + `builds/windows/itzal_rising.exe` ~100 MB) |
 | P1-003 | P1 | `map_loader.gd` — `add_child()` en `_ready` | `gate_boot.gd` | **Cerrado** (`add_child.call_deferred`) |
 | P1-004 | P1 | Multiplayer = “coming soon” en menú | Main Menu → Multiplayer | Conocido |
+| P2-001 | P2 | Carga de la Ascension Beacon no se persistía en save/load (reset a 0 → victoria alterna perdida) | Cargar beacon a medias → guardar → cargar | **Cerrado** (`save_manager.gd` guarda/restaura `charge`; `gate_saveload.gd` lo verifica) |
 
 ## Cómo reportar
 
