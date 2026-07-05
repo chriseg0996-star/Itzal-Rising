@@ -5,22 +5,26 @@ signal building_damaged(building: Node)
 const MAX_QUEUE: int = 5
 const SPAWN_OFFSET: Vector2 = Vector2(0, 80)
 
-## Research available at the Town Center. Each id has 2 tiers; current levels
-## live in GameStats (per-match, reset with it). Research shares the training
-## queue via entries shaped {"scene": null, "duration": d, "research_id": id}.
+## Research available at the Town Center. atk/armor now run THREE tiers with
+## escalating cost and a bigger final payoff (see GameStats.ATK_TIERS), so there
+## is always a next goal and the last upgrade is a real spike. Levels live in
+## GameStats (per-match). Research shares the training queue via entries shaped
+## {"scene": null, "duration": d, "research_id": id}.
 const RESEARCH: Dictionary = {
 	"atk": {
 		"label": "Attack",
 		"levels": [
-			{"cost": {"madera": 100, "oro": 100}, "duration": 20.0},
-			{"cost": {"madera": 200, "oro": 250}, "duration": 30.0},
+			{"cost": {"madera": 100, "oro": 100}, "duration": 25.0},
+			{"cost": {"madera": 200, "oro": 250}, "duration": 40.0},
+			{"cost": {"madera": 350, "oro": 450}, "duration": 60.0},
 		],
 	},
 	"armor": {
 		"label": "Armor",
 		"levels": [
-			{"cost": {"madera": 100, "oro": 100}, "duration": 20.0},
-			{"cost": {"madera": 200, "oro": 250}, "duration": 30.0},
+			{"cost": {"madera": 100, "oro": 100}, "duration": 25.0},
+			{"cost": {"madera": 200, "oro": 250}, "duration": 40.0},
+			{"cost": {"madera": 350, "oro": 450}, "duration": 60.0},
 		],
 	},
 	# Signature tech: a single powerful cavalry-charge upgrade (faction-flavoured
@@ -31,12 +35,13 @@ const RESEARCH: Dictionary = {
 			{"cost": {"madera": 150, "oro": 150}, "duration": 25.0},
 		],
 	},
-	# Eras: advance the whole army's attack + armour. Two steps (Era II, III).
+	# Eras: advance the whole army's attack + armour. Two steps (Era II, III) —
+	# priced and timed as milestones, not speed bumps.
 	"era": {
 		"label": "Advance Era",
 		"levels": [
-			{"cost": {"madera": 250, "oro": 150}, "duration": 45.0},
-			{"cost": {"madera": 500, "oro": 350}, "duration": 70.0},
+			{"cost": {"madera": 300, "oro": 200}, "duration": 55.0},
+			{"cost": {"madera": 650, "oro": 500}, "duration": 95.0},
 		],
 	},
 }

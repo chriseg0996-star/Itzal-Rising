@@ -344,15 +344,20 @@ func _is_player_tc(b: Node) -> bool:
 		and b.get("faction_id") != null \
 		and FactionManager.is_player_faction(int(b.get("faction_id")))
 
+const ROMAN: Array[String] = ["", "I", "II", "III", "IV"]
+func _roman(n: int) -> String:
+	return ROMAN[n] if n >= 0 and n < ROMAN.size() else str(n)
+
 func _research_cell(b: Node, id: String, tag: String) -> Button:
 	var levels: Array = b.RESEARCH[id]["levels"]
 	var lvl: int = GameStats.get_research_level(id)
 	var maxed: bool = lvl >= levels.size()
 	var tip: String = "%s research" % tag
+	var next_roman: String = _roman(lvl + 1)   # tier being bought (I/II/III)
 	if not maxed:
 		var tier: Dictionary = levels[lvl]
-		tip = "%s %s\n%s" % [tag, "II" if lvl == 1 else "I", _cost_str(tier["cost"])]
-	var cell := _cell("%s%s" % [tag, " MAX" if maxed else " %s" % ("II" if lvl == 1 else "I")], "", "", tip,
+		tip = "%s %s\n%s" % [tag, next_roman, _cost_str(tier["cost"])]
+	var cell := _cell("%s%s" % [tag, " MAX" if maxed else " %s" % next_roman], "", "", tip,
 		func() -> void: b.try_queue_research(id))
 	if maxed:
 		cell.disabled = true

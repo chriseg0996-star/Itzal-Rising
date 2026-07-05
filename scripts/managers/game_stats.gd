@@ -1,16 +1,20 @@
 extends Node
 
-const ATK_BONUS_PER_LEVEL: float = 3.0
-const ARMOR_BONUS_PER_LEVEL: float = 2.0
+## Cumulative research bonus at each level (index = level, 0 = none). Late tiers
+## pay off MORE than early ones, so the final upgrade lands as a real power
+## spike instead of another flat step — this is what makes progression noticeable.
+const ATK_TIERS: Array[float]   = [0.0, 3.0, 7.0, 13.0]   # per-tier gain: +3, +4, +6
+const ARMOR_TIERS: Array[float] = [0.0, 2.0, 5.0, 9.0]    # per-tier gain: +2, +3, +4
 ## Signature "cavalry charge" tech: each level adds this much cavalry damage.
 const CAVALRY_BONUS_PER_LEVEL: float = 0.5
 
 ## Eras (AoE-style ages). Advancing at the Town Center grants every one of that
 ## side's units a flat attack + armour bump (dynamic, so it applies retroactively
-## to units already on the field). The AI advances on a timer for parity.
+## to units already on the field). The AI advances on a timer for parity. The
+## bump is deliberately large: an era is an ACT, a felt jump in army power.
 const MAX_ERA: int = 3
-const ERA_ATK_BONUS: float = 3.0     # per era above the first
-const ERA_ARMOR_BONUS: float = 1.0
+const ERA_ATK_BONUS: float = 5.0     # per era above the first
+const ERA_ARMOR_BONUS: float = 3.0
 
 var game_time: float = 0.0
 var units_trained: int = 0
@@ -80,10 +84,10 @@ func complete_research(research_id: String) -> void:
 	match research_id:
 		"atk":
 			atk_level += 1
-			AlertManager.push("Attack upgrade %d complete" % atk_level, "info")
+			AlertManager.push("Attack Tier %d — your army hits harder!" % atk_level, "warning")
 		"armor":
 			armor_level += 1
-			AlertManager.push("Armor upgrade %d complete" % armor_level, "info")
+			AlertManager.push("Armor Tier %d — your army holds longer!" % armor_level, "warning")
 		"cavalry":
 			cavalry_level += 1
 			AlertManager.push("Cavalry charge complete", "info")
@@ -91,10 +95,10 @@ func complete_research(research_id: String) -> void:
 			advance_era()
 
 func player_atk_bonus() -> float:
-	return float(atk_level) * ATK_BONUS_PER_LEVEL
+	return ATK_TIERS[mini(atk_level, ATK_TIERS.size() - 1)]
 
 func player_armor_bonus() -> float:
-	return float(armor_level) * ARMOR_BONUS_PER_LEVEL
+	return ARMOR_TIERS[mini(armor_level, ARMOR_TIERS.size() - 1)]
 
 ## Damage multiplier for player-side cavalry from the signature tech.
 func player_cavalry_mult() -> float:
