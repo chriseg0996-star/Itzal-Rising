@@ -8,6 +8,21 @@ enum State { IDLE, MOVING, HARVESTING, BUILDING, WORKING_FARM, DYING }
 const BUILD_RANGE: float = 64.0
 const FARM_RANGE: float = 56.0
 
+# Painted animation sheet (Meshy/gen → sliced by tools/integrate_villager_anim.py).
+# When present, replaces the pixel SpriteFrames at runtime. Delete the PNG to
+# revert. Cells are CELL px, feet-aligned at the cell bottom; rows below.
+const ANIM_SHEET: String = "res://assets/units/villager_sheet.png"
+const ANIM_CELL: int = 96
+const ANIM_SCALE: float = 0.58
+# [anim name, row, frame count, loop, fps]
+const ANIM_ROWS: Array = [
+	["idle", 0, 7, true, 6.0],
+	["walk", 1, 8, true, 10.0],
+	["harvest", 2, 8, true, 9.0],
+	["build", 3, 7, true, 9.0],
+	["death", 4, 7, false, 8.0],
+]
+
 const DEATH_FADE_TIME: float = 0.5
 const SELECTION_RADIUS: float = 22.0
 const SELECTION_COLOR: Color = Color(0.27, 0.86, 0.50, 1.0)
@@ -70,6 +85,7 @@ func _ready() -> void:
 	var old_sprite := get_node_or_null("Sprite")
 	if old_sprite != null and old_sprite is CanvasItem:
 		(old_sprite as CanvasItem).visible = false
+	_try_painted_anim()
 	_base_modulate = modulate
 	var _sfx := AudioStreamPlayer.new()
 	_sfx.name = "SFX"
@@ -145,10 +161,53 @@ func _update_animation() -> void:
 			_anim_sprite.play("idle")
 		State.MOVING:
 			_anim_sprite.play("walk")
-		State.HARVESTING, State.BUILDING, State.WORKING_FARM:
+		State.BUILDING:
+			_anim_sprite.play(_anim("build"))
+		State.HARVESTING, State.WORKING_FARM:
 			_anim_sprite.play("harvest")
 		State.DYING:
 			_anim_sprite.play("death")
+
+## Use a dedicated animation when the painted sheet provides it, else fall back.
+func _anim(name: String) -> String:
+	var sf: SpriteFrames = _anim_sprite.sprite_frames
+	return name if sf != null and sf.has_animation(name) else "harvest"
+
+## A/B: build a SpriteFrames from the painted sheet and swap it onto the pixel
+## AnimatedSprite2D. Kept behind the PNG's existence so deleting it reverts.
+func _try_painted_anim() -> void:
+	if not ResourceLoader.exists(ANIM_SHEET):
+		return
+	var tex: Texture2D = load(ANIM_SHEET)
+	if tex == null:
+		return
+	var sf := SpriteFrames.new()
+	if sf.has_animation("default"):
+		sf.remove_animation("default")
+	for spec in ANIM_ROWS:
+		var aname: String = spec[0]
+		sf.add_animation(aname)
+		sf.set_animation_loop(aname, bool(spec[3]))
+		sf.set_animation_speed(aname, float(spec[4]))
+		for f in int(spec[2]):
+			var at := AtlasTexture.new()
+			at.atlas = tex
+			at.region = Rect2(f * ANIM_CELL, int(spec[1]) * ANIM_CELL, ANIM_CELL, ANIM_CELL)
+			sf.add_frame(aname, at)
+	_anim_sprite.sprite_frames = sf
+	_anim_sprite.centered = true
+	_anim_sprite.offset = Vector2(0, -ANIM_CELL * 0.5)   # feet (cell bottom) at origin
+	_anim_sprite.scale = Vector2(ANIM_SCALE, ANIM_SCALE)
+	# Lift the HP bar clear of the taller painted body (deferred: HPBarFrame is
+	# added deferred by UnitHpBar.enhance).
+	call_deferred("_raise_hp_bar", ANIM_CELL * ANIM_SCALE - 24.0)
+
+func _raise_hp_bar(amount: float) -> void:
+	for n in ["HPBarBG", "HPBarFG", "HPBarFrame"]:
+		var bar := get_node_or_null(n) as Control
+		if bar != null:
+			bar.offset_top -= amount
+			bar.offset_bottom -= amount
 
 func _physics_process(delta: float) -> void:
 	if _state == State.DYING:
