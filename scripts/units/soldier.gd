@@ -2,6 +2,11 @@ extends CharacterBody2D
 
 enum State { IDLE, MOVING, ATTACKING, DYING, HOLDING, PATROLLING }
 
+# A/B test: when a painted body PNG exists, use it as a static Sprite2D instead
+# of the pixel AnimatedSprite2D. Delete the PNG (or flip this false) to revert.
+const PAINTED_BODY: String = "res://assets/units/soldier_painted.png"
+const PAINTED_HEIGHT: float = 52.0   # on-screen px (matches the ~48px pixel body)
+
 const DEATH_FADE_TIME: float = 0.5
 const SELECTION_RADIUS: float = 22.0
 const SELECTION_COLOR: Color = Color(0.27, 0.86, 0.50, 1.0)
@@ -49,6 +54,7 @@ func _ready() -> void:
 	var old_sprite := get_node_or_null("Sprite")
 	if old_sprite != null and old_sprite is CanvasItem:
 		(old_sprite as CanvasItem).visible = false
+	_try_painted_body()
 	_movement_component = get_node_or_null("MovementComponent") as MovementComponent
 	_stat = get_node_or_null("StatComponent") as StatComponent
 	if _stat != null:
@@ -66,6 +72,37 @@ func _ready() -> void:
 		_anim_sprite.animation_finished.connect(_on_anim_finished)
 	_update_hp_bar()
 	_update_animation()
+
+## A/B: swap the pixel AnimatedSprite2D body for a single painted Sprite2D when
+## the test PNG is present. Mirrors resource_node._apply_painted_sprite — hide
+## the animated body (kept intact so removing the PNG reverts instantly), add a
+## Sprite2D scaled to PAINTED_HEIGHT with its feet at the unit origin.
+func _try_painted_body() -> void:
+	if not ResourceLoader.exists(PAINTED_BODY):
+		return
+	var tex: Texture2D = load(PAINTED_BODY)
+	if tex == null:
+		return
+	if _anim_sprite != null:
+		_anim_sprite.visible = false
+	var s := Sprite2D.new()
+	s.name = "PaintedBody"
+	s.texture = tex
+	s.centered = true
+	var sc: float = PAINTED_HEIGHT / float(tex.get_height())
+	s.scale = Vector2(sc, sc)
+	s.position = Vector2(0.0, -float(tex.get_height()) * sc * 0.5)  # feet at origin
+	add_child(s)
+	# The painted body is taller than the pixel one, so lift the HP bar clear of
+	# its head. Deferred: HPBarFrame is added deferred by UnitHpBar.enhance.
+	call_deferred("_raise_hp_bar", PAINTED_HEIGHT - 20.0)
+
+func _raise_hp_bar(amount: float) -> void:
+	for n in ["HPBarBG", "HPBarFG", "HPBarFrame"]:
+		var bar := get_node_or_null(n) as Control
+		if bar != null:
+			bar.offset_top -= amount
+			bar.offset_bottom -= amount
 
 func _on_died(_owner_unit: CharacterBody2D = null) -> void:
 	state = State.DYING
